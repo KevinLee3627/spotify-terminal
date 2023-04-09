@@ -48,6 +48,11 @@ function msToTime(ms: number): string {
 
 function showScreen(playback: Playback): void {
   const screen = blessed.screen({ smartCSR: true });
+
+  screen.key(['escape', 'q', 'C-c'], function (ch, key) {
+    return process.exit(0);
+  });
+
   screen.title = 'TEST!';
 
   const box = blessed.box({
@@ -77,6 +82,7 @@ function showScreen(playback: Playback): void {
     width: '100%-2',
     height: '150',
   });
+
   const progressBar = blessed.progressbar({
     filled: (playback.progress_ms / playback.item.duration_ms) * 100,
     left: 'center',
@@ -87,26 +93,30 @@ function showScreen(playback: Playback): void {
   });
   progressBox.append(progressBar);
 
-  const timeElapsed = blessed.text({
-    content: msToTime(playback.progress_ms),
-    tags: true,
-  });
   const totalTime = blessed.text({
     content: msToTime(playback.item.duration_ms),
     right: 0,
   });
-  progressBox.append(timeElapsed);
   progressBox.append(totalTime);
+
+  let progress = playback.progress_ms;
+  const timeElapsed = blessed.text({
+    content: msToTime(progress),
+    tags: true,
+  });
+  progressBox.append(timeElapsed);
 
   box.append(progressBox);
 
   screen.append(box);
-  // Quit on Escape, q, or Control-C.
-  screen.key(['escape', 'q', 'C-c'], function (ch, key) {
-    return process.exit(0);
-  });
 
-  screen.render();
+  // TODO: Check if this ever goes too out of sync in the future
+  setInterval(() => {
+    progress += 1000;
+    progressBar.setProgress((progress / playback.item.duration_ms) * 100);
+    timeElapsed.setContent(msToTime(progress));
+    screen.render();
+  }, 1000);
 }
 
 async function main(): Promise<void> {
