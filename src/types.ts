@@ -39,3 +39,10 @@ export interface Playback {
   shuffle_state: true;
   repeat_state: true;
 }
+
+export interface TokenRes {
+  access_token: string;
+  token_type: 'Bearer';
+  scope: string;
+  expires_in: number;
+}
