@@ -24,10 +24,11 @@ class App {
 
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
-  songBox: b.Widgets.BoxElement;
-  progressBar: b.Widgets.ProgressBarElement;
-  timeElapsed: b.Widgets.TextElement;
-  songDuration: b.Widgets.TextElement;
+  songBox!: b.Widgets.BoxElement;
+  progressBar!: b.Widgets.ProgressBarElement;
+  timeElapsed!: b.Widgets.TextElement;
+  songDuration!: b.Widgets.TextElement;
+
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
     this.spotify = spotify;
@@ -37,7 +38,9 @@ class App {
       cols: this.gridWidth,
       screen: this.screen,
     });
+  }
 
+  initSongbox(): void {
     this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
       tags: true,
       style: {
@@ -86,6 +89,7 @@ class App {
   }
 
   initGrid(): any {
+    this.initSongbox();
     void this.refreshScreen();
 
     this.screen.key(['escape', 'q', 'C-c'], function (ch, key) {
