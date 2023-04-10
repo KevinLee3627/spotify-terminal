@@ -4,7 +4,7 @@ import type { Playback } from './types';
 import { Spotify } from './spotify';
 
 const sleep = async (ms: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 function msToTime(ms: number): string {
