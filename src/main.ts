@@ -1,42 +1,6 @@
 import * as blessed from 'blessed';
-import axios from 'axios';
 import type { Playback } from './types';
-
-const base = 'https://api.spotify.com/v1';
-
-class Spotify {
-  token: string | null = null;
-
-  async getToken(): Promise<void> {
-    const res = await axios({
-      method: 'POST',
-      url: 'https://accounts.spotify.com/api/token',
-      data: {
-        grant_type: 'refresh_token',
-        refresh_token: process.env.REFRESH_TOKEN,
-        client_id: process.env.CLIENT_ID,
-        client_secret: process.env.CLIENT_SECRET,
-      },
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
-    this.token = res.data.access_token;
-  }
-
-  async getPlayback(): Promise<Playback | null> {
-    if (this.token == null) return null;
-
-    const res = await axios({
-      method: 'GET',
-      url: `${base}/me/player`,
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
-    return res.data;
-  }
-}
+import { Spotify } from './spotify';
 
 function msToTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -60,7 +24,6 @@ function showScreen(playback: Playback): void {
     left: 'center',
     width: '100%',
     height: '300',
-    // content: `${str}`,
     tags: true,
     border: {
       type: 'line',
@@ -122,8 +85,7 @@ function showScreen(playback: Playback): void {
 async function main(): Promise<void> {
   const spotify = new Spotify();
   await spotify.getToken();
-  const playback = await spotify.getPlayback();
-  if (playback == null) return;
+  const playback = await spotify.getPlaybackState();
   showScreen(playback);
 }
 main().catch((err) => {
