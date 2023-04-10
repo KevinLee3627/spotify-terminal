@@ -52,6 +52,7 @@ class App {
       tags: true,
       style: { focus: { border: { fg: 'green' } } },
     });
+
     this.songBox.key('n', (data) => {
       const handler = async (): Promise<void> => {
         await this.spotify.skipToNext();
@@ -89,12 +90,19 @@ class App {
   }
 
   async initAlbumBox(): Promise<void> {
-    this.albumBox = this.grid.set(0, 0, this.gridHeight - 3, this.gridWidth / 2, b.box, {
+    this.albumBox = this.grid.set(0, 0, this.gridHeight / 2, this.gridWidth / 2, b.box, {
       tags: true,
       scrollable: true,
       style: { focus: { border: { fg: 'green' } } },
     });
-    await this.fetchAlbumTracks();
+    await this.fetchAlbum();
+    console.log(this.currentAlbum.tracks.items.map((t) => t.name));
+    const rows = this.currentAlbum.tracks.items.map((track) => {
+      return b.text({ label: track.name });
+    });
+    rows.forEach((row) => {
+      this.albumBox.append(row);
+    });
     this.updateAlbumBox();
   }
 
@@ -130,6 +138,7 @@ class App {
       this.playback.progress_ms += 1000;
       if (this.playback.progress_ms >= this.playback.item.duration_ms + 1000) {
         this.playback = await this.spotify.getPlaybackState();
+        this.updateAlbumBox();
       }
       this.updateProgress();
       this.updateSongBox();
@@ -159,7 +168,7 @@ class App {
     );
   }
 
-  async fetchAlbumTracks(): Promise<void> {
+  async fetchAlbum(): Promise<void> {
     this.currentAlbum = await this.spotify.getAlbum(this.playback.item.album.id);
   }
 
