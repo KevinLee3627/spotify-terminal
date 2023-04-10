@@ -15,6 +15,8 @@ function msToTime(ms: number): string {
   return `${minutes}:${secondsStr}`;
 }
 
+const bold = (str: string): string => `{bold}${str}{/bold}`;
+
 class App {
   screen = b.screen({ smartCSR: true, autoPadding: true });
   gridHeight = 48;
@@ -63,7 +65,6 @@ class App {
         console.log(err);
       });
     });
-    this.updateSongBox();
 
     this.progressBar = b.progressbar({
       filled: (this.playback.progress_ms / this.playback.item.duration_ms) * 100,
@@ -86,6 +87,8 @@ class App {
       left: '100%-6',
     });
     this.songBox.append(this.songDuration);
+
+    this.updateSongBox();
   }
 
   initAlbumBox(): void {
@@ -96,6 +99,8 @@ class App {
     this.albumBox.on('click', () => {
       console.log('click');
     });
+
+    this.updateAlbumBox();
   }
 
   initGrid(): any {
@@ -152,14 +157,18 @@ class App {
 
   updateSongBox(): void {
     const songTitle = this.playback.item.name;
-    const songArtist = this.playback.item.album.artists
-      .map((artist) => artist.name)
-      .join(', ');
-    const albumName = this.playback.item.album.name;
-    const albumYear = this.playback.item.album.release_date.split('-')[0];
+    const album = this.playback.item.album;
+    const songArtist = album.artists.map((artist) => artist.name).join(', ');
+    const albumName = album.name;
+    const albumYear = album.release_date.split('-')[0];
     this.songBox.setLabel(
-      `{bold}${songTitle}{/bold} by ${songArtist} | ${albumName} (${albumYear})`
+      `${bold(songTitle)} by ${songArtist} | ${albumName} (${albumYear})`
     );
+  }
+
+  updateAlbumBox(): void {
+    const album = this.playback.item.album;
+    this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
   }
 }
 
