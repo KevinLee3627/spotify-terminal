@@ -32,10 +32,9 @@ function showScreen(playback: Playback): void {
 
   const songTitle = playback.item.name;
   const songArtist = playback.item.album.artists.map((artist) => artist.name).join(', ');
-  const str = `PLAYING: {bold}${songTitle}{/bold} by ${songArtist}`;
   const songInfo = blessed.text({
     top: '20',
-    content: str,
+    content: `PLAYING: {bold}${songTitle}{/bold} by ${songArtist}`,
     tags: true,
   });
   box.append(songInfo);
@@ -62,9 +61,8 @@ function showScreen(playback: Playback): void {
   });
   progressBox.append(totalTime);
 
-  let progress = playback.progress_ms;
   const timeElapsed = blessed.text({
-    content: msToTime(progress),
+    content: msToTime(playback.progress_ms),
     tags: true,
   });
   progressBox.append(timeElapsed);
@@ -73,10 +71,12 @@ function showScreen(playback: Playback): void {
 
   screen.append(box);
 
+  let progress = playback.progress_ms;
   // TODO: Check if this ever goes too out of sync in the future
   setInterval(() => {
     progress += 1000;
-    progressBar.setProgress((progress / playback.item.duration_ms) * 100);
+    const percentage = (progress / playback.item.duration_ms) * 100;
+    progressBar.setProgress(percentage);
     timeElapsed.setContent(msToTime(progress));
     screen.render();
   }, 1000);
