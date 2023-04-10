@@ -1,6 +1,6 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { AlbumFull, Playback } from './types';
+import type { AlbumFull, Playback, Track } from './types';
 import { Spotify } from './spotify';
 
 const sleep = async (ms: number): Promise<void> => {
@@ -33,7 +33,7 @@ class App {
   songDuration!: b.Widgets.TextElement;
 
   // ALBUMBOX
-  albumBox!: b.Widgets.BoxElement;
+  albumBox!: b.Widgets.ListElement;
   currentAlbum!: AlbumFull;
 
   constructor(spotify: Spotify, playback: Playback) {
@@ -90,20 +90,51 @@ class App {
   }
 
   async initAlbumBox(): Promise<void> {
-    this.albumBox = this.grid.set(0, 0, this.gridHeight / 2, this.gridWidth / 2, b.box, {
-      tags: true,
-      scrollable: true,
-      style: { focus: { border: { fg: 'green' } } },
-    });
     await this.fetchAlbum();
-    console.log(this.currentAlbum.tracks.items.map((t) => t.name));
+
+    this.albumBox = this.grid.set(
+      24 - 3,
+      0,
+      this.gridHeight / 2,
+      this.gridWidth / 2,
+      b.list,
+      {
+        tags: true,
+        scrollable: true,
+        scrollbar: true,
+        noCellBorders: true,
+        interactive: true,
+        style: {
+          selected: {
+            bg: 'red',
+          },
+          scrollbar: {
+            bg: 'blue',
+          },
+          focus: { border: { fg: 'green' } },
+        },
+        keys: true,
+      }
+    );
+
+    const listWidth = this.albumBox.width as number;
+    const totalBorderWidth = 2;
+    const trackNumWidth = 2;
+    const durationWidth = 9;
+
+    const trackNameWidth = listWidth - totalBorderWidth - trackNumWidth - durationWidth;
+    function formatRow(track: Track): string {
+      const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
+      const trackNumCol = String(track.track_number).padEnd(trackNumWidth, ' ');
+      const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
+      return `${trackNumCol} ${trackNameCol} ${durationCol}`;
+    }
     const rows = this.currentAlbum.tracks.items.map((track) => {
-      return b.text({ label: track.name });
+      return formatRow(track);
     });
-    rows.forEach((row) => {
-      this.albumBox.append(row);
-    });
-    this.updateAlbumBox();
+    this.albumBox.setItems(rows);
+    // Sets box title/other stuff
+    await this.updateAlbumBox();
   }
 
   async initGrid(): Promise<void> {
@@ -138,7 +169,7 @@ class App {
       this.playback.progress_ms += 1000;
       if (this.playback.progress_ms >= this.playback.item.duration_ms + 1000) {
         this.playback = await this.spotify.getPlaybackState();
-        this.updateAlbumBox();
+        await this.updateAlbumBox();
       }
       this.updateProgress();
       this.updateSongBox();
@@ -172,14 +203,9 @@ class App {
     this.currentAlbum = await this.spotify.getAlbum(this.playback.item.album.id);
   }
 
-  updateAlbumBox(): void {
+  async updateAlbumBox(): Promise<void> {
     const album = this.playback.item.album;
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
-    this.currentAlbum.tracks.items.map((track) => {
-      return b.text({
-        content: '',
-      });
-    });
   }
 }
 

@@ -25,7 +25,7 @@ export interface AlbumFull extends Album {
 
 export interface Track {
   artists: Artist[];
-  duration_ms: string;
+  duration_ms: number;
   name: string;
   disc_number: number;
   track_number: number;
