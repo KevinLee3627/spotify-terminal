@@ -3,6 +3,10 @@ import bc from 'blessed-contrib';
 import type { Playback } from './types';
 import { Spotify } from './spotify';
 
+const sleep = async (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 function msToTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
   const seconds = totalSeconds % 60;
@@ -36,8 +40,26 @@ class App {
 
     this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
       tags: true,
+      style: {
+        focus: {
+          bg: 'green',
+        },
+      },
     });
-    this.songBox.key('n', (data) => {});
+    this.songBox.key('n', (data) => {
+      console.log('N PRESSED');
+      const handler = async (): Promise<void> => {
+        console.log(`current track: ${this.playback.item.name}`);
+        await this.spotify.skipToNext();
+        await sleep(500);
+        this.playback = await this.spotify.getPlaybackState();
+        console.log(`new track: ${this.playback.item.name}`);
+        this.updateSongBox();
+      };
+      handler().catch((err) => {
+        console.log(err);
+      });
+    });
     this.updateSongBox();
 
     this.progressBar = b.progressbar({

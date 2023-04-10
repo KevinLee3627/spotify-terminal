@@ -55,4 +55,19 @@ export class Spotify {
     });
     return res.data;
   }
+
+  async skipToNext(): Promise<void> {
+    if (this.token == null) throw new Error('Invalid/missing access token.');
+    await this.makeRequest<unknown>('POST', '/me/player/next');
+  }
+
+  async makeRequest<T>(method: 'GET' | 'POST', endpoint: string): Promise<T> {
+    if (this.token == null) throw new Error('Invalid/missing access token.');
+
+    return await axios({
+      method,
+      url: `${this.base}${endpoint}`,
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+  }
 }
