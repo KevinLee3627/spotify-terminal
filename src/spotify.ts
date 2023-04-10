@@ -51,11 +51,19 @@ export class Spotify {
     await this.makeRequest<unknown>('POST', '/me/player/next');
   }
 
+  async pause(): Promise<void> {
+    await this.makeRequest('PUT', '/me/player/pause');
+  }
+
+  async resume(): Promise<void> {
+    await this.makeRequest('PUT', '/me/player/play');
+  }
+
   async getAlbum(id: string, limit: number = 100): Promise<AlbumFull> {
     return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
   }
 
-  async makeRequest<T>(method: 'GET' | 'POST', endpoint: string): Promise<T> {
+  async makeRequest<T>(method: 'GET' | 'POST' | 'PUT', endpoint: string): Promise<T> {
     if (this.token == null) throw new Error('Invalid/missing access token.');
 
     const res = await axios<T>({
