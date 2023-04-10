@@ -62,8 +62,6 @@ class App {
     songBox.append(totalTime);
 
     void this.refreshScreen(screen, progressBar, timeElapsed);
-    // TODO: Once the progress tracked here reaches 100%, check the playback status again
-    setTimeout(() => {}, 1000);
 
     screen.key(['escape', 'q', 'C-c'], function (ch, key) {
       return process.exit(0);
