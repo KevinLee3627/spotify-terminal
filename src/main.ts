@@ -68,12 +68,9 @@ class App {
       };
 
       const playButton = async (): Promise<void> => {
-        console.log(this.playback);
         if (this.playback.is_playing) {
-          console.log('pausing');
           await this.spotify.pause();
         } else {
-          console.log('resuming');
           await this.spotify.resume();
         }
         await sleep(250);
@@ -160,7 +157,10 @@ class App {
 
     // Must be arrow function so "this" refers to the class and not the function.
     const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
-      if (['escape', 'q', 'C-c'].includes(key.full)) return process.exit(0);
+      // TODO: Pause playback on application close?
+      if (['escape', 'q', 'C-c'].includes(key.full)) {
+        return process.exit(0);
+      }
       switch (key.full) {
         case 's':
           this.songBox.focus();
