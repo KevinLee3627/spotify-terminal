@@ -12,5 +12,7 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "rules": {}
+  "rules": {
+    "new-cap": 0
+  }
 }
