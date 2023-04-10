@@ -24,10 +24,14 @@ class App {
 
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
+  // SONGBOX
   songBox!: b.Widgets.BoxElement;
   progressBar!: b.Widgets.ProgressBarElement;
   timeElapsed!: b.Widgets.TextElement;
   songDuration!: b.Widgets.TextElement;
+
+  // ALBUMBOX
+  albumBox!: b.Widgets.BoxElement;
 
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
@@ -40,14 +44,10 @@ class App {
     });
   }
 
-  initSongbox(): void {
+  initSongBox(): void {
     this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
       tags: true,
-      style: {
-        focus: {
-          bg: 'green',
-        },
-      },
+      style: { focus: { border: { fg: 'green' } } },
     });
     this.songBox.key('n', (data) => {
       console.log('N PRESSED');
@@ -88,13 +88,38 @@ class App {
     this.songBox.append(this.songDuration);
   }
 
+  initAlbumBox(): void {
+    this.albumBox = this.grid.set(0, 0, this.gridHeight - 3, this.gridWidth / 2, b.box, {
+      tags: true,
+      style: { focus: { border: { fg: 'green' } } },
+    });
+    this.albumBox.on('click', () => {
+      console.log('click');
+    });
+  }
+
   initGrid(): any {
-    this.initSongbox();
+    // Define elements + event listeners
+    this.initSongBox();
+    this.initAlbumBox();
     void this.refreshScreen();
 
-    this.screen.key(['escape', 'q', 'C-c'], function (ch, key) {
-      return process.exit(0);
-    });
+    // Must be arrow function so "this" refers to the class and not the function.
+    const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
+      if (['escape', 'q', 'C-c'].includes(key.full)) return process.exit(0);
+      switch (key.full) {
+        case 's':
+          this.songBox.focus();
+          break;
+        case 'a':
+          this.albumBox.focus();
+          break;
+        default:
+          break;
+      }
+    };
+
+    this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
     this.screen.render();
   }
 
