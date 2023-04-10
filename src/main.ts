@@ -53,13 +53,10 @@ class App {
       style: { focus: { border: { fg: 'green' } } },
     });
     this.songBox.key('n', (data) => {
-      console.log('N PRESSED');
       const handler = async (): Promise<void> => {
-        console.log(`current track: ${this.playback.item.name}`);
         await this.spotify.skipToNext();
         await sleep(500);
         this.playback = await this.spotify.getPlaybackState();
-        console.log(`new track: ${this.playback.item.name}`);
         this.updateSongBox();
       };
       handler().catch((err) => {
@@ -91,12 +88,13 @@ class App {
     this.updateSongBox();
   }
 
-  initAlbumBox(): void {
+  async initAlbumBox(): Promise<void> {
     this.albumBox = this.grid.set(0, 0, this.gridHeight - 3, this.gridWidth / 2, b.box, {
       tags: true,
       scrollable: true,
       style: { focus: { border: { fg: 'green' } } },
     });
+    await this.fetchAlbumTracks();
     this.updateAlbumBox();
   }
 
@@ -104,7 +102,7 @@ class App {
     // Define elements + event listeners
 
     this.initSongBox();
-    this.initAlbumBox();
+    await this.initAlbumBox();
     void this.refreshScreen();
 
     // Must be arrow function so "this" refers to the class and not the function.
@@ -161,10 +159,18 @@ class App {
     );
   }
 
+  async fetchAlbumTracks(): Promise<void> {
+    this.currentAlbum = await this.spotify.getAlbum(this.playback.item.album.id);
+  }
+
   updateAlbumBox(): void {
-    const album = this.currentAlbum;
-    // get album tracks
+    const album = this.playback.item.album;
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
+    this.currentAlbum.tracks.items.map((track) => {
+      return b.text({
+        content: '',
+      });
+    });
   }
 }
 
