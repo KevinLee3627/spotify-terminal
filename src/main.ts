@@ -61,13 +61,7 @@ class App {
     });
     songBox.append(totalTime);
 
-    void this.refreshScreen(
-      screen,
-      this.playback.progress_ms,
-      this.playback.item.duration_ms,
-      progressBar,
-      timeElapsed
-    );
+    void this.refreshScreen(screen, progressBar, timeElapsed);
     // TODO: Once the progress tracked here reaches 100%, check the playback status again
     setTimeout(() => {}, 1000);
 
@@ -79,24 +73,23 @@ class App {
 
   async refreshScreen(
     screen: b.Widgets.Screen,
-    progress: number,
-    duration: number,
     progressBar: b.Widgets.ProgressBarElement,
     timeElapsed: b.Widgets.TextElement
   ): Promise<void> {
     if (this.playback.is_playing) {
-      progress += 1000;
-      if (progress >= duration + 1000) {
-        const spotify = new Spotify();
-        await spotify.getToken();
-        this.playback = await spotify.getPlaybackState();
-        progress = this.playback.progress_ms;
-        duration = this.playback.item.duration_ms;
+      this.playback.progress_ms += 1000;
+      if (this.playback.progress_ms >= this.playback.item.duration_ms + 1000) {
+        this.playback = await this.spotify.getPlaybackState();
       }
-      this.updateProgress(progress, duration, progressBar, timeElapsed);
+      this.updateProgress(
+        this.playback.progress_ms,
+        this.playback.item.duration_ms,
+        progressBar,
+        timeElapsed
+      );
     }
     setTimeout(() => {
-      void this.refreshScreen(screen, progress, duration, progressBar, timeElapsed);
+      void this.refreshScreen(screen, progressBar, timeElapsed);
     }, 1000);
     screen.render();
   }
