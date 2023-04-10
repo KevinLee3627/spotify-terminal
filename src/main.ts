@@ -21,6 +21,9 @@ class App {
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
   songBox: b.Widgets.BoxElement;
+  progressBar: b.Widgets.ProgressBarElement;
+  timeElapsed: b.Widgets.TextElement;
+  songDuration: b.Widgets.TextElement;
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
     this.spotify = spotify;
@@ -31,45 +34,37 @@ class App {
       screen: this.screen,
     });
 
-    const songTitle = this.playback.item.name;
-    const songArtist = this.playback.item.album.artists
-      .map((artist) => artist.name)
-      .join(', ');
-    const albumName = this.playback.item.album.name;
-    const albumYear = this.playback.item.album.release_date.split('-')[0];
     this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
-      label: `{bold}${songTitle}{/bold} by ${songArtist} | ${albumName} (${albumYear})`,
       tags: true,
     });
-  }
+    this.songBox.key('n', (data) => {});
+    this.updateSongBox();
 
-  initGrid(): any {
-    // Initializes grid elements and sets up references
-
-    const progressBar = b.progressbar({
+    this.progressBar = b.progressbar({
       filled: (this.playback.progress_ms / this.playback.item.duration_ms) * 100,
       left: 'center',
       width: '100%-12',
       orientation: 'horizontal',
       pch: '█',
     });
+    this.songBox.append(this.progressBar);
 
-    this.songBox.append(progressBar);
-
-    const timeElapsed = b.text({
+    this.timeElapsed = b.text({
       content: msToTime(this.playback.progress_ms),
       left: '0',
       tags: true,
     });
-    this.songBox.append(timeElapsed);
+    this.songBox.append(this.timeElapsed);
 
-    const songDuration = b.text({
+    this.songDuration = b.text({
       content: msToTime(this.playback.item.duration_ms),
       left: '100%-6',
     });
-    this.songBox.append(songDuration);
+    this.songBox.append(this.songDuration);
+  }
 
-    void this.refreshScreen(this.screen, progressBar, timeElapsed, songDuration);
+  initGrid(): any {
+    void this.refreshScreen();
 
     this.screen.key(['escape', 'q', 'C-c'], function (ch, key) {
       return process.exit(0);
@@ -81,42 +76,27 @@ class App {
     this.initGrid();
   }
 
-  async refreshScreen(
-    screen: b.Widgets.Screen,
-    progressBar: b.Widgets.ProgressBarElement,
-    timeElapsed: b.Widgets.TextElement,
-    songDuration: b.Widgets.TextElement
-  ): Promise<void> {
+  async refreshScreen(): Promise<void> {
     if (this.playback.is_playing) {
       this.playback.progress_ms += 1000;
       if (this.playback.progress_ms >= this.playback.item.duration_ms + 1000) {
         this.playback = await this.spotify.getPlaybackState();
       }
-      this.updateProgress(
-        this.playback.progress_ms,
-        this.playback.item.duration_ms,
-        progressBar,
-        timeElapsed,
-        songDuration
-      );
+      this.updateProgress();
       this.updateSongBox();
     }
-    screen.render();
+    this.screen.render();
     setTimeout(() => {
-      void this.refreshScreen(screen, progressBar, timeElapsed, songDuration);
+      void this.refreshScreen();
     }, 1000);
   }
 
-  updateProgress(
-    progress: number,
-    duration: number,
-    progressBar: b.Widgets.ProgressBarElement,
-    timeElapsed: b.Widgets.TextElement,
-    songDuration: b.Widgets.TextElement
-  ): void {
-    progressBar.setProgress((progress / duration) * 100);
-    timeElapsed.setContent(msToTime(progress));
-    songDuration.setContent(msToTime(duration));
+  updateProgress(): void {
+    this.progressBar.setProgress(
+      (this.playback.progress_ms / this.playback.item.duration_ms) * 100
+    );
+    this.timeElapsed.setContent(msToTime(this.playback.progress_ms));
+    this.songDuration.setContent(msToTime(this.playback.item.duration_ms));
   }
 
   updateSongBox(): void {
