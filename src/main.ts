@@ -59,6 +59,7 @@ class App {
         await sleep(500);
         this.playback = await this.spotify.getPlaybackState();
         this.updateSongBox();
+        await this.updateAlbumBox();
       };
       handler().catch((err) => {
         console.log(err);
@@ -104,35 +105,16 @@ class App {
         scrollbar: true,
         noCellBorders: true,
         interactive: true,
+        vi: true,
         style: {
-          selected: {
-            bg: 'red',
-          },
-          scrollbar: {
-            bg: 'blue',
-          },
+          selected: { bg: 'red' },
+          scrollbar: { bg: 'blue' },
           focus: { border: { fg: 'green' } },
         },
         keys: true,
       }
     );
 
-    const listWidth = this.albumBox.width as number;
-    const totalBorderWidth = 2;
-    const trackNumWidth = 2;
-    const durationWidth = 9;
-
-    const trackNameWidth = listWidth - totalBorderWidth - trackNumWidth - durationWidth;
-    function formatRow(track: Track): string {
-      const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
-      const trackNumCol = String(track.track_number).padEnd(trackNumWidth, ' ');
-      const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
-      return `${trackNumCol} ${trackNameCol} ${durationCol}`;
-    }
-    const rows = this.currentAlbum.tracks.items.map((track) => {
-      return formatRow(track);
-    });
-    this.albumBox.setItems(rows);
     // Sets box title/other stuff
     await this.updateAlbumBox();
   }
@@ -204,7 +186,25 @@ class App {
   }
 
   async updateAlbumBox(): Promise<void> {
+    await this.fetchAlbum();
+
     const album = this.playback.item.album;
+    const listWidth = this.albumBox.width as number;
+    const totalBorderWidth = 2;
+    const trackNumWidth = 2;
+    const durationWidth = 9;
+
+    const trackNameWidth = listWidth - totalBorderWidth - trackNumWidth - durationWidth;
+    function formatRow(track: Track): string {
+      const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
+      const trackNumCol = String(track.track_number).padEnd(trackNumWidth, ' ');
+      const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
+      return `${trackNumCol} ${trackNameCol} ${durationCol}`;
+    }
+    const rows = this.currentAlbum.tracks.items.map((track) => {
+      return formatRow(track);
+    });
+    this.albumBox.setItems(rows);
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
   }
 }
