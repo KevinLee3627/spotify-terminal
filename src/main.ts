@@ -11,7 +11,7 @@ function msToTime(ms: number): string {
 }
 
 function showScreen(playback: Playback): void {
-  const screen = blessed.screen({ smartCSR: true });
+  const screen = blessed.screen({ smartCSR: true, autoPadding: true });
 
   screen.key(['escape', 'q', 'C-c'], function (ch, key) {
     return process.exit(0);
@@ -20,35 +20,33 @@ function showScreen(playback: Playback): void {
   screen.title = 'TEST!';
 
   const box = blessed.box({
-    top: '70%',
-    left: 'center',
+    parent: screen,
     width: '100%',
-    height: '300',
     tags: true,
-    border: {
-      type: 'line',
-    },
   });
 
   const songTitle = playback.item.name;
   const songArtist = playback.item.album.artists.map((artist) => artist.name).join(', ');
   const songInfo = blessed.text({
-    top: '20',
+    top: '100%-2',
+    parent: box,
     content: `PLAYING: {bold}${songTitle}{/bold} by ${songArtist}`,
     tags: true,
   });
   box.append(songInfo);
 
   const progressBox = blessed.box({
-    bottom: '0',
-    width: '100%-2',
-    height: '150',
+    parent: box,
+    top: '100%-1',
+    width: '100%',
+    height: '70',
   });
 
   const progressBar = blessed.progressbar({
+    parent: progressBox,
     filled: (playback.progress_ms / playback.item.duration_ms) * 100,
     left: 'center',
-    width: '90%',
+    width: '100%-12',
     height: 1,
     orientation: 'horizontal',
     pch: '█',
@@ -56,12 +54,14 @@ function showScreen(playback: Playback): void {
   progressBox.append(progressBar);
 
   const totalTime = blessed.text({
+    parent: progressBox,
     content: msToTime(playback.item.duration_ms),
     right: 0,
   });
   progressBox.append(totalTime);
 
   const timeElapsed = blessed.text({
+    parent: progressBox,
     content: msToTime(playback.progress_ms),
     tags: true,
   });
@@ -72,12 +72,14 @@ function showScreen(playback: Playback): void {
   screen.append(box);
 
   let progress = playback.progress_ms;
-  // TODO: Check if this ever goes too out of sync in the future
+  // TODO: Once the progress tracked here reaches 100%, check the playback status again
   setInterval(() => {
-    progress += 1000;
-    const percentage = (progress / playback.item.duration_ms) * 100;
-    progressBar.setProgress(percentage);
-    timeElapsed.setContent(msToTime(progress));
+    if (playback.is_playing) {
+      progress += 1000;
+      const percentage = (progress / playback.item.duration_ms) * 100;
+      progressBar.setProgress(percentage);
+      timeElapsed.setContent(msToTime(progress));
+    }
     screen.render();
   }, 1000);
 }
