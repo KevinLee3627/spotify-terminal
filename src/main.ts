@@ -13,19 +13,23 @@ function msToTime(ms: number): string {
 
 class App {
   screen = b.screen({ smartCSR: true, autoPadding: true });
+  gridHeight = 48;
+  gridWidth = 48;
   playback: Playback;
   spotify: Spotify;
 
+  // GRID ELEMENTS
+  grid: bc.Widgets.GridElement;
+  songBox: b.Widgets.BoxElement;
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
     this.spotify = spotify;
-  }
 
-  showGrid(): void {
-    const screen = b.screen({ smartCSR: true, autoPadding: true });
-    const gridHeight = 48;
-    const gridWidth = 48;
-    const grid = new bc.grid({ rows: gridHeight, cols: gridWidth, screen });
+    this.grid = new bc.grid({
+      rows: this.gridHeight,
+      cols: this.gridWidth,
+      screen: this.screen,
+    });
 
     const songTitle = this.playback.item.name;
     const songArtist = this.playback.item.album.artists
@@ -33,10 +37,14 @@ class App {
       .join(', ');
     const albumName = this.playback.item.album.name;
     const albumYear = this.playback.item.album.release_date.split('-')[0];
-    const songBox = grid.set(gridHeight - 3, 0, 3, gridWidth, b.box, {
+    this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
       label: `{bold}${songTitle}{/bold} by ${songArtist} | ${albumName} (${albumYear})`,
       tags: true,
     });
+  }
+
+  initGrid(): any {
+    // Initializes grid elements and sets up references
 
     const progressBar = b.progressbar({
       filled: (this.playback.progress_ms / this.playback.item.duration_ms) * 100,
@@ -46,33 +54,38 @@ class App {
       pch: '█',
     });
 
-    songBox.append(progressBar);
+    this.songBox.append(progressBar);
 
     const timeElapsed = b.text({
       content: msToTime(this.playback.progress_ms),
       left: '0',
       tags: true,
     });
-    songBox.append(timeElapsed);
+    this.songBox.append(timeElapsed);
 
-    const totalTime = b.text({
+    const songDuration = b.text({
       content: msToTime(this.playback.item.duration_ms),
       left: '100%-6',
     });
-    songBox.append(totalTime);
+    this.songBox.append(songDuration);
 
-    void this.refreshScreen(screen, progressBar, timeElapsed);
+    void this.refreshScreen(this.screen, progressBar, timeElapsed, songDuration);
 
-    screen.key(['escape', 'q', 'C-c'], function (ch, key) {
+    this.screen.key(['escape', 'q', 'C-c'], function (ch, key) {
       return process.exit(0);
     });
-    screen.render();
+    this.screen.render();
+  }
+
+  showGrid(): void {
+    this.initGrid();
   }
 
   async refreshScreen(
     screen: b.Widgets.Screen,
     progressBar: b.Widgets.ProgressBarElement,
-    timeElapsed: b.Widgets.TextElement
+    timeElapsed: b.Widgets.TextElement,
+    songDuration: b.Widgets.TextElement
   ): Promise<void> {
     if (this.playback.is_playing) {
       this.playback.progress_ms += 1000;
@@ -83,23 +96,39 @@ class App {
         this.playback.progress_ms,
         this.playback.item.duration_ms,
         progressBar,
-        timeElapsed
+        timeElapsed,
+        songDuration
       );
+      this.updateSongBox();
     }
-    setTimeout(() => {
-      void this.refreshScreen(screen, progressBar, timeElapsed);
-    }, 1000);
     screen.render();
+    setTimeout(() => {
+      void this.refreshScreen(screen, progressBar, timeElapsed, songDuration);
+    }, 1000);
   }
 
   updateProgress(
     progress: number,
     duration: number,
     progressBar: b.Widgets.ProgressBarElement,
-    timeElapsed: b.Widgets.TextElement
+    timeElapsed: b.Widgets.TextElement,
+    songDuration: b.Widgets.TextElement
   ): void {
     progressBar.setProgress((progress / duration) * 100);
     timeElapsed.setContent(msToTime(progress));
+    songDuration.setContent(msToTime(duration));
+  }
+
+  updateSongBox(): void {
+    const songTitle = this.playback.item.name;
+    const songArtist = this.playback.item.album.artists
+      .map((artist) => artist.name)
+      .join(', ');
+    const albumName = this.playback.item.album.name;
+    const albumYear = this.playback.item.album.release_date.split('-')[0];
+    this.songBox.setLabel(
+      `{bold}${songTitle}{/bold} by ${songArtist} | ${albumName} (${albumYear})`
+    );
   }
 }
 
