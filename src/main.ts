@@ -45,6 +45,11 @@ class App {
       cols: this.gridWidth,
       screen: this.screen,
     });
+
+    // this.screen.on('keypress', (ch, key) => {
+    //   console.log(ch);
+    //   console.log(key);
+    // });
   }
 
   initSongBox(): void {
@@ -53,17 +58,44 @@ class App {
       style: { focus: { border: { fg: 'green' } } },
     });
 
-    this.songBox.key('n', (data) => {
-      const handler = async (): Promise<void> => {
+    this.songBox.key(['n', 'p', 'space'], (ch, key) => {
+      const skipToNext = async (): Promise<void> => {
         await this.spotify.skipToNext();
         await sleep(500);
         this.playback = await this.spotify.getPlaybackState();
         this.updateSongBox();
         await this.updateAlbumBox();
       };
-      handler().catch((err) => {
-        console.log(err);
-      });
+
+      const playButton = async (): Promise<void> => {
+        console.log(this.playback);
+        if (this.playback.is_playing) {
+          console.log('pausing');
+          await this.spotify.pause();
+        } else {
+          console.log('resuming');
+          await this.spotify.resume();
+        }
+        await sleep(250);
+        this.playback = await this.spotify.getPlaybackState();
+        this.updateSongBox();
+      };
+
+      switch (key.full) {
+        case 'n':
+          skipToNext().catch((err) => {
+            console.log(err);
+          });
+          break;
+        case 'p':
+        case 'space':
+          playButton().catch((err) => {
+            console.log(err);
+          });
+          break;
+        default:
+          break;
+      }
     });
 
     this.progressBar = b.progressbar({

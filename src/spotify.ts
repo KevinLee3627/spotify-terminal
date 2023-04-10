@@ -65,7 +65,6 @@ export class Spotify {
 
   async makeRequest<T>(method: 'GET' | 'POST' | 'PUT', endpoint: string): Promise<T> {
     if (this.token == null) throw new Error('Invalid/missing access token.');
-
     const res = await axios<T>({
       method,
       url: `${this.base}${endpoint}`,
