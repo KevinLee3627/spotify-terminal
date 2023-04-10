@@ -11,6 +11,30 @@ interface Album {
   artists: Artist[];
 }
 
+export interface AlbumFull extends Album {
+  tracks: {
+    href: string;
+    limit: number;
+    next: string | null;
+    offset: number;
+    previous: string | null;
+    total: number;
+    items: Track[];
+  };
+}
+
+export interface Track {
+  artists: Artist[];
+  duration_ms: string;
+  name: string;
+  disc_number: number;
+  track_number: number;
+  uri: string;
+  id: string;
+  explicit: boolean;
+  album: Album;
+}
+
 interface Artist {
   id: string;
   href: string;

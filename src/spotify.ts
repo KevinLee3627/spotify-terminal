@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { readFile, writeFile } from 'fs/promises';
-import type { Playback, TokenRes } from './types';
+import type { AlbumFull, Playback, TokenRes } from './types';
 
 export class Spotify {
   token: string | null = null;
@@ -44,21 +44,15 @@ export class Spotify {
   }
 
   async getPlaybackState(): Promise<Playback> {
-    if (this.token == null) throw new Error('Invalid/missing access token.');
-
-    const res = await axios({
-      method: 'GET',
-      url: `${this.base}/me/player`,
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
-    return res.data;
+    return await this.makeRequest('GET', '/me/player');
   }
 
   async skipToNext(): Promise<void> {
-    if (this.token == null) throw new Error('Invalid/missing access token.');
     await this.makeRequest<unknown>('POST', '/me/player/next');
+  }
+
+  async getAlbum(id: string, limit: number = 100): Promise<AlbumFull> {
+    return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
   }
 
   async makeRequest<T>(method: 'GET' | 'POST', endpoint: string): Promise<T> {

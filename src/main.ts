@@ -1,6 +1,6 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { Playback } from './types';
+import type { AlbumFull, Playback } from './types';
 import { Spotify } from './spotify';
 
 const sleep = async (ms: number): Promise<void> => {
@@ -34,6 +34,7 @@ class App {
 
   // ALBUMBOX
   albumBox!: b.Widgets.BoxElement;
+  currentAlbum!: AlbumFull;
 
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
@@ -78,7 +79,6 @@ class App {
     this.timeElapsed = b.text({
       content: msToTime(this.playback.progress_ms),
       left: '0',
-      tags: true,
     });
     this.songBox.append(this.timeElapsed);
 
@@ -94,17 +94,15 @@ class App {
   initAlbumBox(): void {
     this.albumBox = this.grid.set(0, 0, this.gridHeight - 3, this.gridWidth / 2, b.box, {
       tags: true,
+      scrollable: true,
       style: { focus: { border: { fg: 'green' } } },
     });
-    this.albumBox.on('click', () => {
-      console.log('click');
-    });
-
     this.updateAlbumBox();
   }
 
-  initGrid(): any {
+  async initGrid(): Promise<void> {
     // Define elements + event listeners
+
     this.initSongBox();
     this.initAlbumBox();
     void this.refreshScreen();
@@ -125,11 +123,8 @@ class App {
     };
 
     this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
-    this.screen.render();
-  }
 
-  showGrid(): void {
-    this.initGrid();
+    this.screen.render();
   }
 
   async refreshScreen(): Promise<void> {
@@ -167,7 +162,8 @@ class App {
   }
 
   updateAlbumBox(): void {
-    const album = this.playback.item.album;
+    const album = this.currentAlbum;
+    // get album tracks
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
   }
 }
@@ -178,7 +174,7 @@ async function main(): Promise<void> {
   const playback = await spotify.getPlaybackState();
   // showScreen(playback);
   const app = new App(spotify, playback);
-  app.showGrid();
+  await app.initGrid();
 }
 main().catch((err) => {
   console.log(err);
