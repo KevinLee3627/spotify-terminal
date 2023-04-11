@@ -115,7 +115,6 @@ class App {
     });
 
     this.progressBar = b.progressbar({
-      // filled: (this.playback.progress_ms / this.playback.item.duration_ms) * 100,
       left: 'center',
       width: '100%-12',
       orientation: 'horizontal',
@@ -125,13 +124,11 @@ class App {
     this.songBox.append(this.progressBar);
 
     this.timeElapsed = b.text({
-      // content: msToTime(this.playback.progress_ms),
       left: '0',
     });
     this.songBox.append(this.timeElapsed);
 
     this.songDuration = b.text({
-      // content: msToTime(this.playback.item.duration_ms),
       left: '100%-6',
     });
     this.songBox.append(this.songDuration);
@@ -141,7 +138,6 @@ class App {
 
   async initAlbumBox(): Promise<void> {
     await this.fetchCurrentAlbum();
-
     this.albumBox = this.grid.set(
       24 - 3,
       0,
@@ -164,6 +160,24 @@ class App {
       }
     );
 
+    this.albumBox.on('select', (item, i) => {
+      const playSelectedTrack = async (index: number): Promise<void> => {
+        if (this.currentAlbum == null) throw new Error('Nothing currently playing.');
+        // TODO: This can NOT be the best way to work this...
+        await this.spotify.resume({ uris: [this.currentAlbum.tracks.items[index].uri] });
+        await sleep(500);
+        await this.fetchCurrentPlayback();
+        await sleep(500);
+        await this.fetchCurrentAlbum();
+        await sleep(500);
+        this.updateSongBox();
+        await this.updateAlbumBox();
+      };
+
+      playSelectedTrack(i).catch((err) => {
+        writeFileSync('./log.json', JSON.stringify(err));
+      });
+    });
     // Sets box title/other stuff
     await this.updateAlbumBox();
   }
