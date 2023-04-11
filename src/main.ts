@@ -2,6 +2,7 @@ import * as b from 'blessed';
 import bc from 'blessed-contrib';
 import type { AlbumFull, Playback, Track } from './types';
 import { Spotify } from './spotify';
+import { writeFileSync } from 'fs';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,7 +35,7 @@ class App {
 
   // ALBUMBOX
   albumBox!: b.Widgets.ListElement;
-  currentAlbum!: AlbumFull;
+  currentAlbum!: AlbumFull | null;
 
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
@@ -62,32 +63,50 @@ class App {
       const skipToNext = async (): Promise<void> => {
         await this.spotify.skipToNext();
         await sleep(500);
-        this.playback = await this.spotify.getPlaybackState();
+        await this.fetchCurrentPlayback();
         this.updateSongBox();
         await this.updateAlbumBox();
       };
 
       const playButton = async (): Promise<void> => {
-        if (this.playback.is_playing) {
-          await this.spotify.pause();
+        if (this.playback.item == null) {
+          // Transfers playback to an active device if nothing is currently playing
+          // TODO: This can NOT be the best way to work this...
+          await this.spotify.transferPlaybackToDevice(process.env.DEVICE_ID as string);
+          await sleep(250);
+          await this.spotify.resume(
+            { context_uri: 'spotify:playlist:2yjBgi4TAosyAxLRclnKk6' },
+            process.env.DEVICE_ID
+          );
+          await sleep(500);
+          await this.fetchCurrentPlayback();
+          await sleep(500);
+          await this.fetchCurrentAlbum();
+          await sleep(500);
+          this.updateSongBox();
+          await this.updateAlbumBox();
         } else {
-          await this.spotify.resume();
+          if (this.playback.is_playing) {
+            await this.spotify.pause();
+          } else if (!this.playback.is_playing) {
+            await this.spotify.resume();
+          }
+          await sleep(250);
+          await this.fetchCurrentPlayback();
+          this.updateSongBox();
         }
-        await sleep(250);
-        this.playback = await this.spotify.getPlaybackState();
-        this.updateSongBox();
       };
 
       switch (key.full) {
         case 'n':
           skipToNext().catch((err) => {
-            console.log(err);
+            writeFileSync('./log.json', JSON.stringify(err));
           });
           break;
         case 'p':
         case 'space':
           playButton().catch((err) => {
-            console.log(err);
+            writeFileSync('./log.json', JSON.stringify(err));
           });
           break;
         default:
@@ -96,22 +115,23 @@ class App {
     });
 
     this.progressBar = b.progressbar({
-      filled: (this.playback.progress_ms / this.playback.item.duration_ms) * 100,
+      // filled: (this.playback.progress_ms / this.playback.item.duration_ms) * 100,
       left: 'center',
       width: '100%-12',
       orientation: 'horizontal',
       pch: '█',
     });
+
     this.songBox.append(this.progressBar);
 
     this.timeElapsed = b.text({
-      content: msToTime(this.playback.progress_ms),
+      // content: msToTime(this.playback.progress_ms),
       left: '0',
     });
     this.songBox.append(this.timeElapsed);
 
     this.songDuration = b.text({
-      content: msToTime(this.playback.item.duration_ms),
+      // content: msToTime(this.playback.item.duration_ms),
       left: '100%-6',
     });
     this.songBox.append(this.songDuration);
@@ -120,7 +140,7 @@ class App {
   }
 
   async initAlbumBox(): Promise<void> {
-    await this.fetchAlbum();
+    await this.fetchCurrentAlbum();
 
     this.albumBox = this.grid.set(
       24 - 3,
@@ -180,9 +200,12 @@ class App {
 
   async refreshScreen(): Promise<void> {
     if (this.playback.is_playing) {
+      if (this.playback.progress_ms == null || this.playback.item == null) {
+        return;
+      }
       this.playback.progress_ms += 1000;
       if (this.playback.progress_ms >= this.playback.item.duration_ms + 1000) {
-        this.playback = await this.spotify.getPlaybackState();
+        await this.fetchCurrentPlayback();
         await this.updateAlbumBox();
       }
       this.updateProgress();
@@ -195,6 +218,12 @@ class App {
   }
 
   updateProgress(): void {
+    if (this.playback.item == null || this.playback.progress_ms == null) {
+      this.progressBar.setProgress(0);
+      this.timeElapsed.setContent('00:00');
+      this.songDuration.setContent('00:00');
+      return;
+    }
     this.progressBar.setProgress(
       (this.playback.progress_ms / this.playback.item.duration_ms) * 100
     );
@@ -203,24 +232,40 @@ class App {
   }
 
   updateSongBox(): void {
-    const songTitle = this.playback.item.name;
-    const album = this.playback.item.album;
-    const songArtist = album.artists.map((artist) => artist.name).join(', ');
-    const albumName = album.name;
-    const albumYear = album.release_date.split('-')[0];
+    const track: Track | null = this.playback.item;
+    if (track == null) {
+      this.songBox.setLabel('N/A');
+      return;
+    }
+    const songTitle = this.playback.item == null ? 'N/A' : this.playback.item.name;
+    const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
+    const albumName = track.album.name;
+    const albumYear = track.album.release_date.split('-')[0];
     this.songBox.setLabel(
       `${bold(songTitle)} by ${songArtist} | ${albumName} (${albumYear})`
     );
   }
 
-  async fetchAlbum(): Promise<void> {
+  async fetchCurrentPlayback(): Promise<void> {
+    this.playback = await this.spotify.getPlaybackState();
+  }
+
+  async fetchCurrentAlbum(): Promise<void> {
+    if (this.playback.item == null) return;
     this.currentAlbum = await this.spotify.getAlbum(this.playback.item.album.id);
   }
 
   async updateAlbumBox(): Promise<void> {
-    await this.fetchAlbum();
+    // TODO: Dynamic height based on # of tracks in album?
+    // TODO: Play selected track when pressing 'enter'?
+    //    Ctrl-Enter = play album, Enter = add to queue and skip to next track
+    await this.fetchCurrentAlbum();
+    if (this.playback.item == null || this.currentAlbum == null) {
+      this.albumBox.setLabel('No album playing.');
+      return;
+    }
 
-    const album = this.playback.item.album;
+    const album = this.currentAlbum;
     const listWidth = this.albumBox.width as number;
     const totalBorderWidth = 2;
     const trackNumWidth = 2;
@@ -245,10 +290,13 @@ async function main(): Promise<void> {
   const spotify = new Spotify();
   await spotify.getToken();
   const playback = await spotify.getPlaybackState();
-  // showScreen(playback);
+  // console.log(playback);
   const app = new App(spotify, playback);
-  await app.initGrid();
+  try {
+    await app.initGrid();
+  } catch (error) {
+    app.screen.destroy();
+    console.log(error);
+  }
 }
-main().catch((err) => {
-  console.log(err);
-});
+void main();

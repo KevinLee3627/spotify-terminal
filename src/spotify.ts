@@ -1,6 +1,20 @@
 import axios from 'axios';
 import { readFile, writeFile } from 'fs/promises';
-import type { AlbumFull, Playback, TokenRes } from './types';
+import type { AlbumFull, Playback, TokenRes, Device } from './types';
+
+interface ResumePlaybackBody {
+  context_uri: string;
+  uris: string[];
+  offset: {
+    position: number;
+  };
+  position_ms: number;
+}
+
+interface RequestOptions<Body = unknown> {
+  body?: Body;
+  query?: Record<string, unknown>;
+}
 
 export class Spotify {
   token: string | null = null;
@@ -43,6 +57,10 @@ export class Spotify {
     }
   }
 
+  async getAvailableDevices(): Promise<{ devices: Device[] }> {
+    return await this.makeRequest('GET', '/me/player/devices');
+  }
+
   async getPlaybackState(): Promise<Playback> {
     return await this.makeRequest('GET', '/me/player');
   }
@@ -55,20 +73,35 @@ export class Spotify {
     await this.makeRequest('PUT', '/me/player/pause');
   }
 
-  async resume(): Promise<void> {
-    await this.makeRequest('PUT', '/me/player/play');
+  async transferPlaybackToDevice(deviceId: string): Promise<void> {
+    await this.makeRequest('PUT', '/me/player', { body: { device_ids: [deviceId] } });
+  }
+
+  async resume(body?: Partial<ResumePlaybackBody>, deviceId?: string): Promise<void> {
+    const options: RequestOptions = { query: {}, body };
+    if (deviceId != null && options.query != null) options.query.device_id = deviceId;
+    await this.makeRequest('PUT', '/me/player/play', options);
   }
 
   async getAlbum(id: string, limit: number = 100): Promise<AlbumFull> {
     return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
   }
 
-  async makeRequest<T>(method: 'GET' | 'POST' | 'PUT', endpoint: string): Promise<T> {
+  async makeRequest<Return = void, Body = Record<string, unknown>>(
+    method: 'GET' | 'POST' | 'PUT',
+    endpoint: string,
+    options?: RequestOptions<Body>
+  ): Promise<Return> {
     if (this.token == null) throw new Error('Invalid/missing access token.');
-    const res = await axios<T>({
+    const res = await axios<Return>({
       method,
       url: `${this.base}${endpoint}`,
-      headers: { Authorization: `Bearer ${this.token}` },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+      },
+      data: options?.body,
+      params: options?.query,
     });
     return res.data;
   }

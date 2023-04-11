@@ -1,4 +1,4 @@
-interface Album {
+export interface Album {
   album_type: 'album' | 'single' | 'compilation';
   total_tracks: number;
   href: string;
@@ -42,23 +42,9 @@ interface Artist {
 }
 
 export interface Playback {
-  device: {
-    id: string;
-    is_active: boolean;
-    is_private_session: boolean;
-    is_restricted: boolean;
-    name: string;
-    type: 'computer' | 'smartphone' | 'speaker';
-    volume_percent: number | null;
-  };
-  item: {
-    album: Album;
-    artists: Artist[];
-    duration_ms: number;
-    id: string;
-    name: string;
-  };
-  progress_ms: number;
+  device: Device | null;
+  item: Track | null;
+  progress_ms: number | null;
   is_playing: boolean;
   shuffle_state: true;
   repeat_state: true;
@@ -69,4 +55,14 @@ export interface TokenRes {
   token_type: 'Bearer';
   scope: string;
   expires_in: number;
+}
+
+export interface Device {
+  id: string;
+  is_active: boolean;
+  is_private_session: boolean;
+  is_restricted: boolean;
+  name: string;
+  type: 'computer' | 'smartphone' | 'speaker';
+  volume_percent: number | null;
 }
