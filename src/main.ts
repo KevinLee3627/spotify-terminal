@@ -259,11 +259,12 @@ class App {
     // TODO: Dynamic height based on # of tracks in album?
     // TODO: Play selected track when pressing 'enter'?
     //    Ctrl-Enter = play album, Enter = add to queue and skip to next track
-    await this.fetchCurrentAlbum();
     if (this.playback.item == null || this.currentAlbum == null) {
       this.albumBox.setLabel('No album playing.');
       return;
     }
+
+    await this.fetchCurrentAlbum();
 
     const album = this.currentAlbum;
     const listWidth = this.albumBox.width as number;
@@ -282,6 +283,8 @@ class App {
       return formatRow(track);
     });
     this.albumBox.setItems(rows);
+    // Select the currently playing track
+    this.albumBox.select(this.playback.item.track_number - 1);
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
   }
 }
