@@ -70,8 +70,10 @@ export class Spotify {
   }
 
   async addTrackToQueue(trackUri: string): Promise<void> {
-    await this.makeRequest('POST', '/me/player/queue', { body: { uri: trackUri } });
+    await this.makeRequest('POST', '/me/player/queue', { query: { uri: trackUri } });
   }
+
+  // async getQueue(): Promise<
 
   async pause(): Promise<void> {
     await this.makeRequest('PUT', '/me/player/pause');

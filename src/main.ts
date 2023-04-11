@@ -38,6 +38,12 @@ class App {
   currentAlbum!: AlbumFull | null;
   selectedAlbumTrackIndex!: number;
 
+  // TODO: QUEUEBOX
+
+  // TODO: SEARCH?
+
+  // TODO: PLAYLISTS?
+
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
     this.spotify = spotify;
@@ -63,9 +69,7 @@ class App {
       const skipToNext = async (): Promise<void> => {
         await this.spotify.skipToNext();
         await sleep(500);
-        await this.fetchCurrentPlayback();
-        this.updateSongBox();
-        await this.updateAlbumBox();
+        await this.updateBoxes();
       };
 
       const playButton = async (): Promise<void> => {
@@ -158,10 +162,39 @@ class App {
     this.albumBox.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
-      const addToQueue = async (trackUri: string): Promise<void> => {
+      const playNow = async (trackUri: string): Promise<void> => {
         await this.spotify.addTrackToQueue(trackUri);
         await sleep(500);
         await this.spotify.skipToNext();
+        await sleep(500);
+        await this.updateBoxes();
+      };
+
+      // TODO: This will play the selected track frrom the album, and then the rest of the songs off the album in order.
+      // Does it depend on shuffle state? Seems like it?
+      // TODO: Autoplay songs after album finishes.
+      const playNowInAlbum = async (): Promise<void> => {
+        if (this.currentAlbum == null) return;
+        // For all the uris of the tracks in the album
+        // Separate the uri of the selected track from the rest
+        // Play the seleced track next, then queue up the rest of the tracks.
+        const selectedTrack =
+          this.currentAlbum.tracks.items[this.selectedAlbumTrackIndex];
+        const trackUris = this.currentAlbum.tracks.items.map((item) => item.uri);
+        const separated = trackUris.reduce<{ selected: string; notSelected: string[] }>(
+          (prev, curr) => {
+            if (curr === selectedTrack.uri) {
+              prev.selected = curr;
+            } else {
+              prev.notSelected.push(curr);
+            }
+            return prev;
+          },
+          { selected: '', notSelected: [] }
+        );
+        const finalUris = [separated.selected, ...separated.notSelected];
+        await this.spotify.resume({ uris: finalUris });
+        await sleep(500);
         await this.updateBoxes();
       };
       // Manage the index of the selected track manually. Inited in updateAlbumBox
@@ -179,6 +212,16 @@ class App {
           this.selectedAlbumTrackIndex++;
           break;
         case 'p':
+          playNow(this.currentAlbum.tracks.items[this.selectedAlbumTrackIndex].uri).catch(
+            (err) => {
+              writeFileSync('./logs.json', JSON.stringify(err));
+            }
+          );
+          break;
+        case 'S-p':
+          playNowInAlbum().catch((err) => {
+            writeFileSync('./logs.json', JSON.stringify(err));
+          });
           break;
         default:
           break;

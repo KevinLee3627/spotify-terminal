@@ -9,6 +9,7 @@ export interface Album {
   type: 'album';
   label: string;
   artists: Artist[];
+  uri: string;
 }
 
 export interface AlbumFull extends Album {
