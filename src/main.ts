@@ -36,6 +36,7 @@ class App {
   // ALBUMBOX
   albumBox!: b.Widgets.ListElement;
   currentAlbum!: AlbumFull | null;
+  selectedAlbumTrackIndex!: number;
 
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
@@ -48,8 +49,7 @@ class App {
     });
 
     // this.screen.on('keypress', (ch, key) => {
-    //   console.log(ch);
-    //   console.log(key);
+    //   console.log(key.full);
     // });
   }
 
@@ -160,11 +160,38 @@ class App {
       }
     );
 
+    this.albumBox.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
+      // p -> (p)lay the song now (add to queue and skip current track)
+      // Shift-p -> (p)lay the song now, in album context (needs context)
+      // const addToQueue = async (trackUri: string): Promise<void> => {
+      //   await this.spotify.addTrackToQueue(trackUri);
+      // };
+      // Manage the index of the selected track manually. Inited in updateAlbumBox
+      if (this.currentAlbum == null) return;
+
+      switch (key.full) {
+        case 'up':
+        case 'k':
+          if (this.selectedAlbumTrackIndex <= 0) return;
+          this.selectedAlbumTrackIndex--;
+          break;
+        case 'down':
+        case 'j':
+          if (this.selectedAlbumTrackIndex >= this.currentAlbum.total_tracks - 1) return;
+          this.selectedAlbumTrackIndex++;
+          break;
+        default:
+          break;
+      }
+    });
+
     this.albumBox.on('select', (item, i) => {
-      const playSelectedTrack = async (index: number): Promise<void> => {
+      const playSelectedTrack = async (): Promise<void> => {
         if (this.currentAlbum == null) throw new Error('Nothing currently playing.');
         // TODO: This can NOT be the best way to work this...
-        await this.spotify.resume({ uris: [this.currentAlbum.tracks.items[index].uri] });
+        await this.spotify.resume({
+          uris: [this.currentAlbum.tracks.items[this.selectedAlbumTrackIndex].uri],
+        });
         await sleep(500);
         await this.fetchCurrentPlayback();
         await sleep(500);
@@ -174,7 +201,7 @@ class App {
         await this.updateAlbumBox();
       };
 
-      playSelectedTrack(i).catch((err) => {
+      playSelectedTrack().catch((err) => {
         writeFileSync('./log.json', JSON.stringify(err));
       });
     });
@@ -192,7 +219,7 @@ class App {
     // Must be arrow function so "this" refers to the class and not the function.
     const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
       // TODO: Pause playback on application close?
-      if (['escape', 'q', 'C-c'].includes(key.full)) {
+      if (['escape', 'C-c'].includes(key.full)) {
         return process.exit(0);
       }
       switch (key.full) {
@@ -299,6 +326,7 @@ class App {
     this.albumBox.setItems(rows);
     // Select the currently playing track
     this.albumBox.select(this.playback.item.track_number - 1);
+    this.selectedAlbumTrackIndex = this.playback.item.track_number - 1;
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
   }
 }
