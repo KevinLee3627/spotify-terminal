@@ -79,12 +79,7 @@ class App {
             process.env.DEVICE_ID
           );
           await sleep(500);
-          await this.fetchCurrentPlayback();
-          await sleep(500);
-          await this.fetchCurrentAlbum();
-          await sleep(500);
-          this.updateSongBox();
-          await this.updateAlbumBox();
+          await this.updateBoxes();
         } else {
           if (this.playback.is_playing) {
             await this.spotify.pause();
@@ -163,9 +158,12 @@ class App {
     this.albumBox.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
-      // const addToQueue = async (trackUri: string): Promise<void> => {
-      //   await this.spotify.addTrackToQueue(trackUri);
-      // };
+      const addToQueue = async (trackUri: string): Promise<void> => {
+        await this.spotify.addTrackToQueue(trackUri);
+        await sleep(500);
+        await this.spotify.skipToNext();
+        await this.updateBoxes();
+      };
       // Manage the index of the selected track manually. Inited in updateAlbumBox
       if (this.currentAlbum == null) return;
 
@@ -180,6 +178,8 @@ class App {
           if (this.selectedAlbumTrackIndex >= this.currentAlbum.total_tracks - 1) return;
           this.selectedAlbumTrackIndex++;
           break;
+        case 'p':
+          break;
         default:
           break;
       }
@@ -193,12 +193,7 @@ class App {
           uris: [this.currentAlbum.tracks.items[this.selectedAlbumTrackIndex].uri],
         });
         await sleep(500);
-        await this.fetchCurrentPlayback();
-        await sleep(500);
-        await this.fetchCurrentAlbum();
-        await sleep(500);
-        this.updateSongBox();
-        await this.updateAlbumBox();
+        await this.updateBoxes();
       };
 
       playSelectedTrack().catch((err) => {
@@ -287,6 +282,17 @@ class App {
     );
   }
 
+  async updateBoxes(): Promise<void> {
+    // TODO: This can NOT be the best way to work this...
+    // TODO: Reconcile w/ refreshScren
+    await this.fetchCurrentPlayback();
+    await sleep(500);
+    await this.fetchCurrentAlbum();
+    await sleep(500);
+    this.updateSongBox();
+    await this.updateAlbumBox();
+  }
+
   async fetchCurrentPlayback(): Promise<void> {
     this.playback = await this.spotify.getPlaybackState();
   }
@@ -298,8 +304,6 @@ class App {
 
   async updateAlbumBox(): Promise<void> {
     // TODO: Dynamic height based on # of tracks in album?
-    // TODO: Play selected track when pressing 'enter'?
-    //    Ctrl-Enter = play album, Enter = add to queue and skip to next track
     if (this.playback.item == null || this.currentAlbum == null) {
       this.albumBox.setLabel('No album playing.');
       return;
