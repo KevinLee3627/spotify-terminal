@@ -363,18 +363,177 @@ class App {
     this.albumBox.setLabel(`${bold(album.name)} (${album.release_date.split('-')[0]})`);
   }
 }
+class Screen {
+  screen = b.screen({ smartCSR: true, autoPadding: true });
+  gridHeight = 48;
+  gridWidth = 48;
+
+  // GRID ELEMENTS
+  grid: bc.Widgets.GridElement;
+  // SONGBOX
+  songBox!: b.Widgets.BoxElement;
+  progressBar!: b.Widgets.ProgressBarElement;
+  timeElapsed!: b.Widgets.TextElement;
+  songDuration!: b.Widgets.TextElement;
+
+  // ALBUMBOX
+  albumBox!: b.Widgets.ListElement;
+
+  // TODO: QUEUEBOX
+
+  // TODO: SEARCH?
+
+  // TODO: PLAYLISTS?
+
+  constructor() {
+    this.grid = new bc.grid({
+      rows: this.gridHeight,
+      cols: this.gridWidth,
+      screen: this.screen,
+    });
+
+    // this.screen.on('keypress', (ch, key) => {
+    //   console.log(key.full);
+    // });
+  }
+
+  initSongBox(playback: Playback): void {
+    this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
+      tags: true,
+      style: { focus: { border: { fg: 'green' } } },
+    });
+
+    this.progressBar = b.progressbar({
+      left: '7',
+      width: '100%-14',
+      orientation: 'horizontal',
+      pch: '█',
+    });
+    this.songBox.append(this.progressBar);
+
+    this.timeElapsed = b.text({ left: '0' });
+    this.songBox.append(this.timeElapsed);
+
+    this.songDuration = b.text({ left: '100%-7' });
+    this.songBox.append(this.songDuration);
+
+    this.updateSongBoxLabel(playback.item);
+    void this.updateSongProgress(
+      playback.progress_ms,
+      playback.item?.duration_ms ?? null,
+      playback.is_playing
+    );
+  }
+
+  updateSongBoxLabel(track: Track | null): void {
+    if (track == null) {
+      this.songBox.setLabel('N/A');
+      return;
+    }
+    const songTitle = track.name == null ? 'N/A' : track.name;
+    const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
+    const albumName = track.album.name;
+    const albumYear = track.album.release_date.split('-')[0];
+    this.songBox.setLabel(
+      `${bold(songTitle)} by ${songArtist} | ${albumName} (${albumYear})`
+    );
+  }
+
+  async updateSongProgress(
+    progress: number | null,
+    duration: number | null,
+    isPlaying: boolean
+  ): Promise<void> {
+    if (progress == null || duration == null) {
+      this.progressBar.setProgress(0);
+      this.timeElapsed.setContent('00:00');
+      this.songDuration.setContent('00:00');
+      return;
+    }
+
+    if (isPlaying) {
+      if (progress >= duration) {
+        console.log('YAy');
+        // await this.fetchCurrentPlayback();
+        // await this.updateAlbumBox();
+      }
+    }
+
+    this.progressBar.setProgress((progress / duration) * 100);
+    this.timeElapsed.setContent(msToTime(progress));
+    this.songDuration.setContent(msToTime(duration));
+    this.screen.render();
+    setTimeout(() => {
+      void this.updateSongProgress(progress + 1000, duration, isPlaying);
+    }, 1000);
+  }
+
+  initAlbumBox(): void {
+    this.albumBox = this.grid.set(
+      24 - 3,
+      0,
+      this.gridHeight / 2,
+      this.gridWidth / 2,
+      b.list,
+      {
+        tags: true,
+        scrollable: true,
+        scrollbar: true,
+        noCellBorders: true,
+        interactive: true,
+        vi: true,
+        style: {
+          selected: { bg: 'red' },
+          scrollbar: { bg: 'blue' },
+          focus: { border: { fg: 'green' } },
+        },
+        keys: true,
+      }
+    );
+  }
+
+  initGrid(playback: Playback): void {
+    // Define elements + event listeners
+    this.initSongBox(playback);
+    this.initAlbumBox();
+
+    // Must be arrow function so "this" refers to the class and not the function.
+    const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
+      // TODO: Pause playback on application close?
+      if (['escape', 'C-c'].includes(key.full)) {
+        return process.exit(0);
+      }
+      switch (key.full) {
+        case 's':
+          this.songBox.focus();
+          break;
+        case 'a':
+          this.albumBox.focus();
+          break;
+        default:
+          break;
+      }
+    };
+
+    this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
+
+    this.screen.render();
+  }
+}
 
 async function main(): Promise<void> {
   const spotify = new Spotify();
   await spotify.getToken();
   const playback = await spotify.getPlaybackState();
   // console.log(playback);
-  const app = new App(spotify, playback);
-  try {
-    await app.initGrid();
-  } catch (error) {
-    app.screen.destroy();
-    console.log(error);
-  }
+  // const app = new App(spotify, playback);
+  // try {
+  //   await app.initGrid();
+  // } catch (error) {
+  //   app.screen.destroy();
+  //   console.log(error);
+  // }
+  const screen = new Screen();
+  screen.initGrid(playback);
 }
 void main();
