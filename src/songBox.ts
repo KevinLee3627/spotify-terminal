@@ -47,6 +47,47 @@ export class SongBox {
   }
 
   init(playback: Playback): void {
+    this.box.key(['n', 'p', 'space'], (ch, key) => {
+      // TODO: ADD DEVICE PICKER BOX
+      // TODO: Finish this.
+      // const playButton = async (): Promise<void> => {
+      //   if (this.playback.item == null) {
+      //     // Transfers playback to an active device if nothing is currently playing
+      //     await this.spotify.transferPlaybackToDevice(process.env.DEVICE_ID as string);
+      //     await sleep(250);
+      //     await this.spotify.resume(
+      //       { context_uri: 'spotify:playlist:2yjBgi4TAosyAxLRclnKk6' },
+      //       process.env.DEVICE_ID
+      //     );
+      //     await sleep(500);
+      //     await this.updateBoxes();
+      //   } else {
+      //     if (this.playback.is_playing) {
+      //       await this.spotify.pause();
+      //     } else if (!this.playback.is_playing) {
+      //       await this.spotify.resume();
+      //     }
+      //     await sleep(250);
+      //     await this.fetchCurrentPlayback();
+      //     this.updateSongBox();
+      //   }
+      // };
+
+      switch (key.full) {
+        case 'n':
+          this.statusEmitter.emit('skipToNext');
+          break;
+        // case 'p':
+        // case 'space':
+        //   playButton().catch((err) => {
+        //     writeFileSync('./log.json', JSON.stringify(err));
+        //   });
+        //   break;
+        default:
+          break;
+      }
+    });
+
     this.updateLabel(playback.item);
     void this.updateProgress(
       playback.progress_ms,

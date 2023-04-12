@@ -41,12 +41,6 @@ class App {
   currentAlbum!: AlbumFull | null;
   selectedAlbumTrackIndex!: number;
 
-  // TODO: QUEUEBOX
-
-  // TODO: SEARCH?
-
-  // TODO: PLAYLISTS?
-
   constructor(spotify: Spotify, playback: Playback) {
     this.playback = playback;
     this.spotify = spotify;
@@ -446,6 +440,33 @@ class Screen {
         console.log(err);
       });
       console.log('song ENDED!');
+    });
+
+    this.statusEmitter.on('skipToNext', () => {
+      const skipToNext = async (): Promise<void> => {
+        await this.spotify.skipToNext();
+        // TODO - how to avoid sleeping? Maybe we 'get' the next song in the queue
+        // instead of just waiting?
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        // TODO: This chunk of code is repeated above - should we extract out to separate function?
+        const track = playback.item;
+        if (track != null) {
+          const album = await this.spotify.getAlbum(track?.album.id);
+          this.songBox.updateLabel(track);
+          void this.songBox.updateProgress(
+            playback.progress_ms,
+            track?.duration_ms ?? null,
+            playback.is_playing
+          );
+          this.albumBox.updateLabel(album);
+          this.albumBox.updateList(album.tracks.items);
+        }
+      };
+
+      skipToNext().catch((err) => {
+        console.log(err);
+      });
     });
   }
 
