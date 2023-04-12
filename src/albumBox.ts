@@ -34,9 +34,10 @@ export class AlbumBox {
     });
   }
 
-  init(album: AlbumFull): void {
+  init(album: AlbumFull, currentTrack: Track): void {
     this.updateLabel(album);
     this.updateList(album.tracks.items);
+    this.selectCurrentlyPlaying(currentTrack);
   }
 
   updateLabel(album: AlbumFull | null): void {

@@ -438,6 +438,7 @@ class Screen {
             playback.is_playing
           );
           this.albumBox.updateLabel(album);
+          this.albumBox.updateList(album.tracks.items);
         }
       };
 
@@ -459,7 +460,7 @@ class Screen {
       }
       const album = await this.spotify.getAlbum(playback.item?.album.id);
       this.songBox.init(playback);
-      this.albumBox.init(album);
+      this.albumBox.init(album, playback.item);
 
       // Must be arrow function so "this" refers to the class and not the function.
       const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
