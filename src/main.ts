@@ -125,14 +125,10 @@ class App {
 
     this.songBox.append(this.progressBar);
 
-    this.timeElapsed = b.text({
-      left: '0',
-    });
+    this.timeElapsed = b.text({ left: '0' });
     this.songBox.append(this.timeElapsed);
 
-    this.songDuration = b.text({
-      left: '100%-7',
-    });
+    this.songDuration = b.text({ left: '100%-7' });
     this.songBox.append(this.songDuration);
 
     this.updateSongBox();
@@ -418,6 +414,20 @@ class Screen {
   initStatusEmitter(): void {
     this.statusEmitter.on('songEnd', () => {
       // Get new playback state
+      const doStuff = async (): Promise<void> => {
+        const playback = await this.spotify.getPlaybackState();
+        const track = playback.item;
+        this.songBox.updateLabel(track);
+        void this.songBox.updateProgress(
+          playback.progress_ms,
+          track?.duration_ms ?? null,
+          playback.is_playing
+        );
+      };
+
+      doStuff().catch((err) => {
+        console.log(err);
+      });
       console.log('song ENDED!');
     });
   }
