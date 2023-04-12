@@ -11,7 +11,7 @@ interface SongBoxOptions {
   height: number;
   playback: Playback;
   grid: bc.Widgets.GridElement;
-  statusEmitter: EventEmitter;
+  customEmitter: EventEmitter;
 }
 
 export class SongBox {
@@ -23,9 +23,9 @@ export class SongBox {
 
   songProgressTimeout: NodeJS.Timeout = setTimeout(() => {}, 0);
 
-  statusEmitter: EventEmitter;
+  customEmitter: EventEmitter;
   constructor(opts: SongBoxOptions) {
-    this.statusEmitter = opts.statusEmitter;
+    this.customEmitter = opts.customEmitter;
 
     this.box = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
       tags: true,
@@ -75,7 +75,7 @@ export class SongBox {
 
       switch (key.full) {
         case 'n':
-          this.statusEmitter.emit('skipToNext');
+          this.customEmitter.emit('skipToNext');
           break;
         // case 'p':
         // case 'space':
@@ -127,7 +127,7 @@ export class SongBox {
     if (isPlaying) {
       if (progress > duration) {
         // Get the new playback
-        this.statusEmitter.emit('songEnd');
+        this.customEmitter.emit('songEnd');
       }
     }
 

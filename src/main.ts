@@ -366,7 +366,7 @@ class Screen {
   gridWidth = 48;
 
   // CUSTOM EVENTS
-  statusEmitter: EventEmitter;
+  customEmitter: EventEmitter;
 
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
@@ -385,7 +385,7 @@ class Screen {
 
   constructor(spotify: Spotify, playback: Playback) {
     this.spotify = spotify;
-    this.statusEmitter = new EventEmitter();
+    this.customEmitter = new EventEmitter();
 
     this.grid = new bc.grid({
       rows: this.gridHeight,
@@ -395,7 +395,7 @@ class Screen {
 
     this.songBox = new SongBox({
       grid: this.grid,
-      statusEmitter: this.statusEmitter,
+      customEmitter: this.customEmitter,
       row: this.gridHeight - 3,
       col: 0,
       width: this.gridWidth,
@@ -405,7 +405,7 @@ class Screen {
 
     this.albumBox = new AlbumBox({
       grid: this.grid,
-      statusEmitter: this.statusEmitter,
+      customEmitter: this.customEmitter,
       row: this.gridHeight / 2 - 3,
       col: 0,
       width: this.gridWidth / 2,
@@ -417,8 +417,8 @@ class Screen {
     // });
   }
 
-  initStatusEmitter(): void {
-    this.statusEmitter.on('songEnd', () => {
+  initCustomEmitter(): void {
+    this.customEmitter.on('songEnd', () => {
       // Get new playback state
       const doStuff = async (): Promise<void> => {
         const playback = await this.spotify.getPlaybackState();
@@ -442,7 +442,7 @@ class Screen {
       console.log('song ENDED!');
     });
 
-    this.statusEmitter.on('skipToNext', () => {
+    this.customEmitter.on('skipToNext', () => {
       const skipToNext = async (): Promise<void> => {
         await this.spotify.skipToNext();
         // TODO - how to avoid sleeping? Maybe we 'get' the next song in the queue
@@ -473,7 +473,7 @@ class Screen {
   async initGrid(): Promise<void> {
     // Define elements + event listeners
     try {
-      this.initStatusEmitter();
+      this.initCustomEmitter();
       const playback = await this.spotify.getPlaybackState();
       if (playback.item == null) {
         console.log('PLAYBACK.ITEM = NULL');

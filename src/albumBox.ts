@@ -10,7 +10,7 @@ interface AlbumBoxOptions {
   width: number;
   height: number;
   grid: bc.Widgets.GridElement;
-  statusEmitter: EventEmitter;
+  customEmitter: EventEmitter;
 }
 
 export class AlbumBox {
