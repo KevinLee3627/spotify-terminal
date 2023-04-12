@@ -409,12 +409,11 @@ class Screen {
       orientation: 'horizontal',
       pch: '█',
     });
-    this.songBox.append(this.progressBar);
-
     this.timeElapsed = b.text({ left: '0' });
-    this.songBox.append(this.timeElapsed);
-
     this.songDuration = b.text({ left: '100%-7' });
+
+    this.songBox.append(this.progressBar);
+    this.songBox.append(this.timeElapsed);
     this.songBox.append(this.songDuration);
 
     this.updateSongBoxLabel(playback.item);
