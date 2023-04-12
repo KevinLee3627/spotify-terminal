@@ -103,11 +103,7 @@ export class SongBox {
     }
     const songTitle = track.name == null ? 'N/A' : track.name;
     const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
-    const albumName = track.album.name;
-    const albumYear = track.album.release_date.split('-')[0];
-    this.box.setLabel(
-      `${bold(songTitle)} by ${songArtist} | ${albumName} (${albumYear})`
-    );
+    this.box.setLabel(`${bold(songTitle)} by ${songArtist}`);
   }
 
   async updateProgress(
