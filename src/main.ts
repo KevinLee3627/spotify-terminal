@@ -3,6 +3,7 @@ import bc from 'blessed-contrib';
 import type { AlbumFull, Playback, Track } from './types';
 import { Spotify } from './spotify';
 import { writeFileSync } from 'fs';
+import EventEmitter from 'events';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -368,14 +369,13 @@ class Screen {
   gridHeight = 48;
   gridWidth = 48;
 
+  // CUSTOM EVENTS
+  statusEmitter: EventEmitter;
+
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
   // SONGBOX
   songBox: SongBox;
-  progressBar!: b.Widgets.ProgressBarElement;
-  timeElapsed!: b.Widgets.TextElement;
-  songDuration!: b.Widgets.TextElement;
-
   songProgressTimeout!: NodeJS.Timeout;
 
   // ALBUMBOX
@@ -388,22 +388,33 @@ class Screen {
   // TODO: PLAYLISTS?
 
   constructor(playback: Playback) {
+    this.statusEmitter = new EventEmitter();
+
     this.grid = new bc.grid({
       rows: this.gridHeight,
       cols: this.gridWidth,
       screen: this.screen,
     });
 
-    this.songBox = new SongBox(
-      this.grid,
-      { row: this.gridHeight - 3, col: 0 },
-      { width: this.gridWidth, height: 3 },
-      playback
-    );
+    this.songBox = new SongBox({
+      grid: this.grid,
+      row: this.gridHeight - 3,
+      col: 0,
+      width: this.gridWidth,
+      height: 3,
+      playback,
+      statusEmitter: this.statusEmitter,
+    });
 
     // this.screen.on('keypress', (ch, key) => {
     //   console.log(key.full);
     // });
+  }
+
+  initStatusEmitter(): void {
+    this.statusEmitter.on('songEnd', () => {
+      console.log('song ENDED!');
+    });
   }
 
   initAlbumBox(): void {
@@ -432,6 +443,7 @@ class Screen {
 
   initGrid(playback: Playback): void {
     // Define elements + event listeners
+    this.initStatusEmitter();
     this.initAlbumBox();
 
     // Must be arrow function so "this" refers to the class and not the function.
@@ -465,6 +477,16 @@ class Screen {
   }
 }
 
+interface SongBoxOptions {
+  row: number;
+  col: number;
+  width: number;
+  height: number;
+  playback: Playback;
+  grid: bc.Widgets.GridElement;
+  statusEmitter: EventEmitter;
+}
+
 class SongBox {
   // SONGBOX
   box: b.Widgets.BoxElement;
@@ -474,13 +496,11 @@ class SongBox {
 
   songProgressTimeout: NodeJS.Timeout = setTimeout(() => {}, 0);
 
-  constructor(
-    grid: bc.Widgets.GridElement,
-    position: { row: number; col: number },
-    size: { width: number; height: number },
-    playback: Playback
-  ) {
-    this.box = grid.set(position.row, position.col, size.height, size.width, b.box, {
+  statusEmitter: EventEmitter;
+  constructor(opts: SongBoxOptions) {
+    this.statusEmitter = opts.statusEmitter;
+
+    this.box = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
       tags: true,
       style: { focus: { border: { fg: 'green' } } },
     });
@@ -499,12 +519,11 @@ class SongBox {
     this.box.append(this.timeElapsed);
     this.box.append(this.songDuration);
 
-    this.updateLabel(playback.item);
-    console.log('RUN');
+    this.updateLabel(opts.playback.item);
     void this.updateProgress(
-      playback.progress_ms,
-      playback.item?.duration_ms ?? null,
-      playback.is_playing
+      opts.playback.progress_ms,
+      opts.playback.item?.duration_ms ?? null,
+      opts.playback.is_playing
     );
   }
 
@@ -539,6 +558,7 @@ class SongBox {
     if (isPlaying) {
       if (progress >= duration) {
         // Get the new playback
+        this.statusEmitter.emit('songEnd');
       }
     }
 
