@@ -83,7 +83,7 @@ export class SongBox {
     }
 
     if (isPlaying) {
-      if (progress >= duration) {
+      if (progress > duration) {
         // Get the new playback
         this.statusEmitter.emit('songEnd');
       }
