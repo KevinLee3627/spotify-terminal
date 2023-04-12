@@ -371,10 +371,12 @@ class Screen {
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
   // SONGBOX
-  songBox!: b.Widgets.BoxElement;
+  songBox: SongBox;
   progressBar!: b.Widgets.ProgressBarElement;
   timeElapsed!: b.Widgets.TextElement;
   songDuration!: b.Widgets.TextElement;
+
+  songProgressTimeout!: NodeJS.Timeout;
 
   // ALBUMBOX
   albumBox!: b.Widgets.ListElement;
@@ -385,86 +387,23 @@ class Screen {
 
   // TODO: PLAYLISTS?
 
-  constructor() {
+  constructor(playback: Playback) {
     this.grid = new bc.grid({
       rows: this.gridHeight,
       cols: this.gridWidth,
       screen: this.screen,
     });
 
+    this.songBox = new SongBox(
+      this.grid,
+      { row: this.gridHeight - 3, col: 0 },
+      { width: this.gridWidth, height: 3 },
+      playback
+    );
+
     // this.screen.on('keypress', (ch, key) => {
     //   console.log(key.full);
     // });
-  }
-
-  initSongBox(playback: Playback): void {
-    this.songBox = this.grid.set(this.gridHeight - 3, 0, 3, this.gridWidth, b.box, {
-      tags: true,
-      style: { focus: { border: { fg: 'green' } } },
-    });
-
-    this.progressBar = b.progressbar({
-      left: '7',
-      width: '100%-14',
-      orientation: 'horizontal',
-      pch: '█',
-    });
-    this.timeElapsed = b.text({ left: '0' });
-    this.songDuration = b.text({ left: '100%-7' });
-
-    this.songBox.append(this.progressBar);
-    this.songBox.append(this.timeElapsed);
-    this.songBox.append(this.songDuration);
-
-    this.updateSongBoxLabel(playback.item);
-    void this.updateSongProgress(
-      playback.progress_ms,
-      playback.item?.duration_ms ?? null,
-      playback.is_playing
-    );
-  }
-
-  updateSongBoxLabel(track: Track | null): void {
-    if (track == null) {
-      this.songBox.setLabel('N/A');
-      return;
-    }
-    const songTitle = track.name == null ? 'N/A' : track.name;
-    const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
-    const albumName = track.album.name;
-    const albumYear = track.album.release_date.split('-')[0];
-    this.songBox.setLabel(
-      `${bold(songTitle)} by ${songArtist} | ${albumName} (${albumYear})`
-    );
-  }
-
-  async updateSongProgress(
-    progress: number | null,
-    duration: number | null,
-    isPlaying: boolean
-  ): Promise<void> {
-    if (progress == null || duration == null) {
-      this.progressBar.setProgress(0);
-      this.timeElapsed.setContent('00:00');
-      this.songDuration.setContent('00:00');
-      return;
-    }
-
-    if (isPlaying) {
-      if (progress >= duration) {
-        console.log('YAy');
-        // await this.fetchCurrentPlayback();
-        // await this.updateAlbumBox();
-      }
-    }
-
-    this.progressBar.setProgress((progress / duration) * 100);
-    this.timeElapsed.setContent(msToTime(progress));
-    this.songDuration.setContent(msToTime(duration));
-    this.screen.render();
-    setTimeout(() => {
-      void this.updateSongProgress(progress + 1000, duration, isPlaying);
-    }, 1000);
   }
 
   initAlbumBox(): void {
@@ -493,7 +432,6 @@ class Screen {
 
   initGrid(playback: Playback): void {
     // Define elements + event listeners
-    this.initSongBox(playback);
     this.initAlbumBox();
 
     // Must be arrow function so "this" refers to the class and not the function.
@@ -504,7 +442,7 @@ class Screen {
       }
       switch (key.full) {
         case 's':
-          this.songBox.focus();
+          this.songBox.box.focus();
           break;
         case 'a':
           this.albumBox.focus();
@@ -516,10 +454,102 @@ class Screen {
 
     this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
 
+    this.refreshScreen();
+  }
+
+  refreshScreen(): void {
     this.screen.render();
+    setTimeout(() => {
+      this.refreshScreen();
+    }, 500);
   }
 }
 
+class SongBox {
+  // SONGBOX
+  box: b.Widgets.BoxElement;
+  progressBar: b.Widgets.ProgressBarElement;
+  timeElapsed: b.Widgets.TextElement;
+  songDuration: b.Widgets.TextElement;
+
+  songProgressTimeout: NodeJS.Timeout = setTimeout(() => {}, 0);
+
+  constructor(
+    grid: bc.Widgets.GridElement,
+    position: { row: number; col: number },
+    size: { width: number; height: number },
+    playback: Playback
+  ) {
+    this.box = grid.set(position.row, position.col, size.height, size.width, b.box, {
+      tags: true,
+      style: { focus: { border: { fg: 'green' } } },
+    });
+
+    this.progressBar = b.progressbar({
+      left: '7',
+      width: '100%-14',
+      orientation: 'horizontal',
+      pch: '█',
+      filled: 50,
+    });
+    this.timeElapsed = b.text({ left: '0' });
+    this.songDuration = b.text({ left: '100%-7' });
+
+    this.box.append(this.progressBar);
+    this.box.append(this.timeElapsed);
+    this.box.append(this.songDuration);
+
+    this.updateLabel(playback.item);
+    console.log('RUN');
+    void this.updateProgress(
+      playback.progress_ms,
+      playback.item?.duration_ms ?? null,
+      playback.is_playing
+    );
+  }
+
+  updateLabel(track: Track | null): void {
+    if (track == null) {
+      this.box.setLabel('N/A');
+      return;
+    }
+    const songTitle = track.name == null ? 'N/A' : track.name;
+    const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
+    const albumName = track.album.name;
+    const albumYear = track.album.release_date.split('-')[0];
+    this.box.setLabel(
+      `${bold(songTitle)} by ${songArtist} | ${albumName} (${albumYear})`
+    );
+  }
+
+  async updateProgress(
+    progress: number | null,
+    duration: number | null,
+    isPlaying: boolean
+  ): Promise<void> {
+    clearTimeout(this.songProgressTimeout);
+
+    if (progress == null || duration == null) {
+      this.progressBar.setProgress(0);
+      this.timeElapsed.setContent('00:00');
+      this.songDuration.setContent('00:00');
+      return;
+    }
+
+    if (isPlaying) {
+      if (progress >= duration) {
+        // Get the new playback
+      }
+    }
+
+    this.progressBar.setProgress((progress / duration) * 100);
+    this.timeElapsed.setContent(msToTime(progress));
+    this.songDuration.setContent(msToTime(duration));
+    this.songProgressTimeout = setTimeout(() => {
+      void this.updateProgress(progress + 1000, duration, isPlaying);
+    }, 1000);
+  }
+}
 async function main(): Promise<void> {
   const spotify = new Spotify();
   await spotify.getToken();
@@ -532,7 +562,7 @@ async function main(): Promise<void> {
   //   app.screen.destroy();
   //   console.log(error);
   // }
-  const screen = new Screen();
+  const screen = new Screen(playback);
   screen.initGrid(playback);
 }
 void main();
