@@ -115,8 +115,8 @@ class App {
     });
 
     this.progressBar = b.progressbar({
-      left: 'center',
-      width: '100%-12',
+      left: '7',
+      width: '100%-14',
       orientation: 'horizontal',
       pch: '█',
     });
@@ -129,7 +129,7 @@ class App {
     this.songBox.append(this.timeElapsed);
 
     this.songDuration = b.text({
-      left: '100%-6',
+      left: '100%-7',
     });
     this.songBox.append(this.songDuration);
 
