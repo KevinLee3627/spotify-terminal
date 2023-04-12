@@ -37,7 +37,6 @@ export class SongBox {
       width: '100%-14',
       orientation: 'horizontal',
       pch: '█',
-      filled: 50,
     });
     this.timeElapsed = b.text({ left: '0' });
     this.songDuration = b.text({ left: '100%-7' });
@@ -45,12 +44,14 @@ export class SongBox {
     this.box.append(this.progressBar);
     this.box.append(this.timeElapsed);
     this.box.append(this.songDuration);
+  }
 
-    this.updateLabel(opts.playback.item);
+  init(playback: Playback): void {
+    this.updateLabel(playback.item);
     void this.updateProgress(
-      opts.playback.progress_ms,
-      opts.playback.item?.duration_ms ?? null,
-      opts.playback.is_playing
+      playback.progress_ms,
+      playback.item?.duration_ms ?? null,
+      playback.is_playing
     );
   }
 

@@ -5,6 +5,7 @@ import { Spotify } from './spotify';
 import { writeFileSync } from 'fs';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
+import { AlbumBox } from './albumBox';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -364,6 +365,8 @@ class App {
 class Screen {
   spotify: Spotify;
 
+  currentPlayback!: Playback;
+
   screen = b.screen({ smartCSR: true, autoPadding: true });
   gridHeight = 48;
   gridWidth = 48;
@@ -378,7 +381,7 @@ class Screen {
   songProgressTimeout!: NodeJS.Timeout;
 
   // ALBUMBOX
-  albumBox!: b.Widgets.ListElement;
+  albumBox: AlbumBox;
 
   // TODO: QUEUEBOX
 
@@ -398,12 +401,21 @@ class Screen {
 
     this.songBox = new SongBox({
       grid: this.grid,
+      statusEmitter: this.statusEmitter,
       row: this.gridHeight - 3,
       col: 0,
       width: this.gridWidth,
       height: 3,
       playback,
+    });
+
+    this.albumBox = new AlbumBox({
+      grid: this.grid,
       statusEmitter: this.statusEmitter,
+      row: this.gridHeight / 2 - 3,
+      col: 0,
+      width: this.gridWidth / 2,
+      height: this.gridHeight / 2 - 3,
     });
 
     // this.screen.on('keypress', (ch, key) => {
@@ -417,12 +429,16 @@ class Screen {
       const doStuff = async (): Promise<void> => {
         const playback = await this.spotify.getPlaybackState();
         const track = playback.item;
-        this.songBox.updateLabel(track);
-        void this.songBox.updateProgress(
-          playback.progress_ms,
-          track?.duration_ms ?? null,
-          playback.is_playing
-        );
+        if (track != null) {
+          const album = await this.spotify.getAlbum(track?.album.id);
+          this.songBox.updateLabel(track);
+          void this.songBox.updateProgress(
+            playback.progress_ms,
+            track?.duration_ms ?? null,
+            playback.is_playing
+          );
+          this.albumBox.updateLabel(album);
+        }
       };
 
       doStuff().catch((err) => {
@@ -432,56 +448,43 @@ class Screen {
     });
   }
 
-  initAlbumBox(): void {
-    this.albumBox = this.grid.set(
-      24 - 3,
-      0,
-      this.gridHeight / 2,
-      this.gridWidth / 2,
-      b.list,
-      {
-        tags: true,
-        scrollable: true,
-        scrollbar: true,
-        noCellBorders: true,
-        interactive: true,
-        vi: true,
-        style: {
-          selected: { bg: 'red' },
-          scrollbar: { bg: 'blue' },
-          focus: { border: { fg: 'green' } },
-        },
-        keys: true,
-      }
-    );
-  }
-
-  initGrid(playback: Playback): void {
+  async initGrid(): Promise<void> {
     // Define elements + event listeners
-    this.initStatusEmitter();
-    this.initAlbumBox();
-
-    // Must be arrow function so "this" refers to the class and not the function.
-    const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
-      // TODO: Pause playback on application close?
-      if (['escape', 'C-c'].includes(key.full)) {
-        return process.exit(0);
+    try {
+      this.initStatusEmitter();
+      const playback = await this.spotify.getPlaybackState();
+      if (playback.item == null) {
+        console.log('PLAYBACK.ITEM = NULL');
+        return;
       }
-      switch (key.full) {
-        case 's':
-          this.songBox.box.focus();
-          break;
-        case 'a':
-          this.albumBox.focus();
-          break;
-        default:
-          break;
-      }
-    };
+      const album = await this.spotify.getAlbum(playback.item?.album.id);
+      this.songBox.init(playback);
+      this.albumBox.init(album);
 
-    this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
+      // Must be arrow function so "this" refers to the class and not the function.
+      const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
+        // TODO: Pause playback on application close?
+        if (['escape', 'C-c'].includes(key.full)) {
+          return process.exit(0);
+        }
+        switch (key.full) {
+          case 's':
+            this.songBox.box.focus();
+            break;
+          case 'a':
+            this.albumBox.element.focus();
+            break;
+          default:
+            break;
+        }
+      };
 
-    this.refreshScreen();
+      this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
+
+      this.refreshScreen();
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   refreshScreen(): void {
@@ -505,6 +508,6 @@ async function main(): Promise<void> {
   //   console.log(error);
   // }
   const screen = new Screen(spotify, playback);
-  screen.initGrid(playback);
+  await screen.initGrid();
 }
 void main();
