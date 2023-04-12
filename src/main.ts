@@ -72,6 +72,7 @@ class App {
         await this.updateBoxes();
       };
 
+      // TODO: ADD DEVICE PICKER BOX
       const playButton = async (): Promise<void> => {
         if (this.playback.item == null) {
           // Transfers playback to an active device if nothing is currently playing
@@ -228,21 +229,6 @@ class App {
       }
     });
 
-    this.albumBox.on('select', (item, i) => {
-      const playSelectedTrack = async (): Promise<void> => {
-        if (this.currentAlbum == null) throw new Error('Nothing currently playing.');
-        // TODO: This can NOT be the best way to work this...
-        await this.spotify.resume({
-          uris: [this.currentAlbum.tracks.items[this.selectedAlbumTrackIndex].uri],
-        });
-        await sleep(500);
-        await this.updateBoxes();
-      };
-
-      playSelectedTrack().catch((err) => {
-        writeFileSync('./log.json', JSON.stringify(err));
-      });
-    });
     // Sets box title/other stuff
     await this.updateAlbumBox();
   }
