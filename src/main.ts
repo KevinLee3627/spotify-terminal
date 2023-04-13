@@ -164,7 +164,6 @@ class Screen {
     });
 
     this.customEmitter.on('playTrackFromAlbum', (trackUri: string) => {
-      console.log('Playing track from album');
       const playNow = async (trackUri: string): Promise<void> => {
         // TODO: Can we avoid the sleep() calls?
         await this.spotify.addTrackToQueue(trackUri);
@@ -172,7 +171,6 @@ class Screen {
         await this.spotify.skipToNext();
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
-        console.log(`playing ${playback.item?.name ?? 'N/A'}`);
         await this.updateSongAndAlbumBox(playback);
       };
 
