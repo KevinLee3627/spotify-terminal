@@ -34,11 +34,11 @@ export class SongBox {
 
     this.progressBar = b.progressbar({
       left: '7',
-      width: '100%-14',
+      width: '100%-7',
       orientation: 'horizontal',
       pch: '█',
     });
-    this.timeElapsed = b.text({ left: '0' });
+    this.timeElapsed = b.text({ left: '0', width: 5 });
     this.songDuration = b.text({ left: '100%-7' });
 
     this.box.append(this.progressBar);
