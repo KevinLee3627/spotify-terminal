@@ -5,6 +5,7 @@ import { Spotify } from './spotify';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
 import { AlbumBox } from './albumBox';
+import { SearchBox } from './search';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,10 +35,13 @@ class Screen {
   grid: bc.Widgets.GridElement;
   songBox: SongBox;
   albumBox: AlbumBox;
+  searchBox: SearchBox;
 
   // TODO: QUEUEBOX
 
   // TODO: SEARCH?
+
+  // TODO: Friends activity: https://github.com/valeriangalliat/spotify-buddylist?
 
   // TODO: PLAYLISTS?
 
@@ -68,6 +72,15 @@ class Screen {
       col: 0,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2,
+    });
+
+    this.searchBox = new SearchBox({
+      grid: this.grid,
+      customEmitter: this.customEmitter,
+      row: 0,
+      col: this.gridWidth / 2,
+      width: this.gridWidth / 2,
+      height: this.gridHeight - 3,
     });
 
     // this.screen.on('keypress', (ch, key) => {
@@ -211,9 +224,11 @@ class Screen {
         this.albumBox.setNullState();
         this.songBox.init(playback);
         this.albumBox.init();
+        this.searchBox.init();
       } else {
         this.songBox.init(playback);
         this.albumBox.init(album, playback.item);
+        this.searchBox.init();
       }
 
       // Must be arrow function so "this" refers to the class and not the function.
@@ -229,12 +244,15 @@ class Screen {
           case 'a':
             this.albumBox.element.focus();
             break;
+          case 'c':
+            this.searchBox.element.focus();
+            break;
           default:
             break;
         }
       };
 
-      this.screen.key(['escape', 'q', 'C-c', 's', 'a'], screenKeyListener);
+      this.screen.key(['escape', 'q', 'C-c', 's', 'a', 'c'], screenKeyListener);
 
       this.refreshScreen();
     } catch (err) {
