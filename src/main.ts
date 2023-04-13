@@ -498,6 +498,22 @@ class Screen {
         console.log(err);
       });
     });
+
+    this.customEmitter.on('playTrackFromAlbum', (trackUri: string) => {
+      const playNow = async (trackUri: string): Promise<void> => {
+        // TODO: Can we avoid the sleep() calls?
+        await this.spotify.addTrackToQueue(trackUri);
+        await sleep(500);
+        await this.spotify.skipToNext();
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+
+      playNow(trackUri).catch((err) => {
+        console.log(err);
+      });
+    });
   }
 
   async initGrid(): Promise<void> {
