@@ -80,7 +80,7 @@ class Screen {
       row: 0,
       col: this.gridWidth / 2,
       width: this.gridWidth / 2,
-      height: this.gridHeight - 3,
+      height: 3,
     });
 
     // this.screen.on('keypress', (ch, key) => {

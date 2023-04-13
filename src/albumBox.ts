@@ -48,6 +48,7 @@ export class AlbumBox {
       // TODO: Autoplay songs after album finishes.
       // Manage the index of the selected track manually. Inited in updateAlbumBox
 
+      // TODO: Add a way to add the selected song to a specific playlist.
       switch (key.full) {
         case 'up':
         case 'k':
