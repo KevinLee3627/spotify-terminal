@@ -89,7 +89,8 @@ export class Spotify {
     await this.makeRequest('PUT', '/me/player/play', options);
   }
 
-  async getAlbum(id: string, limit: number = 100): Promise<AlbumFull> {
+  async getAlbum(id: string | null, limit: number = 100): Promise<AlbumFull | null> {
+    if (id == null) return null;
     return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
   }
 

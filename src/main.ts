@@ -359,8 +359,6 @@ class App {
 class Screen {
   spotify: Spotify;
 
-  currentPlayback!: Playback;
-
   screen = b.screen({ smartCSR: true, autoPadding: true });
   gridHeight = 48;
   gridWidth = 48;
@@ -417,23 +415,31 @@ class Screen {
     // });
   }
 
+  async updateSongAndAlbumBox(playback: Playback): Promise<void> {
+    const track = playback.item;
+    if (track != null) {
+      const album = await this.spotify.getAlbum(track?.album.id);
+      this.songBox.updateLabel(track);
+      void this.songBox.updateProgress(
+        playback.progress_ms,
+        track?.duration_ms ?? null,
+        playback.is_playing
+      );
+      if (album == null) {
+        this.albumBox.element.setLabel('N/A');
+        return;
+      }
+      this.albumBox.updateLabel(album);
+      this.albumBox.updateList(album.tracks.items);
+    }
+  }
+
   initCustomEmitter(): void {
     this.customEmitter.on('songEnd', () => {
       // Get new playback state
       const doStuff = async (): Promise<void> => {
         const playback = await this.spotify.getPlaybackState();
-        const track = playback.item;
-        if (track != null) {
-          const album = await this.spotify.getAlbum(track?.album.id);
-          this.songBox.updateLabel(track);
-          void this.songBox.updateProgress(
-            playback.progress_ms,
-            track?.duration_ms ?? null,
-            playback.is_playing
-          );
-          this.albumBox.updateLabel(album);
-          this.albumBox.updateList(album.tracks.items);
-        }
+        await this.updateSongAndAlbumBox(playback);
       };
 
       doStuff().catch((err) => {
@@ -449,22 +455,38 @@ class Screen {
         // instead of just waiting?
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
-        // TODO: This chunk of code is repeated above - should we extract out to separate function?
-        const track = playback.item;
-        if (track != null) {
-          const album = await this.spotify.getAlbum(track?.album.id);
-          this.songBox.updateLabel(track);
-          void this.songBox.updateProgress(
-            playback.progress_ms,
-            track?.duration_ms ?? null,
-            playback.is_playing
-          );
-          this.albumBox.updateLabel(album);
-          this.albumBox.updateList(album.tracks.items);
-        }
+        await this.updateSongAndAlbumBox(playback);
       };
 
       skipToNext().catch((err) => {
+        console.log(err);
+      });
+    });
+
+    this.customEmitter.on('hitPlayButton', () => {
+      console.log('event received');
+      const playButton = async (): Promise<void> => {
+        let playback = await this.spotify.getPlaybackState();
+        if (playback.item == null) {
+          // Transfers playback to an active device if nothing is currently playing
+          await this.spotify.transferPlaybackToDevice(process.env.DEVICE_ID as string);
+          await sleep(500);
+          await this.spotify.resume(
+            { context_uri: 'spotify:playlist:2yjBgi4TAosyAxLRclnKk6' },
+            process.env.DEVICE_ID
+          );
+        } else {
+          if (playback.is_playing) {
+            await this.spotify.pause();
+          } else {
+            await this.spotify.resume();
+          }
+        }
+        await sleep(500);
+        playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+      playButton().catch((err) => {
         console.log(err);
       });
     });
@@ -476,12 +498,15 @@ class Screen {
       this.initCustomEmitter();
       const playback = await this.spotify.getPlaybackState();
       if (playback.item == null) {
-        console.log('PLAYBACK.ITEM = NULL');
-        return;
+        this.songBox.init(playback);
+        this.albumBox.element.setLabel('N/A');
+        console.log('no playing track :(');
+      } else {
+        const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
+        this.songBox.init(playback);
+        if (album != null) this.albumBox.init(album, playback.item);
+        else this.albumBox.element.setLabel('N/A');
       }
-      const album = await this.spotify.getAlbum(playback.item?.album.id);
-      this.songBox.init(playback);
-      this.albumBox.init(album, playback.item);
 
       // Must be arrow function so "this" refers to the class and not the function.
       const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
@@ -521,6 +546,7 @@ async function main(): Promise<void> {
   const spotify = new Spotify();
   await spotify.getToken();
   const playback = await spotify.getPlaybackState();
+  // TODO: Transfer playback to librespot on app startup
   // console.log(playback);
   // const app = new App(spotify, playback);
   // try {

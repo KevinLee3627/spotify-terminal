@@ -34,10 +34,10 @@ export class AlbumBox {
     });
   }
 
-  init(album: AlbumFull, currentTrack: Track): void {
+  init(album: AlbumFull, currentTrack: Track | null): void {
     this.updateLabel(album);
     this.updateList(album.tracks.items);
-    this.selectCurrentlyPlaying(currentTrack);
+    if (currentTrack != null) this.selectCurrentlyPlaying(currentTrack);
   }
 
   updateLabel(album: AlbumFull | null): void {
