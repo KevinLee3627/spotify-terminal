@@ -83,16 +83,19 @@ class Screen {
     const track = playback.item;
     if (track != null) {
       const album = await this.spotify.getAlbum(track?.album.id);
+
+      if (album == null) {
+        this.albumBox.setNullState();
+        return;
+      }
+
+      this.albumBox.setCurrentAlbum(album);
       this.songBox.updateLabel(track);
       void this.songBox.startProgress(
         playback.progress_ms,
         track?.duration_ms ?? null,
         playback.is_playing
       );
-      if (album == null) {
-        this.albumBox.setNullState();
-        return;
-      }
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items);
       this.albumBox.selectCurrentlyPlaying(track);
@@ -149,15 +152,11 @@ class Screen {
         await sleep(500);
         playback = await this.spotify.getPlaybackState();
         await this.updateSongAndAlbumBox(playback);
-        this.songBox
-          .startProgress(
-            playback.progress_ms,
-            playback.item?.duration_ms ?? null,
-            playback.is_playing
-          )
-          .catch((err) => {
-            console.log(err);
-          });
+        await this.songBox.startProgress(
+          playback.progress_ms,
+          playback.item?.duration_ms ?? null,
+          playback.is_playing
+        );
       };
       playButton().catch((err) => {
         console.log(err);
@@ -165,6 +164,7 @@ class Screen {
     });
 
     this.customEmitter.on('playTrackFromAlbum', (trackUri: string) => {
+      console.log('Playing track from album');
       const playNow = async (trackUri: string): Promise<void> => {
         // TODO: Can we avoid the sleep() calls?
         await this.spotify.addTrackToQueue(trackUri);
@@ -172,6 +172,7 @@ class Screen {
         await this.spotify.skipToNext();
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
+        console.log(`playing ${playback.item?.name ?? 'N/A'}`);
         await this.updateSongAndAlbumBox(playback);
       };
 

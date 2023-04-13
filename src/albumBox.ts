@@ -66,23 +66,25 @@ export class AlbumBox {
         case 'p':
           this.customEmitter.emit(
             'playTrackFromAlbum',
-            album?.tracks.items[this.selectedAlbumTrackIndex].uri
+            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
           );
           break;
         case 'S-p':
           this.customEmitter.emit(
             'playTrackFromAlbumWithinAlbum',
-            album,
-            album?.tracks.items[this.selectedAlbumTrackIndex].uri
+            this.currentAlbum,
+            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
           );
           break;
         default:
           break;
       }
     });
-
-    this.updateLabel(album ?? null);
-    this.updateList(album?.tracks.items ?? []);
+    if (album != null) {
+      this.setCurrentAlbum(album);
+      this.updateLabel(album);
+      this.updateList(album.tracks.items ?? []);
+    }
     if (currentTrack != null) this.selectCurrentlyPlaying(currentTrack);
   }
 
@@ -122,5 +124,9 @@ export class AlbumBox {
 
   setNullState(): void {
     this.element.setLabel('N/A');
+  }
+
+  setCurrentAlbum(album: AlbumFull): void {
+    this.currentAlbum = album;
   }
 }
