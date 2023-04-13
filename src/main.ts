@@ -32,11 +32,7 @@ class Screen {
 
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
-  // SONGBOX
   songBox: SongBox;
-  songProgressTimeout!: NodeJS.Timeout;
-
-  // ALBUMBOX
   albumBox: AlbumBox;
 
   // TODO: QUEUEBOX
