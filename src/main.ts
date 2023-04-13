@@ -95,6 +95,7 @@ class Screen {
       }
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items);
+      this.albumBox.selectCurrentlyPlaying(track);
     }
   }
 
@@ -127,7 +128,6 @@ class Screen {
     });
 
     this.customEmitter.on('hitPlayButton', () => {
-      console.log('HIT');
       const playButton = async (): Promise<void> => {
         let playback = await this.spotify.getPlaybackState();
         if (playback.item == null) {
@@ -222,20 +222,16 @@ class Screen {
     try {
       this.initCustomEmitter();
       const playback = await this.spotify.getPlaybackState();
-      if (playback.item == null) {
+      const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
+
+      if (playback.item == null || album == null) {
         this.songBox.setNullState();
         this.albumBox.setNullState();
         this.songBox.init(playback);
-        this.albumBox.init(album, playback.item);
+        this.albumBox.init();
       } else {
-        const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
-        if (album == null) {
-          this.songBox.setNullState();
-          this.albumBox.setNullState();
-        } else {
-          this.songBox.init(playback);
-          this.albumBox.init(album, playback.item);
-        }
+        this.songBox.init(playback);
+        this.albumBox.init(album, playback.item);
       }
 
       // Must be arrow function so "this" refers to the class and not the function.

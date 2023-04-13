@@ -38,7 +38,7 @@ export class AlbumBox {
     this.customEmitter = opts.customEmitter;
   }
 
-  init(album: AlbumFull, currentTrack: Track | null): void {
+  init(album?: AlbumFull, currentTrack?: Track | null): void {
     this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
@@ -51,25 +51,29 @@ export class AlbumBox {
       switch (key.full) {
         case 'up':
         case 'k':
-          if (this.selectedAlbumTrackIndex <= 0) return;
+          if (this.currentAlbum != null && this.selectedAlbumTrackIndex <= 0) return;
           this.selectedAlbumTrackIndex--;
           break;
         case 'down':
         case 'j':
-          if (this.selectedAlbumTrackIndex >= album.total_tracks - 1) return;
+          if (
+            this.currentAlbum != null &&
+            this.selectedAlbumTrackIndex >= this.currentAlbum.total_tracks - 1
+          )
+            return;
           this.selectedAlbumTrackIndex++;
           break;
         case 'p':
           this.customEmitter.emit(
             'playTrackFromAlbum',
-            album.tracks.items[this.selectedAlbumTrackIndex].uri
+            album?.tracks.items[this.selectedAlbumTrackIndex].uri
           );
           break;
         case 'S-p':
           this.customEmitter.emit(
             'playTrackFromAlbumWithinAlbum',
             album,
-            album.tracks.items[this.selectedAlbumTrackIndex].uri
+            album?.tracks.items[this.selectedAlbumTrackIndex].uri
           );
           break;
         default:
@@ -77,8 +81,8 @@ export class AlbumBox {
       }
     });
 
-    this.updateLabel(album);
-    this.updateList(album.tracks.items);
+    this.updateLabel(album ?? null);
+    this.updateList(album?.tracks.items ?? []);
     if (currentTrack != null) this.selectCurrentlyPlaying(currentTrack);
   }
 
