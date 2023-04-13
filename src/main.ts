@@ -420,7 +420,7 @@ class Screen {
     if (track != null) {
       const album = await this.spotify.getAlbum(track?.album.id);
       this.songBox.updateLabel(track);
-      void this.songBox.updateProgress(
+      void this.songBox.startProgress(
         playback.progress_ms,
         track?.duration_ms ?? null,
         playback.is_playing
@@ -474,12 +474,25 @@ class Screen {
             process.env.DEVICE_ID
           );
         } else {
-          if (playback.is_playing) await this.spotify.pause();
-          else await this.spotify.resume();
+          if (playback.is_playing) {
+            await this.spotify.pause();
+            this.songBox.stopProgress();
+          } else {
+            await this.spotify.resume();
+          }
         }
         await sleep(500);
         playback = await this.spotify.getPlaybackState();
         await this.updateSongAndAlbumBox(playback);
+        this.songBox
+          .startProgress(
+            playback.progress_ms,
+            playback.item?.duration_ms ?? null,
+            playback.is_playing
+          )
+          .catch((err) => {
+            console.log(err);
+          });
       };
       playButton().catch((err) => {
         console.log(err);

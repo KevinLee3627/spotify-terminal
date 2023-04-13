@@ -65,7 +65,7 @@ export class SongBox {
     });
 
     this.updateLabel(playback.item);
-    void this.updateProgress(
+    void this.startProgress(
       playback.progress_ms,
       playback.item?.duration_ms ?? null,
       playback.is_playing
@@ -86,7 +86,7 @@ export class SongBox {
     this.box.setLabel('N/A');
   }
 
-  async updateProgress(
+  async startProgress(
     progress: number | null,
     duration: number | null,
     isPlaying: boolean
@@ -110,8 +110,16 @@ export class SongBox {
     this.progressBar.setProgress((progress / duration) * 100);
     this.timeElapsed.setContent(msToTime(progress));
     this.songDuration.setContent(msToTime(duration));
+
+    // Only advance the timer by 1 second if we are currently playing
+    if (isPlaying) progress += 1000;
+
     this.songProgressTimeout = setTimeout(() => {
-      void this.updateProgress(progress + 1000, duration, isPlaying);
+      void this.startProgress(progress, duration, isPlaying);
     }, 1000);
+  }
+
+  stopProgress(): void {
+    clearTimeout(this.songProgressTimeout);
   }
 }
