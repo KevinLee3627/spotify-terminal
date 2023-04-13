@@ -82,6 +82,10 @@ export class SongBox {
     this.box.setLabel(`${bold(songTitle)} by ${songArtist}`);
   }
 
+  setNullState(): void {
+    this.box.setLabel('N/A');
+  }
+
   async updateProgress(
     progress: number | null,
     duration: number | null,

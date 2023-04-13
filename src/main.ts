@@ -426,7 +426,7 @@ class Screen {
         playback.is_playing
       );
       if (album == null) {
-        this.albumBox.element.setLabel('N/A');
+        this.albumBox.setNullState();
         return;
       }
       this.albumBox.updateLabel(album);
@@ -445,7 +445,6 @@ class Screen {
       doStuff().catch((err) => {
         console.log(err);
       });
-      console.log('song ENDED!');
     });
 
     this.customEmitter.on('skipToNext', () => {
@@ -464,7 +463,6 @@ class Screen {
     });
 
     this.customEmitter.on('hitPlayButton', () => {
-      console.log('event received');
       const playButton = async (): Promise<void> => {
         let playback = await this.spotify.getPlaybackState();
         if (playback.item == null) {
@@ -476,11 +474,8 @@ class Screen {
             process.env.DEVICE_ID
           );
         } else {
-          if (playback.is_playing) {
-            await this.spotify.pause();
-          } else {
-            await this.spotify.resume();
-          }
+          if (playback.is_playing) await this.spotify.pause();
+          else await this.spotify.resume();
         }
         await sleep(500);
         playback = await this.spotify.getPlaybackState();
@@ -498,14 +493,17 @@ class Screen {
       this.initCustomEmitter();
       const playback = await this.spotify.getPlaybackState();
       if (playback.item == null) {
-        this.songBox.init(playback);
-        this.albumBox.element.setLabel('N/A');
-        console.log('no playing track :(');
+        this.songBox.setNullState();
+        this.albumBox.setNullState();
       } else {
         const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
-        this.songBox.init(playback);
-        if (album != null) this.albumBox.init(album, playback.item);
-        else this.albumBox.element.setLabel('N/A');
+        if (album == null) {
+          this.songBox.setNullState();
+          this.albumBox.setNullState();
+        } else {
+          this.songBox.init(playback);
+          this.albumBox.init(album, playback.item);
+        }
       }
 
       // Must be arrow function so "this" refers to the class and not the function.

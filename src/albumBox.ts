@@ -73,4 +73,8 @@ export class AlbumBox {
     this.element.select(track.track_number - 1);
     this.selectedAlbumTrackIndex = track.track_number - 1;
   }
+
+  setNullState(): void {
+    this.element.setLabel('N/A');
+  }
 }
