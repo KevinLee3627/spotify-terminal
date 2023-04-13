@@ -187,23 +187,10 @@ class Screen {
           album: AlbumFull,
           trackUri: string
         ): Promise<void> => {
-          // For all the uris of the tracks in the album
-          // Separate the uri of the selected track from the rest
           // Play the seleced track next, then queue up the rest of the tracks.
           const trackUris = album.tracks.items.map((item) => item.uri);
-          const separated = trackUris.reduce<{ selected: string; notSelected: string[] }>(
-            (prev, curr) => {
-              if (curr === trackUri) {
-                prev.selected = curr;
-              } else {
-                prev.notSelected.push(curr);
-              }
-              return prev;
-            },
-            { selected: '', notSelected: [] }
-          );
-          const finalUris = [separated.selected, ...separated.notSelected];
-          await this.spotify.resume({ uris: finalUris });
+          const picked = trackUris.slice(trackUris.indexOf(trackUri));
+          await this.spotify.resume({ uris: picked });
           await sleep(500);
           const playback = await this.spotify.getPlaybackState();
           await this.updateSongAndAlbumBox(playback);
