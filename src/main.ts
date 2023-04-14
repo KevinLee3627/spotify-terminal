@@ -6,6 +6,7 @@ import EventEmitter from 'events';
 import { SongBox } from './songBox';
 import { AlbumBox } from './albumBox';
 import { SearchBox } from './search';
+import { PlaybackControlBox } from './songControlBox';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,6 +35,7 @@ class Screen {
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
   songBox: SongBox;
+  playbackControlBox: PlaybackControlBox;
   albumBox: AlbumBox;
   searchBox: SearchBox;
 
@@ -62,6 +64,16 @@ class Screen {
       col: 0,
       width: this.gridWidth,
       height: 3,
+      playback,
+    });
+
+    this.playbackControlBox = new PlaybackControlBox({
+      grid: this.grid,
+      customEmitter: this.customEmitter,
+      row: this.gridHeight - 3 - 3,
+      col: this.gridWidth / 2,
+      height: 3,
+      width: this.gridWidth / 4,
       playback,
     });
 
@@ -210,6 +222,18 @@ class Screen {
         });
       }
     );
+
+    this.customEmitter.on('cycleRepeatState', (newState: Playback['repeat_state']) => {
+      const setState = async (newState: Playback['repeat_state']): Promise<void> => {
+        await this.spotify.setRepeatState(newState);
+        this.playbackControlBox.setRepeatState(newState);
+        this.playbackControlBox.updateRepeatText(newState);
+      };
+
+      setState(newState).catch((err) => {
+        console.log(err);
+      });
+    });
   }
 
   async initGrid(): Promise<void> {
@@ -244,8 +268,11 @@ class Screen {
           case 'a':
             this.albumBox.element.focus();
             break;
-          case 'c':
+          case 'q':
             this.searchBox.element.focus();
+            break;
+          case 'c':
+            this.playbackControlBox.element.focus();
             break;
           default:
             break;
