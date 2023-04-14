@@ -97,7 +97,6 @@ export class AlbumBox {
     this.element.setLabel(`${bold(album.name)} (${album.release_date})`);
   }
 
-  // TODO: HAndle alubms w/ multiple discs (Ex. Kendrick's newest album)
   updateList(tracks: Track[]): void {
     const listWidth = this.element.width as number;
     const totalBorderWidth = 2;
@@ -105,22 +104,28 @@ export class AlbumBox {
     const durationWidth = 9;
 
     const trackNameWidth = listWidth - totalBorderWidth - trackNumWidth - durationWidth;
-    function formatRow(track: Track): string {
+    function formatRow(track: Track, index: number): string {
       const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
-      const trackNumCol = String(track.track_number).padEnd(trackNumWidth, ' ');
+      const trackNumCol = String(index + 1).padEnd(trackNumWidth, ' ');
       const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
       return `${trackNumCol} ${trackNameCol} ${durationCol}`;
     }
-    const rows = tracks.map((track) => {
-      return formatRow(track);
+    const rows = tracks.map((track, i) => {
+      return formatRow(track, i);
     });
     this.element.setItems(rows);
   }
 
   selectCurrentlyPlaying(track: Track): void {
     // Select the currently playing track
-    this.element.select(track.track_number - 1);
-    this.selectedAlbumTrackIndex = track.track_number - 1;
+    // get index of track in album
+    if (this.currentAlbum == null) return;
+
+    const trackIndex = this.currentAlbum?.tracks.items.findIndex(
+      (val) => val.id === track.id
+    );
+    this.element.select(trackIndex);
+    this.selectedAlbumTrackIndex = trackIndex;
   }
 
   setNullState(): void {
