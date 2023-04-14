@@ -56,6 +56,8 @@ export class SongBox {
           this.customEmitter.emit('skipToNext');
           break;
         case 'p':
+          this.customEmitter.emit('skipToPrev');
+          break;
         case 'space':
           this.customEmitter.emit('hitPlayButton');
           break;

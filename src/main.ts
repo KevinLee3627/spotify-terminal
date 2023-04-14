@@ -164,6 +164,21 @@ class Screen {
       });
     });
 
+    this.customEmitter.on('skipToPrev', () => {
+      const skipToNext = async (): Promise<void> => {
+        await this.spotify.skipToPrev();
+        // TODO - how to avoid sleeping? Maybe we 'get' the next song in the queue
+        // instead of just waiting?
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+
+      skipToNext().catch((err) => {
+        console.log(err);
+      });
+    });
+
     this.customEmitter.on('hitPlayButton', () => {
       const playButton = async (): Promise<void> => {
         let playback = await this.spotify.getPlaybackState();

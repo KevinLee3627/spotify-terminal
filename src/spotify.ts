@@ -66,7 +66,11 @@ export class Spotify {
   }
 
   async skipToNext(): Promise<void> {
-    await this.makeRequest<unknown>('POST', '/me/player/next');
+    await this.makeRequest('POST', '/me/player/next');
+  }
+
+  async skipToPrev(): Promise<void> {
+    await this.makeRequest('POST', '/me/player/previous');
   }
 
   async addTrackToQueue(trackUri: string): Promise<void> {
