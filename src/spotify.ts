@@ -89,6 +89,10 @@ export class Spotify {
     await this.makeRequest('PUT', '/me/player/play', options);
   }
 
+  async setRepeatState(state: Playback['repeat_state']): Promise<void> {
+    await this.makeRequest('PUT', `/me/player/repeat`, { query: { state } });
+  }
+
   async getAlbum(id: string | null, limit: number = 100): Promise<AlbumFull | null> {
     if (id == null) return null;
     return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
