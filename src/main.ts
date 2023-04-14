@@ -27,7 +27,7 @@ export const bold = (str: string): string => `{bold}${str}{/bold}`;
 class Screen {
   spotify: Spotify;
 
-  screen = b.screen({ smartCSR: true, autoPadding: true });
+  screen = b.screen({ smartCSR: true, autoPadding: true, log: './log.json' });
   gridHeight = 48;
   gridWidth = 48;
 
