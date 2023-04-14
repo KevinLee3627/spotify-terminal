@@ -7,6 +7,7 @@ import { SongBox } from './songBox';
 import { AlbumBox } from './albumBox';
 import { SearchBox } from './search';
 import { PlaybackControlBox } from './songControlBox';
+import { VolumeControlBox } from './volumeControlBox';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -36,6 +37,7 @@ class Screen {
   grid: bc.Widgets.GridElement;
   songBox: SongBox;
   playbackControlBox: PlaybackControlBox;
+  volumeControlBox: VolumeControlBox;
   albumBox: AlbumBox;
   searchBox: SearchBox;
 
@@ -72,6 +74,16 @@ class Screen {
       customEmitter: this.customEmitter,
       row: this.gridHeight - 3 - 3,
       col: this.gridWidth / 2,
+      height: 3,
+      width: this.gridWidth / 4,
+      playback,
+    });
+
+    this.volumeControlBox = new VolumeControlBox({
+      grid: this.grid,
+      customEmitter: this.customEmitter,
+      row: this.gridHeight - 3 - 3,
+      col: this.gridWidth * 0.75,
       height: 3,
       width: this.gridWidth / 4,
       playback,
@@ -117,6 +129,7 @@ class Screen {
         track?.duration_ms ?? null,
         playback.is_playing
       );
+      this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items);
       this.albumBox.selectCurrentlyPlaying(track);

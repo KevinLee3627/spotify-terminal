@@ -59,11 +59,11 @@ export interface TokenRes {
 }
 
 export interface Device {
-  id: string | null;
+  id: string | undefined;
   is_active: boolean;
   is_private_session: boolean;
   is_restricted: boolean;
   name: string;
   type: 'computer' | 'smartphone' | 'speaker';
-  volume_percent: number | null;
+  volume_percent: number | undefined;
 }
