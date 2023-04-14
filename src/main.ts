@@ -8,6 +8,7 @@ import { AlbumBox } from './albumBox';
 import { SearchBox } from './search';
 import { PlaybackControlBox } from './songControlBox';
 import { VolumeControlBox } from './volumeControlBox';
+import { QueueBox } from './queueBox';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -40,6 +41,7 @@ class Screen {
   volumeControlBox: VolumeControlBox;
   albumBox: AlbumBox;
   searchBox: SearchBox;
+  queueBox: QueueBox;
 
   // TODO: QUEUEBOX
 
@@ -107,6 +109,15 @@ class Screen {
       height: 3,
     });
 
+    this.queueBox = new QueueBox({
+      grid: this.grid,
+      customEmitter: this.customEmitter,
+      row: 0,
+      col: 0,
+      width: this.gridWidth / 2,
+      height: this.gridHeight / 2 - 3,
+    });
+
     // this.screen.on('keypress', (ch, key) => {
     //   console.log(key.full);
     // });
@@ -122,6 +133,8 @@ class Screen {
         return;
       }
 
+      const queue = await this.spotify.getQueue();
+
       this.albumBox.setCurrentAlbum(album);
       this.songBox.updateLabel(track);
       void this.songBox.startProgress(
@@ -133,6 +146,7 @@ class Screen {
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items);
       this.albumBox.selectCurrentlyPlaying(track);
+      this.queueBox.updateList(queue.queue);
     }
   }
 
@@ -309,7 +323,7 @@ class Screen {
       this.initCustomEmitter();
       const playback = await this.spotify.getPlaybackState();
       const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
-
+      const queue = await this.spotify.getQueue();
       if (playback.item == null || album == null) {
         this.songBox.setNullState();
         this.albumBox.setNullState();
@@ -320,6 +334,7 @@ class Screen {
         this.songBox.init(playback);
         this.albumBox.init(album, playback.item);
         this.searchBox.init();
+        this.queueBox.init(queue.queue);
       }
 
       // Must be arrow function so "this" refers to the class and not the function.
@@ -344,12 +359,15 @@ class Screen {
           case 'v':
             this.volumeControlBox.element.focus();
             break;
+          case 'w':
+            this.queueBox.element.focus();
+            break;
           default:
             break;
         }
       };
 
-      this.screen.key(['escape', 'q', 'C-c', 's', 'a', 'c', 'v'], screenKeyListener);
+      this.screen.key(['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w'], screenKeyListener);
 
       this.refreshScreen();
     } catch (err) {

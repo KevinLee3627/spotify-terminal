@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { readFile, writeFile } from 'fs/promises';
-import type { AlbumFull, Playback, TokenRes, Device } from './types';
+import type { AlbumFull, Playback, TokenRes, Device, Track } from './types';
 
 interface ResumePlaybackBody {
   context_uri: string;
@@ -14,6 +14,11 @@ interface ResumePlaybackBody {
 interface RequestOptions<Body = unknown> {
   body?: Body;
   query?: Record<string, unknown>;
+}
+
+interface QueueRes {
+  currently_playing: Track | null;
+  queue: Track[];
 }
 
 export class Spotify {
@@ -77,7 +82,9 @@ export class Spotify {
     await this.makeRequest('POST', '/me/player/queue', { query: { uri: trackUri } });
   }
 
-  // async getQueue(): Promise<
+  async getQueue(): Promise<QueueRes> {
+    return await this.makeRequest<QueueRes>('GET', '/me/player/queue');
+  }
 
   async pause(): Promise<void> {
     await this.makeRequest('PUT', '/me/player/pause');

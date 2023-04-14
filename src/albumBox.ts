@@ -43,11 +43,9 @@ export class AlbumBox {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
 
-      // TODO: This will play the selected track frrom the album, and then the rest of the songs off the album in order.
-      // Does it depend on shuffle state? Seems like it?
       // TODO: Autoplay songs after album finishes.
       // Manage the index of the selected track manually. Inited in updateAlbumBox
-
+      // TODO: Handle songs with very long names
       // TODO: Add a way to add the selected song to a specific playlist.
       switch (key.full) {
         case 'up':
