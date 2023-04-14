@@ -69,7 +69,7 @@ export class PlaybackControlBox {
   }
 
   updateShuffleText(state: Playback['shuffle_state']): void {
-    this.shuffleText.setContent(`${bold('s')}huffle: ${state ? 'on' : 'off'}`);
+    this.shuffleText.setContent(`${bold('(s)')}huffle: ${state ? 'on' : 'off'}`);
   }
 
   toggleShuffle(): void {
