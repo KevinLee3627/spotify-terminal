@@ -17,12 +17,20 @@ export class VolumeControlBox {
   element: b.Widgets.BoxElement;
   customEmitter: EventEmitter;
   volume: number | undefined;
+  bar: b.Widgets.ProgressBarElement;
 
   constructor(opts: VolumeControlBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
       style: { focus: { border: { fg: 'green' } } },
       label: 'control',
     });
+
+    this.bar = b.progressbar({
+      width: '100%-2',
+      orientation: 'horizontal',
+      pch: '█',
+    });
+    this.element.append(this.bar);
 
     this.customEmitter = opts.customEmitter;
 
@@ -63,6 +71,7 @@ export class VolumeControlBox {
     else if (volume > 100) volume = 100;
 
     this.element.setLabel(`Volume: ${volume}%`);
+    this.bar.setProgress(volume);
   }
 
   setVolume(volume: number): void {
