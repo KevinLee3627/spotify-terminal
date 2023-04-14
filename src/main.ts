@@ -259,6 +259,20 @@ class Screen {
         console.log(err);
       });
     });
+
+    this.customEmitter.on('setVolume', (volume: number) => {
+      if (volume < 0) volume = 0;
+      else if (volume > 100) volume = 100;
+
+      const setVolume = async (volume: number): Promise<void> => {
+        await this.spotify.setVolume(volume);
+        this.volumeControlBox.updateVolumeText(volume);
+      };
+
+      setVolume(volume).catch((err) => {
+        console.log(err);
+      });
+    });
   }
 
   async initGrid(): Promise<void> {
@@ -299,12 +313,15 @@ class Screen {
           case 'c':
             this.playbackControlBox.element.focus();
             break;
+          case 'v':
+            this.volumeControlBox.element.focus();
+            break;
           default:
             break;
         }
       };
 
-      this.screen.key(['escape', 'q', 'C-c', 's', 'a', 'c'], screenKeyListener);
+      this.screen.key(['escape', 'q', 'C-c', 's', 'a', 'c', 'v'], screenKeyListener);
 
       this.refreshScreen();
     } catch (err) {

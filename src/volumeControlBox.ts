@@ -33,7 +33,28 @@ export class VolumeControlBox {
     this.element.key(['m', 'x', 'up', 'down', 'left', 'right'], (ch, key) => {
       if (this.volume == null) return;
 
-      console.log('test');
+      switch (key.full) {
+        case 'up':
+        case 'right':
+          this.customEmitter.emit('setVolume', this.volume + 10);
+          this.setVolume(this.volume + 10);
+          break;
+        case 'down':
+        case 'left':
+          this.customEmitter.emit('setVolume', this.volume - 10);
+          this.setVolume(this.volume - 10);
+          break;
+        case 'm':
+          this.customEmitter.emit('setVolume', 0);
+          this.setVolume(0);
+          break;
+        case 'x':
+          this.customEmitter.emit('setVolume', 100);
+          this.setVolume(100);
+          break;
+        default:
+          break;
+      }
     });
   }
 
@@ -42,5 +63,12 @@ export class VolumeControlBox {
     else if (volume > 100) volume = 100;
 
     this.element.setLabel(`Volume: ${volume}%`);
+  }
+
+  setVolume(volume: number): void {
+    if (volume < 0) volume = 0;
+    else if (volume > 100) volume = 100;
+
+    this.volume = volume;
   }
 }
