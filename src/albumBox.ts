@@ -47,6 +47,7 @@ export class AlbumBox {
       // Manage the index of the selected track manually. Inited in updateAlbumBox
       // TODO: Handle songs with very long names
       // TODO: Add a way to add the selected song to a specific playlist.
+      // TODO: Add song to queue
       switch (key.full) {
         case 'up':
         case 'k':
@@ -96,6 +97,7 @@ export class AlbumBox {
     this.element.setLabel(`${bold(album.name)} (${album.release_date})`);
   }
 
+  // TODO: HAndle alubms w/ multiple discs (Ex. Kendrick's newest album)
   updateList(tracks: Track[]): void {
     const listWidth = this.element.width as number;
     const totalBorderWidth = 2;

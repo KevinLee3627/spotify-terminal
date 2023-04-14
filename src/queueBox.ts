@@ -44,6 +44,7 @@ export class QueueBox {
   init(queue: Track[]): void {
     this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
       // TODO: Handle songs with very long names
+      // TODO: Remove song from queue
       // TODO: Add a way to add the selected song to a specific playlist.
       switch (key.full) {
         case 'up':
