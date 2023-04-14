@@ -18,7 +18,6 @@ interface RequestOptions<Body = unknown> {
 
 export class Spotify {
   token: string | null = null;
-  tokenExpires: number; // unix epoch ms
   base = 'https://api.spotify.com/v1';
 
   async getToken(): Promise<void> {
@@ -50,10 +49,8 @@ export class Spotify {
         const tokenFileData = { ...res.data, expires_in: inOneHour };
         await writeFile('./token.json', JSON.stringify(tokenFileData), 'utf-8');
         this.token = res.data.access_token;
-        this.tokenExpires = inOneHour;
       } else {
         this.token = tokenFile.access_token;
-        this.tokenExpires = tokenFile.expires_in;
       }
     } catch (err) {
       console.log(err);
@@ -102,9 +99,7 @@ export class Spotify {
     endpoint: string,
     options?: RequestOptions<Body>
   ): Promise<Return> {
-    if (this.token == null || new Date().getTime() > this.tokenExpires)
-      await this.getToken();
-
+    if (this.token == null) throw new Error('Invalid/missing access token.');
     const res = await axios<Return>({
       method,
       url: `${this.base}${endpoint}`,
