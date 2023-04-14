@@ -234,6 +234,18 @@ class Screen {
         console.log(err);
       });
     });
+
+    this.customEmitter.on('toggleShuffle', (currentState: Playback['shuffle_state']) => {
+      const toggleState = async (state: Playback['shuffle_state']): Promise<void> => {
+        await this.spotify.setShuffleState(state);
+        this.playbackControlBox.updateShuffleText(state);
+        this.playbackControlBox.setShuffleState(state);
+      };
+
+      toggleState(!currentState).catch((err) => {
+        console.log(err);
+      });
+    });
   }
 
   async initGrid(): Promise<void> {

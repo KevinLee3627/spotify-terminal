@@ -21,6 +21,9 @@ export class PlaybackControlBox {
   repeatStateOptions: Array<Playback['repeat_state']> = ['off', 'track', 'context'];
   currentRepeatState: Playback['repeat_state'];
 
+  shuffleText: b.Widgets.TextElement;
+  currentShuffleState: Playback['shuffle_state'];
+
   constructor(opts: PlaybackControlBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
       style: { focus: { border: { fg: 'green' } } },
@@ -30,14 +33,23 @@ export class PlaybackControlBox {
     this.customEmitter = opts.customEmitter;
 
     this.currentRepeatState = opts.playback.repeat_state;
+    this.currentShuffleState = opts.playback.shuffle_state;
 
     this.repeatText = b.text({ tags: true });
     this.element.append(this.repeatText);
     this.updateRepeatText(opts.playback.repeat_state);
 
+    this.shuffleText = b.text({ tags: true, left: (this.element.width as number) / 2 });
+    this.element.append(this.shuffleText);
+    this.updateShuffleText(opts.playback.shuffle_state);
+
     this.element.key(['r', 's'], (ch, key) => {
       if (key.full === 'r') {
         this.cycleRepeatState();
+      }
+
+      if (key.full === 's') {
+        this.toggleShuffle();
       }
     });
   }
@@ -54,5 +66,17 @@ export class PlaybackControlBox {
 
   setRepeatState(state: Playback['repeat_state']): void {
     this.currentRepeatState = state;
+  }
+
+  updateShuffleText(state: Playback['shuffle_state']): void {
+    this.shuffleText.setContent(`${bold('s')}huffle: ${state ? 'on' : 'off'}`);
+  }
+
+  toggleShuffle(): void {
+    this.customEmitter.emit('toggleShuffle', this.currentShuffleState);
+  }
+
+  setShuffleState(state: Playback['shuffle_state']): void {
+    this.currentShuffleState = state;
   }
 }

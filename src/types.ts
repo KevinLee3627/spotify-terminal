@@ -47,7 +47,7 @@ export interface Playback {
   item: Track | null;
   progress_ms: number | null;
   is_playing: boolean;
-  shuffle_state: true;
+  shuffle_state: boolean;
   repeat_state: 'off' | 'track' | 'context';
 }
 
