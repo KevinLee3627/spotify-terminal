@@ -43,12 +43,12 @@ interface Artist {
 }
 
 export interface Playback {
-  device: Device | null;
+  device: Device;
   item: Track | null;
   progress_ms: number | null;
   is_playing: boolean;
   shuffle_state: true;
-  repeat_state: true;
+  repeat_state: 'off' | 'track' | 'context';
 }
 
 export interface TokenRes {
@@ -59,7 +59,7 @@ export interface TokenRes {
 }
 
 export interface Device {
-  id: string;
+  id: string | null;
   is_active: boolean;
   is_private_session: boolean;
   is_restricted: boolean;
