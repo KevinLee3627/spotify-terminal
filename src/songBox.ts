@@ -47,7 +47,7 @@ export class SongBox {
   }
 
   init(playback: Playback): void {
-    this.box.key(['n', 'p', 'space'], (ch, key) => {
+    this.box.key(['n', 'p', 'space', 'r'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
       // TODO: Finish this.
 
@@ -57,6 +57,9 @@ export class SongBox {
           break;
         case 'p':
           this.customEmitter.emit('skipToPrev');
+          break;
+        case 'r':
+          this.customEmitter.emit('restartTrack');
           break;
         case 'space':
           this.customEmitter.emit('hitPlayButton');

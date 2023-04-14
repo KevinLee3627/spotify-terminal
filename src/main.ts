@@ -179,6 +179,19 @@ class Screen {
       });
     });
 
+    this.customEmitter.on('restartTrack', () => {
+      const restartTrack = async (): Promise<void> => {
+        await this.spotify.seekToPosition(0);
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+
+      restartTrack().catch((err) => {
+        console.log(err);
+      });
+    });
+
     this.customEmitter.on('hitPlayButton', () => {
       const playButton = async (): Promise<void> => {
         let playback = await this.spotify.getPlaybackState();

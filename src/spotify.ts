@@ -93,6 +93,10 @@ export class Spotify {
     await this.makeRequest('PUT', '/me/player/play', options);
   }
 
+  async seekToPosition(ms: number): Promise<void> {
+    await this.makeRequest('PUT', `/me/player/seek`, { query: { position_ms: ms } });
+  }
+
   async setRepeatState(state: Playback['repeat_state']): Promise<void> {
     await this.makeRequest('PUT', `/me/player/repeat`, { query: { state } });
   }
