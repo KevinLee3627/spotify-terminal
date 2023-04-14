@@ -97,6 +97,14 @@ export class Spotify {
     await this.makeRequest('PUT', `/me/player/shuffle`, { query: { state } });
   }
 
+  async setVolume(volume: number): Promise<void> {
+    if (volume < 0) volume = 0;
+    if (volume > 100) volume = 100;
+    await this.makeRequest('PUT', '/me/player/volume', {
+      query: { volume_percent: volume },
+    });
+  }
+
   async getAlbum(id: string | null, limit: number = 100): Promise<AlbumFull | null> {
     if (id == null) return null;
     return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
