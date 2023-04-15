@@ -7,6 +7,7 @@ import type {
   Device,
   Track,
   SimplifiedPlaylist,
+  Album,
 } from './types';
 
 interface ResumePlaybackBody {
@@ -38,16 +39,24 @@ interface GetCurrentUserPlaylistsRes {
   items: SimplifiedPlaylist[];
 }
 
-export type SearchType =
-  | 'album'
-  | 'artist'
-  | 'playlist'
-  | 'track'
-  | 'show'
-  | 'episode'
-  | 'audiobook';
+export type SearchType = 'album' | 'track';
 
 export type SearchTypePlural = `${SearchType}s`;
+
+export interface SearchResObject<T> {
+  href: string;
+  limit: number;
+  offset: number;
+  total: number;
+  next: string | undefined | null;
+  previous: string | undefined | null;
+  items: T[];
+}
+
+export interface SearchRes {
+  tracks: SearchResObject<Track>;
+  albums: SearchResObject<Album>;
+}
 
 export class Spotify {
   token: string | null = null;
@@ -174,7 +183,7 @@ export class Spotify {
     type: SearchType[],
     limit: number = 20,
     offset: number = 0
-  ): Promise<Partial<Record<SearchTypePlural, unknown>>> {
+  ): Promise<Partial<SearchRes>> {
     return await this.makeRequest('GET', '/search', {
       query: { q, type: type.join(','), limit, offset },
     });

@@ -10,6 +10,7 @@ import { PlaybackControlBox } from './songControlBox';
 import { VolumeControlBox } from './volumeControlBox';
 import { QueueBox } from './queueBox';
 import { PlaylistBox } from './playlistBox';
+import { SearchResultBox } from './searchResultBox';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -42,6 +43,7 @@ class Screen {
   volumeControlBox: VolumeControlBox;
   albumBox: AlbumBox;
   searchBox: SearchBox;
+  searchResultBox: SearchResultBox;
   queueBox: QueueBox;
   playlistBox: PlaylistBox;
 
@@ -109,6 +111,15 @@ class Screen {
       col: 0,
       width: this.gridWidth / 2,
       height: 3,
+    });
+
+    this.searchResultBox = new SearchResultBox({
+      grid: this.grid,
+      row: 3,
+      col: 0,
+      width: this.gridWidth / 2,
+      height: this.gridHeight - 9,
+      customEmitter: this.customEmitter,
     });
 
     this.queueBox = new QueueBox({
@@ -340,7 +351,10 @@ class Screen {
       this.screen.log(`search query: ${val}`);
       const search = async (val: string, types: SearchType[]): Promise<void> => {
         const res = await this.spotify.search(val, types);
-        this.screen.log(res);
+        if (types.includes('album') && res.albums != null) {
+          if ('album_type' in res.albums.items[0])
+            this.searchResultBox.showAlbumResults(res.albums.items);
+        }
       };
 
       search(val, types).catch((err) => {
