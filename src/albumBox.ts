@@ -88,6 +88,7 @@ export class AlbumBox {
       this.setCurrentAlbum(album);
       this.updateLabel(album);
       this.updateList(album.tracks.items ?? [], liked ?? {});
+      this.setHeight(album.total_tracks + 2);
     }
     if (currentTrack != null) this.selectCurrentlyPlaying(currentTrack);
   }
@@ -150,5 +151,12 @@ export class AlbumBox {
 
   setCurrentAlbum(album: AlbumFull): void {
     this.currentAlbum = album;
+  }
+
+  setHeight(height: number): void {
+    const maxHeight = (this.element.screen.height as number) / 2;
+    if (height >= maxHeight) height = maxHeight;
+
+    this.element.height = height;
   }
 }

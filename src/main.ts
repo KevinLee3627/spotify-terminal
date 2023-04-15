@@ -106,7 +106,7 @@ class Screen {
       grid: this.grid,
       customEmitter: this.customEmitter,
       row: 0,
-      col: this.gridWidth / 2 + 1,
+      col: 0,
       width: this.gridWidth / 2,
       height: 3,
     });
@@ -115,11 +115,10 @@ class Screen {
       grid: this.grid,
       customEmitter: this.customEmitter,
       row: 0,
-      col: 0,
+      col: this.gridWidth / 2 + 1,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2 - 6,
     });
-    this.queueBox.element.hide();
 
     this.playlistBox = new PlaylistBox({
       grid: this.grid,
@@ -166,6 +165,7 @@ class Screen {
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items, liked);
       this.albumBox.selectCurrentlyPlaying(track);
+      this.albumBox.setHeight(album.total_tracks + 2);
 
       this.queueBox.updateList(queue.queue);
     }
