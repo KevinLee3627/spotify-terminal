@@ -5,8 +5,8 @@ import { bold } from './main';
 import type { Playback } from './types';
 
 interface PlaybackControlBoxOptions {
-  row: number;
-  col: number;
+  top: number;
+  left: number;
   width: number;
   height: number;
   grid: bc.Widgets.GridElement;
@@ -25,11 +25,19 @@ export class PlaybackControlBox {
   currentShuffleState: Playback['shuffle_state'];
 
   constructor(opts: PlaybackControlBoxOptions) {
-    this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
+    // this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
+    //   style: { focus: { border: { fg: 'green' } } },
+    //   label: 'control',
+    // });
+    this.element = b.box({
       style: { focus: { border: { fg: 'green' } } },
       label: 'control',
+      width: opts.width,
+      height: opts.height,
+      top: opts.top,
+      left: opts.left,
+      border: 'line',
     });
-
     this.customEmitter = opts.customEmitter;
 
     this.currentRepeatState = opts.playback.repeat_state;
@@ -39,7 +47,11 @@ export class PlaybackControlBox {
     this.element.append(this.repeatText);
     this.updateRepeatText(opts.playback.repeat_state);
 
-    this.shuffleText = b.text({ tags: true, left: (this.element.width as number) / 2 });
+    this.shuffleText = b.text({
+      tags: true,
+      // NOTE: APPARENTLY only integers are allowed...
+      left: Math.floor((this.element.width as number) / 2),
+    });
     this.element.append(this.shuffleText);
     this.updateShuffleText(opts.playback.shuffle_state);
 

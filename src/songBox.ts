@@ -2,7 +2,9 @@ import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { msToTime, bold } from './main';
+import type { PlaybackControlBox } from './songControlBox';
 import type { Playback, Track } from './types';
+import type { VolumeControlBox } from './volumeControlBox';
 
 interface SongBoxOptions {
   row: number;
@@ -12,6 +14,8 @@ interface SongBoxOptions {
   playback: Playback;
   grid: bc.Widgets.GridElement;
   customEmitter: EventEmitter;
+  controlBox: PlaybackControlBox;
+  volumeBox: VolumeControlBox;
 }
 
 export class SongBox {
@@ -22,6 +26,9 @@ export class SongBox {
   songDuration: b.Widgets.TextElement;
 
   songProgressTimeout: NodeJS.Timeout = setTimeout(() => {}, 0);
+
+  controlBox: PlaybackControlBox;
+  volumeBox: VolumeControlBox;
 
   customEmitter: EventEmitter;
   constructor(opts: SongBoxOptions) {
@@ -35,15 +42,22 @@ export class SongBox {
     this.progressBar = b.progressbar({
       left: '7',
       width: '100%-7',
+      height: 1,
       orientation: 'horizontal',
       pch: '█',
     });
+
+    this.controlBox = opts.controlBox;
+    this.volumeBox = opts.volumeBox;
+
     this.timeElapsed = b.text({ left: '0', width: 5 });
     this.songDuration = b.text({ left: '100%-7' });
 
     this.box.append(this.progressBar);
     this.box.append(this.timeElapsed);
     this.box.append(this.songDuration);
+    this.box.append(this.controlBox.element);
+    this.box.append(this.volumeBox.element);
   }
 
   init(playback: Playback): void {

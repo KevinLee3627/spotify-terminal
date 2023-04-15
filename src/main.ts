@@ -54,47 +54,47 @@ class Screen {
   constructor(spotify: Spotify, playback: Playback) {
     this.spotify = spotify;
     this.customEmitter = new EventEmitter();
-
     this.grid = new bc.grid({
       rows: this.gridHeight,
       cols: this.gridWidth,
       screen: this.screen,
     });
-
-    this.songBox = new SongBox({
-      grid: this.grid,
-      customEmitter: this.customEmitter,
-      row: this.gridHeight - 3,
-      col: 0,
-      width: this.gridWidth,
-      height: 3,
-      playback,
-    });
-
     this.playbackControlBox = new PlaybackControlBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      row: this.gridHeight - 3 - 3,
-      col: this.gridWidth / 2,
+      top: 2,
+      left: 1,
       height: 3,
-      width: this.gridWidth / 4,
+      width: ((this.screen.width as number) - 2) / 3,
       playback,
     });
 
     this.volumeControlBox = new VolumeControlBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      row: this.gridHeight - 3 - 3,
-      col: this.gridWidth * 0.75,
+      top: 2,
+      left: ((this.screen.width as number) - 2) / 3 + 1,
       height: 3,
-      width: this.gridWidth / 4,
+      width: ((this.screen.width as number) - 2) / 3,
       playback,
+    });
+
+    this.songBox = new SongBox({
+      grid: this.grid,
+      customEmitter: this.customEmitter,
+      row: this.gridHeight - 7,
+      col: 0,
+      width: this.gridWidth,
+      height: 7,
+      playback,
+      controlBox: this.playbackControlBox,
+      volumeBox: this.volumeControlBox,
     });
 
     this.albumBox = new AlbumBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      row: this.gridHeight / 2 - 3,
+      row: this.gridHeight / 2 - 8,
       col: 0,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2,
@@ -104,7 +104,7 @@ class Screen {
       grid: this.grid,
       customEmitter: this.customEmitter,
       row: 0,
-      col: this.gridWidth / 2,
+      col: 0,
       width: this.gridWidth / 2,
       height: 3,
     });
@@ -117,6 +117,7 @@ class Screen {
       width: this.gridWidth / 2,
       height: this.gridHeight / 2 - 3,
     });
+    this.queueBox.element.hide();
 
     // this.screen.on('keypress', (ch, key) => {
     //   console.log(key.full);
@@ -367,7 +368,10 @@ class Screen {
         }
       };
 
-      this.screen.key(['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w'], screenKeyListener);
+      this.screen.key(
+        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y'],
+        screenKeyListener
+      );
 
       this.refreshScreen();
     } catch (err) {
@@ -391,4 +395,6 @@ async function main(): Promise<void> {
   const screen = new Screen(spotify, playback);
   await screen.initGrid();
 }
-void main();
+main().catch((err) => {
+  console.log(err);
+});

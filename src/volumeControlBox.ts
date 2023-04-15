@@ -4,8 +4,8 @@ import type EventEmitter from 'events';
 import type { Playback } from './types';
 
 interface VolumeControlBoxOptions {
-  row: number;
-  col: number;
+  top: number;
+  left: number;
   width: number;
   height: number;
   grid: bc.Widgets.GridElement;
@@ -20,9 +20,14 @@ export class VolumeControlBox {
   bar: b.Widgets.ProgressBarElement;
 
   constructor(opts: VolumeControlBoxOptions) {
-    this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
+    this.element = b.box({
       style: { focus: { border: { fg: 'green' } } },
       label: 'control',
+      height: opts.height,
+      width: opts.width,
+      top: opts.top,
+      left: opts.left,
+      border: 'line',
     });
 
     this.bar = b.progressbar({
