@@ -125,6 +125,19 @@ export class Spotify {
     return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
   }
 
+  async checkSavedTracks(ids: string[]): Promise<Record<string, boolean>> {
+    const idQuery = ids.join(',');
+
+    const results = await this.makeRequest<boolean[]>('GET', '/me/tracks/contains', {
+      query: { ids: idQuery },
+    });
+    const mapping = results.reduce<Record<string, boolean>>((acc, curr, i) => {
+      acc[ids[i]] = curr;
+      return acc;
+    }, {});
+    return mapping;
+  }
+
   async makeRequest<Return = void, Body = Record<string, unknown>>(
     method: 'GET' | 'POST' | 'PUT',
     endpoint: string,

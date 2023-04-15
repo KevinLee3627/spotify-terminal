@@ -132,10 +132,12 @@ class Screen {
         this.albumBox.setNullState();
         return;
       }
-
+      const liked = await this.spotify.checkSavedTracks(
+        album.tracks.items.map((track) => track.id)
+      );
+      this.screen.log(liked);
       const queue = await this.spotify.getQueue();
 
-      this.albumBox.setCurrentAlbum(album);
       this.songBox.updateLabel(track);
       void this.songBox.startProgress(
         playback.progress_ms,
@@ -147,9 +149,12 @@ class Screen {
       this.playbackControlBox.updateRepeatText(playback.repeat_state);
       this.playbackControlBox.setRepeatState(playback.repeat_state);
       this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
+
+      this.albumBox.setCurrentAlbum(album);
       this.albumBox.updateLabel(album);
-      this.albumBox.updateList(album.tracks.items);
+      this.albumBox.updateList(album.tracks.items, liked);
       this.albumBox.selectCurrentlyPlaying(track);
+
       this.queueBox.updateList(queue.queue);
     }
   }
@@ -328,6 +333,7 @@ class Screen {
       const playback = await this.spotify.getPlaybackState();
       const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
       const queue = await this.spotify.getQueue();
+
       if (playback.item == null || album == null) {
         this.songBox.setNullState();
         this.albumBox.setNullState();
@@ -335,8 +341,11 @@ class Screen {
         this.albumBox.init();
         this.searchBox.init();
       } else {
+        const liked = await this.spotify.checkSavedTracks(
+          album.tracks.items.map((t) => t.id)
+        );
         this.songBox.init(playback);
-        this.albumBox.init(album, playback.item);
+        this.albumBox.init(album, playback.item, liked);
         this.searchBox.init();
         this.queueBox.init(queue.queue);
       }

@@ -38,7 +38,11 @@ export class AlbumBox {
     this.customEmitter = opts.customEmitter;
   }
 
-  init(album?: AlbumFull, currentTrack?: Track | null): void {
+  init(
+    album?: AlbumFull,
+    currentTrack?: Track | null,
+    liked?: Record<string, boolean>
+  ): void {
     this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
@@ -83,7 +87,7 @@ export class AlbumBox {
     if (album != null) {
       this.setCurrentAlbum(album);
       this.updateLabel(album);
-      this.updateList(album.tracks.items ?? []);
+      this.updateList(album.tracks.items ?? [], liked ?? {});
     }
     if (currentTrack != null) this.selectCurrentlyPlaying(currentTrack);
   }
@@ -97,23 +101,35 @@ export class AlbumBox {
     this.element.setLabel(`${bold(album.name)} (${album.release_date})`);
   }
 
-  updateList(tracks: Track[]): void {
-    const listWidth = this.element.width as number;
-    const totalBorderWidth = 2;
-    const trackNumWidth = 2;
-    const durationWidth = 9;
-
-    const trackNameWidth = listWidth - totalBorderWidth - trackNumWidth - durationWidth;
-    function formatRow(track: Track, index: number): string {
-      const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
-      const trackNumCol = String(index + 1).padEnd(trackNumWidth, ' ');
-      const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
-      return `${trackNumCol} ${trackNameCol} ${durationCol}`;
-    }
+  updateList(tracks: Track[], likedRecord: Record<string, boolean>): void {
     const rows = tracks.map((track, i) => {
-      return formatRow(track, i);
+      return this.formatRow(track, i, likedRecord[track.id]);
     });
     this.element.setItems(rows);
+  }
+
+  formatRow(track: Track, index: number, liked: boolean): string {
+    const listWidth = this.element.width as number;
+    const totalBorderWidth = 2;
+    const totalPaddingWidth = 3; // 4 columns, 1 col of padding between each column
+    const trackNumWidth = 2;
+    const durationWidth = 5;
+    const likedColWidth = 2;
+
+    const trackNameWidth =
+      listWidth -
+      totalBorderWidth -
+      totalPaddingWidth -
+      trackNumWidth -
+      durationWidth -
+      likedColWidth;
+
+    const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
+    const trackNumCol = String(index + 1).padEnd(trackNumWidth, ' ');
+    const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
+    const likedCol = liked ? '♥' : '';
+
+    return `${trackNumCol} ${trackNameCol} ${durationCol} ${likedCol}`;
   }
 
   selectCurrentlyPlaying(track: Track): void {
