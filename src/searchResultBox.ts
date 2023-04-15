@@ -35,6 +35,17 @@ export class SearchResultBox {
     this.element.hide();
 
     this.customEmitter = opts.customEmitter;
+
+    this.element.key(['h'], (ch, key) => {
+      switch (key.full) {
+        case 'h':
+          this.element.hide();
+          break;
+
+        default:
+          break;
+      }
+    });
   }
 
   show(): void {
