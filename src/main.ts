@@ -352,8 +352,7 @@ class Screen {
       const search = async (val: string, types: SearchType[]): Promise<void> => {
         const res = await this.spotify.search(val, types);
         if (types.includes('album') && res.albums != null) {
-          if ('album_type' in res.albums.items[0])
-            this.searchResultBox.showAlbumResults(res.albums.items);
+          this.searchResultBox.showAlbumResults(res.albums.items);
         }
       };
 
