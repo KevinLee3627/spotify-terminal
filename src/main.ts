@@ -62,7 +62,7 @@ class Screen {
     this.playbackControlBox = new PlaybackControlBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      top: 2,
+      top: 1,
       left: 1,
       height: 3,
       width: ((this.screen.width as number) - 2) / 3,
@@ -72,7 +72,7 @@ class Screen {
     this.volumeControlBox = new VolumeControlBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      top: 2,
+      top: 1,
       left: ((this.screen.width as number) - 2) / 3 + 1,
       height: 3,
       width: ((this.screen.width as number) - 2) / 3,
@@ -82,10 +82,10 @@ class Screen {
     this.songBox = new SongBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      row: this.gridHeight - 7,
+      row: this.gridHeight - 6,
       col: 0,
       width: this.gridWidth,
-      height: 7,
+      height: 6,
       playback,
       controlBox: this.playbackControlBox,
       volumeBox: this.volumeControlBox,
@@ -94,7 +94,7 @@ class Screen {
     this.albumBox = new AlbumBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      row: this.gridHeight / 2 - 8,
+      row: this.gridHeight / 2 - 6,
       col: 0,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2,
@@ -115,9 +115,8 @@ class Screen {
       row: 0,
       col: 0,
       width: this.gridWidth / 2,
-      height: this.gridHeight / 2 - 3,
+      height: this.gridHeight / 2 - 6,
     });
-    this.queueBox.element.hide();
 
     // this.screen.on('keypress', (ch, key) => {
     //   console.log(key.full);
