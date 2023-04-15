@@ -339,7 +339,6 @@ class Screen {
     });
 
     this.customEmitter.on('search', (val: string, types: SearchType[]) => {
-      this.screen.log(`search query: ${val}`);
       const search = async (val: string, types: SearchType[]): Promise<void> => {
         const res = await this.spotify.search(val, types);
         if (types.includes('album') && res.albums != null) {
@@ -349,6 +348,19 @@ class Screen {
 
       search(val, types).catch((err) => {
         this.screen.log(err);
+      });
+    });
+
+    this.customEmitter.on('playPlaylist', (uri: string) => {
+      const play = async (uri: string): Promise<void> => {
+        await this.spotify.resume({ context_uri: uri });
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+
+      play(uri).catch((err) => {
+        this.screen.log(err.response);
       });
     });
   }

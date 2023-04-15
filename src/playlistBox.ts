@@ -37,15 +37,30 @@ export class PlaylistBox {
     });
 
     this.customEmitter = opts.customEmitter;
-    if (opts.playlists != null) this.playlists = opts.playlists;
-
-    this.element.key(['r', 's'], (ch, key) => {});
-  }
-
-  init(playlists: SimplifiedPlaylist[]): void {
-    this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {});
-
-    this.updateList(playlists);
+    if (opts.playlists != null) {
+      this.playlists = opts.playlists;
+      this.updateList(this.playlists);
+    }
+    this.element.key(['p', 'up', 'k', 'down', 'j'], (ch, key) => {
+      switch (key.full) {
+        case 'up':
+        case 'k':
+          if (this.selectedIndex <= 0) return;
+          this.selectedIndex--;
+          break;
+        case 'down':
+        case 'j':
+          if (this.selectedIndex >= this.playlists.length) return;
+          this.selectedIndex++;
+          break;
+        case 'p':
+          this.customEmitter.emit('playPlaylist', this.playlists[this.selectedIndex].uri);
+          break;
+        default:
+          break;
+      }
+      this.element.screen.log(`selected: ${this.playlists[this.selectedIndex].name}`);
+    });
   }
 
   updateList(playlists: SimplifiedPlaylist[]): void {
