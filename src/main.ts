@@ -165,7 +165,6 @@ class Screen {
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items, liked);
       this.albumBox.selectCurrentlyPlaying(track);
-      this.albumBox.setHeight(album.total_tracks + 2);
 
       this.queueBox.updateList(queue.queue);
     }
