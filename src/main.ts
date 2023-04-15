@@ -28,8 +28,8 @@ class Screen {
   spotify: Spotify;
 
   screen = b.screen({ smartCSR: true, autoPadding: true, log: './log.json' });
-  gridHeight = 48;
-  gridWidth = 48;
+  gridHeight = parseInt(this.screen.height as string, 10);
+  gridWidth = parseInt(this.screen.width as string, 10);
 
   // CUSTOM EVENTS
   customEmitter: EventEmitter;
@@ -95,7 +95,7 @@ class Screen {
       grid: this.grid,
       customEmitter: this.customEmitter,
       row: this.gridHeight / 2 - 6,
-      col: 0,
+      col: this.gridWidth / 2 + 1,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2,
     });
