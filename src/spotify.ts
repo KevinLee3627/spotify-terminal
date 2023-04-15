@@ -38,6 +38,17 @@ interface GetCurrentUserPlaylistsRes {
   items: SimplifiedPlaylist[];
 }
 
+export type SearchType =
+  | 'album'
+  | 'artist'
+  | 'playlist'
+  | 'track'
+  | 'show'
+  | 'episode'
+  | 'audiobook';
+
+export type SearchTypePlural = `${SearchType}s`;
+
 export class Spotify {
   token: string | null = null;
   tokenExpires: number | null = null;
@@ -156,6 +167,17 @@ export class Spotify {
       return acc;
     }, {});
     return mapping;
+  }
+
+  async search(
+    q: string,
+    type: SearchType[],
+    limit: number = 20,
+    offset: number = 0
+  ): Promise<Partial<Record<SearchTypePlural, unknown>>> {
+    return await this.makeRequest('GET', '/search', {
+      query: { q, type: type.join(','), limit, offset },
+    });
   }
 
   async getCurrentUserPlaylists(

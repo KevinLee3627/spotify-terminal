@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
 import type { AlbumFull, Playback } from './types';
-import { Spotify } from './spotify';
+import { type SearchType, Spotify } from './spotify';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
 import { AlbumBox } from './albumBox';
@@ -147,7 +147,6 @@ class Screen {
       const liked = await this.spotify.checkSavedTracks(
         album.tracks.items.map((track) => track.id)
       );
-      this.screen.log(liked);
       const queue = await this.spotify.getQueue();
 
       this.songBox.updateLabel(track);
@@ -336,6 +335,18 @@ class Screen {
         console.log(err);
       });
     });
+
+    this.customEmitter.on('search', (val: string, types: SearchType[]) => {
+      this.screen.log(`search query: ${val}`);
+      const search = async (val: string, types: SearchType[]): Promise<void> => {
+        const res = await this.spotify.search(val, types);
+        this.screen.log(res);
+      };
+
+      search(val, types).catch((err) => {
+        this.screen.log(err);
+      });
+    });
   }
 
   async initGrid(): Promise<void> {
@@ -346,7 +357,6 @@ class Screen {
       const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
       const queue = await this.spotify.getQueue();
       const playlists = await this.spotify.getCurrentUserPlaylists();
-      this.screen.log(playlists);
 
       this.playlistBox.updateList(playlists.items);
 
@@ -355,14 +365,12 @@ class Screen {
         this.albumBox.setNullState();
         this.songBox.init(playback);
         this.albumBox.init();
-        this.searchBox.init();
       } else {
         const liked = await this.spotify.checkSavedTracks(
           album.tracks.items.map((t) => t.id)
         );
         this.songBox.init(playback);
         this.albumBox.init(album, playback.item, liked);
-        this.searchBox.init();
         this.queueBox.init(queue.queue);
       }
 

@@ -1,6 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
+import type { SearchType } from './spotify';
 
 interface SearchBoxOptions {
   row: number;
@@ -13,6 +14,8 @@ interface SearchBoxOptions {
 
 export class SearchBox {
   element: b.Widgets.TextboxElement;
+  customEmitter: EventEmitter;
+  searchType: SearchType[];
 
   constructor(opts: SearchBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.textbox, {
@@ -21,21 +24,39 @@ export class SearchBox {
       inputOnFocus: true,
     });
 
-    // this.element.on('focus', () => {
-    //   console.log('focused');
-    //   this.element.readInput((err, val) => {
-    //     if (err != null) console.log(err);
-    //     console.log(val);
-    //   });
-    // });
+    this.searchType = ['album', 'track'];
 
-    this.element.on('submit', (val) => {
-      // console.log(`submitted ${this.element.getValue()}`);
-      // this.element.clearValue();
+    this.setLabel(this.searchType);
+
+    this.customEmitter = opts.customEmitter;
+
+    this.element.on('submit', (val: string) => {
+      this.customEmitter.emit('search', val, this.searchType);
+    });
+
+    this.element.key(['C-a', 'C-t', 'C-l'], (ch, key) => {
+      console.log(key.full);
+      switch (key.full) {
+        case 'C-a':
+          this.setSearchType(['album']);
+          break;
+        case 'C-t':
+          this.setSearchType(['track']);
+          break;
+        case 'C-l':
+          this.setSearchType(['album', 'track']);
+          break;
+        default:
+          break;
+      }
     });
   }
 
-  init(): void {
-    this.element.setLabel('search');
+  setLabel(searchTypes: SearchType[]): void {
+    this.element.setLabel(`search: ${searchTypes.join(', ')}`);
+  }
+
+  setSearchType(type: SearchType[]): void {
+    this.searchType = type;
   }
 }
