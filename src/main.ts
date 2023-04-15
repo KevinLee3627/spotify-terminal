@@ -142,6 +142,10 @@ class Screen {
         track?.duration_ms ?? null,
         playback.is_playing
       );
+      this.playbackControlBox.updateShuffleText(playback.shuffle_state);
+      this.playbackControlBox.setShuffleState(playback.shuffle_state);
+      this.playbackControlBox.updateRepeatText(playback.repeat_state);
+      this.playbackControlBox.setRepeatState(playback.repeat_state);
       this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
       this.albumBox.updateLabel(album);
       this.albumBox.updateList(album.tracks.items);
