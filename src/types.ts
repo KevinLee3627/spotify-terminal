@@ -42,6 +42,15 @@ interface Artist {
   name: string;
 }
 
+export interface Context {
+  type: 'album' | 'playlist' | 'album' | 'show';
+  href: string;
+  uri: string;
+  external_urls: {
+    spotify: string;
+  };
+}
+
 export interface Playback {
   device: Device;
   item: Track | null;
@@ -49,6 +58,7 @@ export interface Playback {
   is_playing: boolean;
   shuffle_state: boolean;
   repeat_state: 'off' | 'track' | 'context';
+  context: Context | null;
 }
 
 export interface TokenRes {
