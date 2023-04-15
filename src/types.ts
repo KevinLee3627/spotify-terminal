@@ -67,3 +67,61 @@ export interface Device {
   type: 'computer' | 'smartphone' | 'speaker';
   volume_percent: number | undefined;
 }
+
+export interface SimplifiedPlaylist {
+  collaborative: boolean;
+  description: string;
+  href: string;
+  id: string;
+  name: string;
+  owner: {
+    followers: {
+      total: number;
+    };
+    href: string;
+    id: string; // spotify user id
+    type: 'user';
+    uri: string;
+    display_name: string | null;
+  };
+  public: boolean;
+  snapshot_id: string;
+  tracks: {
+    href: string;
+    total: number;
+  };
+
+  type: 'playlist';
+  uri: string;
+}
+
+export interface Playlist extends SimplifiedPlaylist {
+  followers: {
+    total: number;
+  };
+  tracks: {
+    href: string;
+    total: number;
+    limit: number;
+    offset: number;
+    next: string | null | undefined;
+    previous: string | null | undefined;
+    items: PlaylistTrack[];
+  };
+}
+
+export interface PlaylistTrack {
+  added_at: string;
+  added_by: {
+    followers: {
+      total: number;
+    };
+    href: string;
+    id: string; // spotify user id
+    type: 'user';
+    uri: string;
+    display_name: string | null;
+  };
+  is_local: boolean;
+  track: Track;
+}
