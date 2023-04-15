@@ -338,15 +338,17 @@ class Screen {
       });
     });
 
-    this.customEmitter.on('search', (val: string, types: SearchType[]) => {
-      const search = async (val: string, types: SearchType[]): Promise<void> => {
-        const res = await this.spotify.search(val, types);
-        if (types.includes('album') && res.albums != null) {
+    this.customEmitter.on('search', (val: string, type: SearchType) => {
+      const search = async (val: string, type: SearchType): Promise<void> => {
+        const res = await this.spotify.search(val, [type]);
+        if (type === 'album' && res.albums != null) {
           this.searchResultBox.showAlbumResults(res.albums.items);
+        } else if (type === 'track' && res.tracks != null) {
+          this.searchResultBox.showTrackResults(res.tracks.items);
         }
       };
 
-      search(val, types).catch((err) => {
+      search(val, type).catch((err) => {
         this.screen.log(err);
       });
     });

@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
-import type { Album } from './types';
+import type { Album, Track } from './types';
 
 interface SearchResultBoxOptions {
   row: number;
@@ -56,6 +56,13 @@ export class SearchResultBox {
 
   showAlbumResults(albums: Album[]): void {
     this.element.setItems(albums.map((a) => a.name));
+    this.show();
+  }
+
+  showTrackResults(tracks: Track[]): void {
+    this.element.setItems(
+      tracks.map((t) => `${t.name} by ${t.artists.map((a) => a.name).join(', ')}`)
+    );
     this.show();
   }
 }

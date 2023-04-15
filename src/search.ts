@@ -15,7 +15,7 @@ interface SearchBoxOptions {
 export class SearchBox {
   element: b.Widgets.TextboxElement;
   customEmitter: EventEmitter;
-  searchType: SearchType[];
+  searchType: SearchType;
 
   constructor(opts: SearchBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.textbox, {
@@ -24,7 +24,7 @@ export class SearchBox {
       inputOnFocus: true,
     });
 
-    this.searchType = ['album', 'track'];
+    this.searchType = 'track';
 
     this.setLabel(this.searchType);
 
@@ -37,13 +37,13 @@ export class SearchBox {
     this.element.key(['C-a', 'C-t', 'C-l'], (ch, key) => {
       switch (key.full) {
         case 'C-a':
-          this.setSearchType(['album']);
+          this.setSearchType('album');
           break;
         case 'C-t':
-          this.setSearchType(['track']);
+          this.setSearchType('track');
           break;
         case 'C-l':
-          this.setSearchType(['album', 'track']);
+          this.setSearchType('album');
           break;
         default:
           break;
@@ -52,11 +52,11 @@ export class SearchBox {
     });
   }
 
-  setLabel(searchTypes: SearchType[]): void {
-    this.element.setLabel(`search: ${searchTypes.join(', ')}`);
+  setLabel(searchTypes: SearchType): void {
+    this.element.setLabel(`search: ${searchTypes}`);
   }
 
-  setSearchType(type: SearchType[]): void {
+  setSearchType(type: SearchType): void {
     this.searchType = type;
   }
 }
