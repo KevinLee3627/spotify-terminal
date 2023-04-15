@@ -120,13 +120,14 @@ class Screen {
       height: this.gridHeight / 2 - 6,
     });
 
+    // TODO: Get all playlists, not just first 20
     this.playlistBox = new PlaylistBox({
       grid: this.grid,
       customEmitter: this.customEmitter,
-      row: 16,
+      row: this.gridHeight / 2 - 6,
       col: 0,
       width: this.gridWidth / 2,
-      height: this.gridHeight - 32,
+      height: this.gridHeight / 2,
     });
 
     // this.screen.on('keypress', (ch, key) => {
@@ -427,4 +428,5 @@ async function main(): Promise<void> {
 }
 main().catch((err) => {
   console.log(err);
+  console.log(err.response.data);
 });

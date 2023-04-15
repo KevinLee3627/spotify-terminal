@@ -173,8 +173,10 @@ export class Spotify {
     options?: RequestOptions<Body>
   ): Promise<Return> {
     if (this.token == null) throw new Error('Invalid/missing access token.');
-    if (this.tokenExpires != null && this.tokenExpires <= new Date().getTime())
+    if (this.tokenExpires != null && this.tokenExpires <= new Date().getTime()) {
       await this.getToken();
+      console.log('token expired ! got new one');
+    }
 
     const res = await axios<Return>({
       method,
