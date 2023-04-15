@@ -9,6 +9,7 @@ import { SearchBox } from './search';
 import { PlaybackControlBox } from './songControlBox';
 import { VolumeControlBox } from './volumeControlBox';
 import { QueueBox } from './queueBox';
+import { PlaylistBox } from './playlistBox';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -27,7 +28,7 @@ export const bold = (str: string): string => `{bold}${str}{/bold}`;
 class Screen {
   spotify: Spotify;
 
-  screen = b.screen({ smartCSR: true, autoPadding: true, log: './log.json' });
+  screen = b.screen({ autoPadding: true, log: './log.json' });
   gridHeight = parseInt(this.screen.height as string, 10);
   gridWidth = parseInt(this.screen.width as string, 10);
 
@@ -42,6 +43,7 @@ class Screen {
   albumBox: AlbumBox;
   searchBox: SearchBox;
   queueBox: QueueBox;
+  playlistBox: PlaylistBox;
 
   // TODO: QUEUEBOX
 
@@ -104,7 +106,7 @@ class Screen {
       grid: this.grid,
       customEmitter: this.customEmitter,
       row: 0,
-      col: 0,
+      col: this.gridWidth / 2 + 1,
       width: this.gridWidth / 2,
       height: 3,
     });
@@ -116,6 +118,16 @@ class Screen {
       col: 0,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2 - 6,
+    });
+    this.queueBox.element.hide();
+
+    this.playlistBox = new PlaylistBox({
+      grid: this.grid,
+      customEmitter: this.customEmitter,
+      row: 16,
+      col: 0,
+      width: this.gridWidth / 2,
+      height: this.gridHeight - 32,
     });
 
     // this.screen.on('keypress', (ch, key) => {
@@ -333,6 +345,10 @@ class Screen {
       const playback = await this.spotify.getPlaybackState();
       const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
       const queue = await this.spotify.getQueue();
+      const playlists = await this.spotify.getCurrentUserPlaylists();
+      this.screen.log(playlists);
+
+      this.playlistBox.updateList(playlists.items);
 
       if (playback.item == null || album == null) {
         this.songBox.setNullState();
@@ -374,6 +390,9 @@ class Screen {
             break;
           case 'w':
             this.queueBox.element.focus();
+            break;
+          case 'y':
+            this.playlistBox.element.focus();
             break;
           default:
             break;

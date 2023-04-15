@@ -1,6 +1,13 @@
 import axios from 'axios';
 import { readFile, writeFile } from 'fs/promises';
-import type { AlbumFull, Playback, TokenRes, Device, Track } from './types';
+import type {
+  AlbumFull,
+  Playback,
+  TokenRes,
+  Device,
+  Track,
+  SimplifiedPlaylist,
+} from './types';
 
 interface ResumePlaybackBody {
   context_uri: string;
@@ -19,6 +26,16 @@ interface RequestOptions<Body = unknown> {
 interface QueueRes {
   currently_playing: Track | null;
   queue: Track[];
+}
+
+interface GetCurrentUserPlaylistsRes {
+  href: string;
+  limit: number;
+  next: string | null | undefined;
+  offset: number;
+  prev: string | null | undefined;
+  total: number;
+  items: SimplifiedPlaylist[];
 }
 
 export class Spotify {
@@ -136,6 +153,15 @@ export class Spotify {
       return acc;
     }, {});
     return mapping;
+  }
+
+  async getCurrentUserPlaylists(
+    limit: number = 20,
+    offset: number = 0
+  ): Promise<GetCurrentUserPlaylistsRes> {
+    return await this.makeRequest<GetCurrentUserPlaylistsRes>('GET', '/me/playlists', {
+      query: { limit, offset },
+    });
   }
 
   async makeRequest<Return = void, Body = Record<string, unknown>>(
