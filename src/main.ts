@@ -28,8 +28,7 @@ export const bold = (str: string): string => `{bold}${str}{/bold}`;
 
 class Screen {
   spotify: Spotify;
-
-  screen = b.screen({ autoPadding: true, log: './log.json' });
+  screen = b.screen({ autoPadding: true, log: './log.json', fullUnicode: true });
   gridHeight = parseInt(this.screen.height as string, 10);
   gridWidth = parseInt(this.screen.width as string, 10);
 
@@ -46,14 +45,6 @@ class Screen {
   searchResultBox: SearchResultBox;
   queueBox: QueueBox;
   playlistBox: PlaylistBox;
-
-  // TODO: QUEUEBOX
-
-  // TODO: SEARCH?
-
-  // TODO: Friends activity: https://github.com/valeriangalliat/spotify-buddylist?
-
-  // TODO: PLAYLISTS?
 
   constructor(spotify: Spotify, playback: Playback) {
     this.spotify = spotify;
