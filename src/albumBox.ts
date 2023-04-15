@@ -99,7 +99,11 @@ export class AlbumBox {
       this.element.setLabel('No album playing.');
       return;
     }
-    this.element.setLabel(`${bold(album.name)} (${album.release_date})`);
+    this.element.setLabel(
+      `${bold(album.name)} by ${bold(album.artists.map((a) => a.name).join(', '))} (${
+        album.release_date
+      })`
+    );
   }
 
   updateList(tracks: Track[], likedRecord: Record<string, boolean>): void {
