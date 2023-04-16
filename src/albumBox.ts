@@ -69,7 +69,7 @@ export class AlbumBox {
           break;
         case 'p':
           this.customEmitter.emit(
-            'playTrackFromAlbum',
+            'playTrack',
             this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
           );
           break;

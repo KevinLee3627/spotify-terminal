@@ -277,7 +277,7 @@ class Screen {
       });
     });
 
-    this.customEmitter.on('playTrackFromAlbum', (trackUri: string) => {
+    this.customEmitter.on('playTrack', (trackUri: string) => {
       const playNow = async (trackUri: string): Promise<void> => {
         // TODO: Can we avoid the sleep() calls?
         await this.spotify.addTrackToQueue(trackUri);
