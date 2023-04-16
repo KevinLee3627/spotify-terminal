@@ -453,13 +453,18 @@ class Screen {
           case 'y':
             this.playlistBox.element.focus();
             break;
+          case ':':
+            while (this.screen.focused != null) {
+              this.screen.focusPop();
+            }
+            break;
           default:
             break;
         }
       };
 
       this.screen.key(
-        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y'],
+        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', ':'],
         screenKeyListener
       );
 
