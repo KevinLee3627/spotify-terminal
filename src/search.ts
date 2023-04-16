@@ -35,6 +35,13 @@ export class SearchBox {
       this.customEmitter.emit('search', val, this.searchType);
     });
 
+    this.element.on('cancel', () => {
+      // Completely clear focus when escaping text input focus
+      while (this.element.screen.focused != null) {
+        this.element.screen.focusPop();
+      }
+    });
+
     this.element.key(['C-a', 'C-t', 'C-l'], (ch, key) => {
       switch (key.full) {
         case 'C-a':

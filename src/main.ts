@@ -462,7 +462,6 @@ class Screen {
             break;
         }
       };
-
       this.screen.key(
         ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', ':'],
         screenKeyListener
