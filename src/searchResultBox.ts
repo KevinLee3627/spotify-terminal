@@ -18,6 +18,8 @@ export class SearchResultBox {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
   resultType: SearchType = 'track';
+  selectedIndex: number = 0;
+  results: Array<Album | Track> = [];
 
   constructor(opts: SearchResultBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
@@ -39,8 +41,24 @@ export class SearchResultBox {
 
     this.customEmitter = opts.customEmitter;
 
-    this.element.key(['h'], (ch, key) => {
+    this.element.key(['h', 'up', 'down', 'j', 'k', 'p'], (ch, key) => {
       switch (key.full) {
+        case 'up':
+        case 'k':
+          if (this.selectedIndex <= 0) return;
+          this.selectedIndex--;
+          break;
+        case 'down':
+        case 'j':
+          if (this.selectedIndex >= this.results.length) return;
+          this.selectedIndex++;
+          break;
+        case 'p':
+          if (this.resultType === 'album')
+            this.customEmitter.emit('playPlaylist', this.results[this.selectedIndex].uri);
+          else if (this.resultType === 'track')
+            this.customEmitter.emit('playTrack', this.results[this.selectedIndex].uri);
+          break;
         case 'h':
           this.element.hide();
           break;
@@ -104,5 +122,9 @@ export class SearchResultBox {
 
   setResultType(type: SearchType): void {
     this.resultType = type;
+  }
+
+  setResults(results: Array<Album | Track>): void {
+    this.results = results;
   }
 }

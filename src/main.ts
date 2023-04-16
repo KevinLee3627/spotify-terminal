@@ -293,6 +293,19 @@ class Screen {
       });
     });
 
+    this.customEmitter.on('playAlbum', (albumUri: string) => {
+      const playAlbum = async (albumUri: string): Promise<void> => {
+        await this.spotify.resume({ context_uri: albumUri });
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+
+      playAlbum(albumUri).catch((err) => {
+        this.screen.log(err);
+      });
+    });
+
     // TODO: what a name...
     this.customEmitter.on(
       'playTrackFromAlbumWithinAlbum',
@@ -359,9 +372,11 @@ class Screen {
         const res = await this.spotify.search(val, [type]);
         if (type === 'album' && res.albums != null) {
           this.searchResultBox.setResultType('album');
+          this.searchResultBox.setResults(res.albums.items);
           this.searchResultBox.showAlbumResults(res.albums.items);
         } else if (type === 'track' && res.tracks != null) {
           this.searchResultBox.setResultType('track');
+          this.searchResultBox.setResults(res.tracks.items);
           this.searchResultBox.showTrackResults(res.tracks.items);
         }
       };
