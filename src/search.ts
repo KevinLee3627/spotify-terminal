@@ -42,7 +42,7 @@ export class SearchBox {
       }
     });
 
-    this.element.key(['C-a', 'C-t', 'C-l'], (ch, key) => {
+    this.element.key(['C-a', 'C-t', 'C-l', 'C-x'], (ch, key) => {
       switch (key.full) {
         case 'C-a':
           this.setSearchType('album');
@@ -52,6 +52,9 @@ export class SearchBox {
           break;
         case 'C-l':
           this.setSearchType('album');
+          break;
+        case 'C-x':
+          this.element.clearValue();
           break;
         default:
           break;
