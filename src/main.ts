@@ -186,6 +186,7 @@ class Screen {
     });
 
     this.customEmitter.on('skipToNext', () => {
+      // TODO: Bug when hitting next after coming back to player after long time.
       const skipToNext = async (): Promise<void> => {
         await this.spotify.skipToNext();
         // TODO - how to avoid sleeping? Maybe we 'get' the next song in the queue
@@ -342,8 +343,10 @@ class Screen {
       const search = async (val: string, type: SearchType): Promise<void> => {
         const res = await this.spotify.search(val, [type]);
         if (type === 'album' && res.albums != null) {
+          this.searchResultBox.setResultType('album');
           this.searchResultBox.showAlbumResults(res.albums.items);
         } else if (type === 'track' && res.tracks != null) {
+          this.searchResultBox.setResultType('track');
           this.searchResultBox.showTrackResults(res.tracks.items);
         }
       };
@@ -355,7 +358,7 @@ class Screen {
 
     this.customEmitter.on('playPlaylist', (uri: string) => {
       const play = async (uri: string): Promise<void> => {
-        await this.spotify.resume({ context_uri: uri });
+        await this.spotify.resume({ context_uri: uri }, process.env.DEVICE_ID);
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
         await this.updateSongAndAlbumBox(playback);

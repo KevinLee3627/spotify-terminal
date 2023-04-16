@@ -1,6 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
+import type { SearchType } from './spotify';
 import type { Album, Track } from './types';
 
 interface SearchResultBoxOptions {
@@ -15,6 +16,7 @@ interface SearchResultBoxOptions {
 export class SearchResultBox {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
+  resultType: SearchType = 'track';
 
   constructor(opts: SearchResultBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
@@ -64,5 +66,9 @@ export class SearchResultBox {
       tracks.map((t) => `${t.name} by ${t.artists.map((a) => a.name).join(', ')}`)
     );
     this.show();
+  }
+
+  setResultType(type: SearchType): void {
+    this.resultType = type;
   }
 }
