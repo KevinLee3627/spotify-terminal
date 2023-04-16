@@ -258,7 +258,7 @@ class Screen {
         );
       };
       playButton().catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -274,7 +274,7 @@ class Screen {
       };
 
       playNow(trackUri).catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -296,7 +296,7 @@ class Screen {
         };
 
         playNowInAlbum(album, trackUri).catch((err) => {
-          console.log(err);
+          this.screen.log(err);
         });
       }
     );
@@ -309,7 +309,7 @@ class Screen {
       };
 
       setState(newState).catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -321,7 +321,7 @@ class Screen {
       };
 
       toggleState(!currentState).catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -335,7 +335,7 @@ class Screen {
       };
 
       setVolume(volume).catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
