@@ -31,6 +31,7 @@ export class SearchBox {
     this.customEmitter = opts.customEmitter;
 
     this.element.on('submit', (val: string) => {
+      if (val == null || val.length <= 0) return;
       this.customEmitter.emit('search', val, this.searchType);
     });
 
