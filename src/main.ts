@@ -24,6 +24,21 @@ export function msToTime(ms: number): string {
   return `${minutes}:${secondsStr}`;
 }
 
+export function cutoff(
+  str: string,
+  maxLength: number,
+  endingChar = '.',
+  endingCharCount = 3
+): string {
+  if (endingChar.length !== 1) throw new Error('endingChar must be a single character');
+  if (maxLength <= 0) throw new Error('maxLength must be greater than 0');
+  if (!Number.isInteger(maxLength)) throw new Error('maxLength must be an integer');
+
+  if (str.length <= maxLength) return str;
+
+  return str.slice(0, maxLength - endingCharCount) + endingChar.repeat(endingCharCount);
+}
+
 export const bold = (str: string): string => `{bold}${str}{/bold}`;
 
 class Screen {
@@ -108,7 +123,7 @@ class Screen {
       grid: this.grid,
       row: 3,
       col: 0,
-      width: this.gridWidth / 2,
+      width: this.gridWidth,
       height: this.gridHeight - 9,
       customEmitter: this.customEmitter,
     });
