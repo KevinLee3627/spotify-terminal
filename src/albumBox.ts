@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
-import { msToTime, bold } from './main';
+import { msToTime, bold, cutoff } from './main';
 import type { AlbumFull, Track } from './types';
 
 interface AlbumBoxOptions {
@@ -130,7 +130,7 @@ export class AlbumBox {
       durationWidth -
       likedColWidth;
 
-    const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
+    const trackNameCol = cutoff(track.name.padEnd(trackNameWidth, ' '), trackNameWidth);
     const trackNumCol = String(index + 1).padEnd(trackNumWidth, ' ');
     const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
     const likedCol = liked ? '♥' : '';
