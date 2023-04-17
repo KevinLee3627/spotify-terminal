@@ -310,7 +310,6 @@ class Screen {
       });
     });
 
-    // TODO: what a name...
     this.customEmitter.on(
       'playTrackFromAlbumWithinAlbum',
       (album: AlbumFull, trackUri: string) => {
@@ -445,6 +444,7 @@ class Screen {
         console.log(err);
       });
     });
+    // TODO: Check if track is already in playlist before adding
     this.customEmitter.on(
       'addTrackToPlaylist',
       (playlist: SimplifiedPlaylist, track: Track) => {

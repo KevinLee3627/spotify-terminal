@@ -49,9 +49,6 @@ export class AlbumBox {
 
       // TODO: Autoplay songs after album finishes.
       // Manage the index of the selected track manually. Inited in updateAlbumBox
-      // TODO: Handle songs with very long names
-      // TODO: Add a way to add the selected song to a specific playlist.
-      // TODO: Add song to queue
       switch (key.full) {
         case 'up':
         case 'k':
@@ -99,7 +96,6 @@ export class AlbumBox {
   }
 
   updateLabel(album: AlbumFull | null): void {
-    // TODO: Dynamic height based on # of tracks in album?
     if (album == null) {
       this.element.setLabel('No album playing.');
       return;

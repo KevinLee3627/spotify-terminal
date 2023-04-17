@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
-import { msToTime } from './main';
+import { cutoff, msToTime } from './main';
 import type { Track } from './types';
 
 interface QueueBoxOptions {
@@ -43,9 +43,7 @@ export class QueueBox {
 
   init(queue: Track[]): void {
     this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j'], (ch, key) => {
-      // TODO: Handle songs with very long names
-      // TODO: Remove song from queue
-      // TODO: Add a way to add the selected song to a specific playlist.
+      // TODO: Remove song from queue - impossible through API?
       switch (key.full) {
         case 'up':
         case 'k':
@@ -73,7 +71,7 @@ export class QueueBox {
 
     const trackNameWidth = listWidth - totalBorderWidth - queueNumWidth - durationWidth;
     function formatRow(track: Track, index: number): string {
-      const trackNameCol = track.name.padEnd(trackNameWidth, ' ');
+      const trackNameCol = cutoff(track.name.padEnd(trackNameWidth, ' '), trackNameWidth);
       const trackNumCol = String(index + 1).padEnd(queueNumWidth, ' ');
       const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
       return `${trackNumCol} ${trackNameCol} ${durationCol}`;

@@ -63,7 +63,6 @@ export class SongBox {
 
     this.box.key(['n', 'p', 'space', 'r', 'l', 'C-a'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
-      // TODO: Finish this.
 
       switch (key.full) {
         case 'n':
