@@ -34,6 +34,7 @@ export class AlbumBox {
       },
       keys: true,
     });
+    this.element.set('id', 'albumBox');
 
     this.customEmitter = opts.customEmitter;
   }

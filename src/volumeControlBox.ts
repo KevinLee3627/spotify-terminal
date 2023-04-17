@@ -29,6 +29,7 @@ export class VolumeControlBox {
       left: opts.left,
       border: 'line',
     });
+    this.element.set('id', 'volumeControlBox');
 
     this.bar = b.progressbar({
       width: '100%-2',

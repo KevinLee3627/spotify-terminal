@@ -37,6 +37,7 @@ export class SearchResultBox {
       keys: true,
       label: 'results',
     });
+    this.element.set('id', 'searchResultBox');
     this.element.hide();
 
     this.customEmitter = opts.customEmitter;

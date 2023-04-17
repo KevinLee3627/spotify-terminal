@@ -20,7 +20,7 @@ interface SongBoxOptions {
 
 export class SongBox {
   // SONGBOX
-  box: b.Widgets.BoxElement;
+  element: b.Widgets.BoxElement;
   progressBar: b.Widgets.ProgressBarElement;
   timeElapsed: b.Widgets.TextElement;
   songDuration: b.Widgets.TextElement;
@@ -36,10 +36,11 @@ export class SongBox {
     this.currentPlayback = opts.playback;
     this.customEmitter = opts.customEmitter;
 
-    this.box = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
+    this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
       tags: true,
       style: { focus: { border: { fg: 'green' } } },
     });
+    this.element.set('id', 'songBox');
 
     this.progressBar = b.progressbar({
       left: '7',
@@ -55,13 +56,13 @@ export class SongBox {
     this.timeElapsed = b.text({ left: '0', width: 5 });
     this.songDuration = b.text({ left: '100%-7' });
 
-    this.box.append(this.progressBar);
-    this.box.append(this.timeElapsed);
-    this.box.append(this.songDuration);
-    this.box.append(this.controlBox.element);
-    this.box.append(this.volumeBox.element);
+    this.element.append(this.progressBar);
+    this.element.append(this.timeElapsed);
+    this.element.append(this.songDuration);
+    this.element.append(this.controlBox.element);
+    this.element.append(this.volumeBox.element);
 
-    this.box.key(['n', 'p', 'space', 'r', 'l', 'C-a'], (ch, key) => {
+    this.element.key(['n', 'p', 'space', 'r', 'l', 'C-a'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
 
       switch (key.full) {
@@ -99,16 +100,16 @@ export class SongBox {
 
   updateLabel(track: Track | null, liked = false): void {
     if (track == null) {
-      this.box.setLabel('N/A');
+      this.element.setLabel('N/A');
       return;
     }
     const songTitle = track.name == null ? 'N/A' : track.name;
     const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
-    this.box.setLabel(`${bold(songTitle)} by ${songArtist} ${liked ? '♥' : ''}`);
+    this.element.setLabel(`${bold(songTitle)} by ${songArtist} ${liked ? '♥' : ''}`);
   }
 
   setNullState(): void {
-    this.box.setLabel('N/A');
+    this.element.setLabel('N/A');
   }
 
   async startProgress(

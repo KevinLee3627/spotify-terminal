@@ -5,14 +5,14 @@ import { type SearchType, Spotify } from './spotify';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
 import { AlbumBox } from './albumBox';
-import { SearchBox } from './search';
+import { SearchBox } from './searchBox';
 import { PlaybackControlBox } from './songControlBox';
 import { VolumeControlBox } from './volumeControlBox';
 import { QueueBox } from './queueBox';
 import { PlaylistBox } from './playlistBox';
 import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
-import { PlaylistAddModal } from './playlistModal';
+import { PlaylistAddModal } from './playlistAddModal';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -149,9 +149,9 @@ class Screen {
       height: this.gridHeight / 2,
     });
 
-    this.screen.on('keypress', (ch, key) => {
-      this.screen.log(key.full);
-    });
+    // this.screen.on('keypress', (ch, key) => {
+    //   this.screen.log(key.full);
+    // });
   }
 
   async updateSongAndAlbumBox(playback?: Playback): Promise<void> {
@@ -509,7 +509,7 @@ class Screen {
         }
         switch (key.full) {
           case 's':
-            this.songBox.box.focus();
+            this.songBox.element.focus();
             break;
           case 'a':
             this.albumBox.element.focus();
@@ -529,9 +529,10 @@ class Screen {
           case 'y':
             this.playlistBox.element.focus();
             break;
-          case ':':
+          case ':': // TODO: After focusing multiple boxes, this command goes funky
             while (this.screen.focused != null) {
               this.screen.focusPop();
+              this.screen.log(this.screen.focused.get('id', 'no name provided'));
             }
             break;
           default:

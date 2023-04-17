@@ -35,6 +35,7 @@ export class PlaylistBox {
       label: 'playlists',
       keys: true,
     });
+    this.element.set('id', 'playlistBox');
 
     this.customEmitter = opts.customEmitter;
     if (opts.playlists != null) {

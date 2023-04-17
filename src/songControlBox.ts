@@ -39,6 +39,7 @@ export class PlaybackControlBox {
       border: 'line',
     });
     this.customEmitter = opts.customEmitter;
+    this.element.set('id', 'songControlBox');
 
     this.currentRepeatState = opts.playback.repeat_state;
     this.currentShuffleState = opts.playback.shuffle_state;

@@ -23,6 +23,7 @@ export class SearchBox {
       style: { focus: { border: { fg: 'green' } } },
       inputOnFocus: true,
     });
+    this.element.set('id', 'searchBox');
 
     this.searchType = 'track';
 

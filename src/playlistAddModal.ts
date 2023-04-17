@@ -37,6 +37,7 @@ export class PlaylistAddModal {
       label: 'playlists',
       keys: true,
     });
+    this.element.set('id', 'playlistAddModal]');
 
     this.customEmitter = opts.customEmitter;
     this.playlists = opts.playlists;
