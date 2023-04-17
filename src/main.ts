@@ -152,7 +152,8 @@ class Screen {
     // });
   }
 
-  async updateSongAndAlbumBox(playback: Playback): Promise<void> {
+  async updateSongAndAlbumBox(playback?: Playback): Promise<void> {
+    if (playback == null) playback = await this.spotify.getPlaybackState();
     const track = playback.item;
     if (track != null) {
       const album = await this.spotify.getAlbum(track?.album.id);
@@ -166,6 +167,7 @@ class Screen {
       );
       const queue = await this.spotify.getQueue();
 
+      this.songBox.setCurrentPlayback(playback);
       this.songBox.updateLabel(track);
       void this.songBox.startProgress(
         playback.progress_ms,
@@ -397,6 +399,25 @@ class Screen {
       play(uri).catch((err) => {
         this.screen.log(err.response);
       });
+    });
+
+    this.customEmitter.on('toggleTrackLikeStatus', (trackId?: string) => {
+      const likeTrack = async (trackId: string): Promise<void> => {
+        const savedRes = await this.spotify.checkSavedTracks([trackId]);
+        this.screen.log(savedRes);
+        if (savedRes[trackId]) {
+          await this.spotify.removeSavedTracks([trackId]);
+        } else {
+          await this.spotify.saveTracks([trackId]);
+        }
+        await this.updateSongAndAlbumBox();
+      };
+
+      if (trackId != null) {
+        likeTrack(trackId).catch((err) => {
+          this.screen.log(err);
+        });
+      }
     });
   }
 

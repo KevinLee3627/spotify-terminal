@@ -178,6 +178,16 @@ export class Spotify {
     return mapping;
   }
 
+  async saveTracks(trackIds: string[]): Promise<void> {
+    await this.makeRequest('PUT', '/me/tracks', { query: { ids: trackIds.join(',') } });
+  }
+
+  async removeSavedTracks(trackIds: string[]): Promise<void> {
+    await this.makeRequest('DELETE', '/me/tracks', {
+      query: { ids: trackIds.join(',') },
+    });
+  }
+
   async search(
     q: string,
     type: SearchType[],
@@ -199,7 +209,7 @@ export class Spotify {
   }
 
   async makeRequest<Return = void, Body = Record<string, unknown>>(
-    method: 'GET' | 'POST' | 'PUT',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
     options?: RequestOptions<Body>
   ): Promise<Return> {

@@ -24,6 +24,7 @@ export class SongBox {
   progressBar: b.Widgets.ProgressBarElement;
   timeElapsed: b.Widgets.TextElement;
   songDuration: b.Widgets.TextElement;
+  currentPlayback: Playback;
 
   songProgressTimeout: NodeJS.Timeout = setTimeout(() => {}, 0);
 
@@ -32,6 +33,7 @@ export class SongBox {
 
   customEmitter: EventEmitter;
   constructor(opts: SongBoxOptions) {
+    this.currentPlayback = opts.playback;
     this.customEmitter = opts.customEmitter;
 
     this.box = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
@@ -75,6 +77,9 @@ export class SongBox {
           break;
         case 'space':
           this.customEmitter.emit('hitPlayButton');
+          break;
+        case 'l':
+          this.customEmitter.emit('toggleTrackLikeStatus', this.currentPlayback.item?.id);
           break;
         default:
           break;
@@ -138,5 +143,9 @@ export class SongBox {
 
   stopProgress(): void {
     clearTimeout(this.songProgressTimeout);
+  }
+
+  setCurrentPlayback(playback: Playback): void {
+    this.currentPlayback = playback;
   }
 }
