@@ -43,7 +43,7 @@ export class AlbumBox {
     currentTrack?: Track | null,
     liked?: Record<string, boolean>
   ): void {
-    this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l'], (ch, key) => {
+    this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
 
@@ -80,6 +80,12 @@ export class AlbumBox {
         case 'l':
           this.customEmitter.emit(
             'toggleTrackLikeStatus',
+            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+          );
+          break;
+        case 'C-a':
+          this.customEmitter.emit(
+            'addToPlaylistModal',
             this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
           );
           break;
