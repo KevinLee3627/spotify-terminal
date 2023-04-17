@@ -168,7 +168,7 @@ class Screen {
       const queue = await this.spotify.getQueue();
 
       this.songBox.setCurrentPlayback(playback);
-      this.songBox.updateLabel(track);
+      this.songBox.updateLabel(track, liked[track.id]);
       void this.songBox.startProgress(
         playback.progress_ms,
         track?.duration_ms ?? null,

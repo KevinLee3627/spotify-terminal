@@ -94,14 +94,14 @@ export class SongBox {
     );
   }
 
-  updateLabel(track: Track | null): void {
+  updateLabel(track: Track | null, liked = false): void {
     if (track == null) {
       this.box.setLabel('N/A');
       return;
     }
     const songTitle = track.name == null ? 'N/A' : track.name;
     const songArtist = track.album.artists.map((artist) => artist.name).join(', ');
-    this.box.setLabel(`${bold(songTitle)} by ${songArtist}`);
+    this.box.setLabel(`${bold(songTitle)} by ${songArtist} ${liked ? '♥' : ''}`);
   }
 
   setNullState(): void {
