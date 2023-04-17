@@ -61,7 +61,7 @@ export class SongBox {
     this.box.append(this.controlBox.element);
     this.box.append(this.volumeBox.element);
 
-    this.box.key(['n', 'p', 'space', 'r', 'l'], (ch, key) => {
+    this.box.key(['n', 'p', 'space', 'r', 'l', 'C-a'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
       // TODO: Finish this.
 
@@ -81,8 +81,9 @@ export class SongBox {
         case 'l':
           this.customEmitter.emit('toggleTrackLikeStatus', this.currentPlayback.item);
           break;
-        case 'a':
-          this.customEmitter.emit('addToPlaylistModal');
+        case 'C-a':
+          if (this.currentPlayback.item != null)
+            this.customEmitter.emit('addToPlaylistModal', this.currentPlayback.item);
           break;
         default:
           break;

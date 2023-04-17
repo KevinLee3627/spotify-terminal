@@ -1,6 +1,6 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { AlbumFull, Playback, Track } from './types';
+import type { AlbumFull, Playback, SimplifiedPlaylist, Track } from './types';
 import { type SearchType, Spotify } from './spotify';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
@@ -12,6 +12,7 @@ import { QueueBox } from './queueBox';
 import { PlaylistBox } from './playlistBox';
 import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
+import { PlaylistAddModal } from './playlistModal';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -148,9 +149,9 @@ class Screen {
       height: this.gridHeight / 2,
     });
 
-    // this.screen.on('keypress', (ch, key) => {
-    //   console.log(key.full);
-    // });
+    this.screen.on('keypress', (ch, key) => {
+      this.screen.log(key.full);
+    });
   }
 
   async updateSongAndAlbumBox(playback?: Playback): Promise<void> {
@@ -421,6 +422,47 @@ class Screen {
         });
       }
     });
+
+    this.customEmitter.on('addToPlaylistModal', (track: Track) => {
+      const showPlaylistModal = async (): Promise<void> => {
+        const playlistsRes = await this.spotify.getCurrentUserPlaylists();
+        const width = 40;
+        const height = 35;
+        const modal = new PlaylistAddModal({
+          row: this.gridHeight / 2 - height / 2,
+          col: this.gridWidth / 2 - width / 2,
+          height,
+          width,
+          grid: this.grid,
+          playlists: playlistsRes.items,
+          customEmitter: this.customEmitter,
+          track,
+        });
+        modal.element.focus();
+      };
+
+      showPlaylistModal().catch((err) => {
+        console.log(err);
+      });
+    });
+    this.customEmitter.on(
+      'addTrackToPlaylist',
+      (playlist: SimplifiedPlaylist, track: Track) => {
+        const addTrackToPlaylist = async (
+          playlist: SimplifiedPlaylist,
+          track: Track
+        ): Promise<void> => {
+          await this.spotify.addTracksToPlaylist(playlist.id, [track.uri]);
+          this.createToast(
+            `Added ${bold(track.name)} to playlist ${bold(playlist.name)}`
+          );
+        };
+
+        addTrackToPlaylist(playlist, track).catch((err) => {
+          console.log(err);
+        });
+      }
+    );
   }
 
   createToast(content: string): Toast {
