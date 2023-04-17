@@ -208,6 +208,12 @@ export class Spotify {
     });
   }
 
+  async addTracksToPlaylist(playlistId: string, trackUris: string[]): Promise<void> {
+    await this.makeRequest('POST', `/playlists/${playlistId}/tracks`, {
+      body: trackUris,
+    });
+  }
+
   async makeRequest<Return = void, Body = Record<string, unknown>>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
