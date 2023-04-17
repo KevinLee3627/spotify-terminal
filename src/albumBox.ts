@@ -83,7 +83,7 @@ export class AlbumBox {
         case 'l':
           this.customEmitter.emit(
             'toggleTrackLikeStatus',
-            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].id
+            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
           );
           break;
         default:

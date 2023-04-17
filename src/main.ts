@@ -1,6 +1,6 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { AlbumFull, Playback } from './types';
+import type { AlbumFull, Playback, Track } from './types';
 import { type SearchType, Spotify } from './spotify';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
@@ -11,6 +11,7 @@ import { VolumeControlBox } from './volumeControlBox';
 import { QueueBox } from './queueBox';
 import { PlaylistBox } from './playlistBox';
 import { SearchResultBox } from './searchResultBox';
+import { Toast } from './toast';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -401,23 +402,37 @@ class Screen {
       });
     });
 
-    this.customEmitter.on('toggleTrackLikeStatus', (trackId?: string) => {
-      const likeTrack = async (trackId: string): Promise<void> => {
-        const savedRes = await this.spotify.checkSavedTracks([trackId]);
-        this.screen.log(savedRes);
-        if (savedRes[trackId]) {
-          await this.spotify.removeSavedTracks([trackId]);
+    this.customEmitter.on('toggleTrackLikeStatus', (track: Track) => {
+      const likeTrack = async (track: Track): Promise<void> => {
+        const savedRes = await this.spotify.checkSavedTracks([track.id]);
+        if (savedRes[track.id]) {
+          await this.spotify.removeSavedTracks([track.id]);
+          this.createToast(`Removed ${bold(track.name)} from saved tracks`);
         } else {
-          await this.spotify.saveTracks([trackId]);
+          await this.spotify.saveTracks([track.id]);
+          this.createToast(`Added ${bold(track.name)} to saved tracks`);
         }
         await this.updateSongAndAlbumBox();
       };
 
-      if (trackId != null) {
-        likeTrack(trackId).catch((err) => {
+      if (track != null) {
+        likeTrack(track).catch((err) => {
           this.screen.log(err);
         });
       }
+    });
+  }
+
+  createToast(content: string): Toast {
+    const width = 25;
+    const height = 8;
+    return new Toast({
+      row: this.gridHeight - height,
+      col: this.gridWidth - width,
+      height,
+      width,
+      content,
+      grid: this.grid,
     });
   }
 

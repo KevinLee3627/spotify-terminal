@@ -79,7 +79,10 @@ export class SongBox {
           this.customEmitter.emit('hitPlayButton');
           break;
         case 'l':
-          this.customEmitter.emit('toggleTrackLikeStatus', this.currentPlayback.item?.id);
+          this.customEmitter.emit('toggleTrackLikeStatus', this.currentPlayback.item);
+          break;
+        case 'a':
+          this.customEmitter.emit('addToPlaylistModal');
           break;
         default:
           break;
