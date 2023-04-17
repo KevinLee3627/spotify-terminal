@@ -59,7 +59,6 @@ export class PlaylistBox {
         default:
           break;
       }
-      this.element.screen.log(`selected: ${this.playlists[this.selectedIndex].name}`);
     });
   }
 
