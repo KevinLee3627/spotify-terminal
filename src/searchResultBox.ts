@@ -67,6 +67,10 @@ export class SearchResultBox {
           break;
       }
     });
+
+    this.element.on('blur', () => {
+      this.element.hide();
+    });
   }
 
   show(): void {
