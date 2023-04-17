@@ -414,13 +414,11 @@ class Screen {
       if (playback.item == null || album == null) {
         this.songBox.setNullState();
         this.albumBox.setNullState();
-        this.songBox.init(playback);
         this.albumBox.init();
       } else {
         const liked = await this.spotify.checkSavedTracks(
           album.tracks.items.map((t) => t.id)
         );
-        this.songBox.init(playback);
         this.albumBox.init(album, playback.item, liked);
         this.queueBox.init(queue.queue);
       }

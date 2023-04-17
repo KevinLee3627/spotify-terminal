@@ -58,10 +58,8 @@ export class SongBox {
     this.box.append(this.songDuration);
     this.box.append(this.controlBox.element);
     this.box.append(this.volumeBox.element);
-  }
 
-  init(playback: Playback): void {
-    this.box.key(['n', 'p', 'space', 'r'], (ch, key) => {
+    this.box.key(['n', 'p', 'space', 'r', 'l'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
       // TODO: Finish this.
 
@@ -83,11 +81,11 @@ export class SongBox {
       }
     });
 
-    this.updateLabel(playback.item);
+    this.updateLabel(opts.playback.item);
     void this.startProgress(
-      playback.progress_ms,
-      playback.item?.duration_ms ?? null,
-      playback.is_playing
+      opts.playback.progress_ms,
+      opts.playback.item?.duration_ms ?? null,
+      opts.playback.is_playing
     );
   }
 
