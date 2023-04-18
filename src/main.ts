@@ -156,8 +156,7 @@ class Screen {
     // });
   }
 
-  async updateSongAndAlbumBox(playback?: Playback): Promise<void> {
-    if (playback == null) playback = await this.spotify.getPlaybackState();
+  async updateSongAndAlbumBox(playback: Playback): Promise<void> {
     const track = playback.item;
     if (track != null) {
       const album = await this.spotify.getAlbum(track?.album.id);
@@ -414,7 +413,8 @@ class Screen {
           await this.spotify.saveTracks([track.id]);
           this.createToast(`Added ${bold(track.name)} to saved tracks`);
         }
-        await this.updateSongAndAlbumBox();
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
       };
 
       if (track != null) {
