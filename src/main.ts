@@ -48,7 +48,7 @@ class Screen {
   screen = b.screen({ autoPadding: true, log: './log.json', fullUnicode: true });
   gridHeight = parseInt(this.screen.height as string, 10);
   gridWidth = parseInt(this.screen.width as string, 10);
-
+  ghostElement = b.box({});
   // CUSTOM EVENTS
   customEmitter: EventEmitter;
 
@@ -64,6 +64,8 @@ class Screen {
   playlistBox: PlaylistBox;
 
   constructor(spotify: Spotify, playback: Playback) {
+    this.screen.append(this.ghostElement);
+
     this.spotify = spotify;
     this.customEmitter = new EventEmitter();
     this.grid = new bc.grid({
@@ -529,11 +531,12 @@ class Screen {
           case 'y':
             this.playlistBox.element.focus();
             break;
-          case ':': // TODO: After focusing multiple boxes, this command goes funky
-            while (this.screen.focused != null) {
-              this.screen.focusPop();
-              this.screen.log(this.screen.focused.get('id', 'no name provided'));
-            }
+          case ':':
+            // After focusing multiple boxes, this command goes funky
+            // Could not figure out why the last element on the stack had their
+            // focus styling persist - added a "ghost" element that we can focus to
+            // in order to 'reset' the focus. Hacky :(
+            this.ghostElement.focus();
             break;
           default:
             break;
