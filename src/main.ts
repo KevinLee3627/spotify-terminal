@@ -202,7 +202,7 @@ class Screen {
       };
 
       doStuff().catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -218,7 +218,7 @@ class Screen {
       };
 
       skipToNext().catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -233,7 +233,7 @@ class Screen {
       };
 
       skipToNext().catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -246,7 +246,7 @@ class Screen {
       };
 
       restartTrack().catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
 
@@ -443,7 +443,7 @@ class Screen {
       };
 
       showPlaylistModal().catch((err) => {
-        console.log(err);
+        this.screen.log(err);
       });
     });
     // TODO: Check if track is already in playlist before adding
@@ -461,7 +461,7 @@ class Screen {
         };
 
         addTrackToPlaylist(playlist, track).catch((err) => {
-          console.log(err);
+          this.screen.log(err);
         });
       }
     );
@@ -549,7 +549,7 @@ class Screen {
 
       this.refreshScreen();
     } catch (err) {
-      console.log(err);
+      this.screen.log(err);
     }
   }
 
