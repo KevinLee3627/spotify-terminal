@@ -56,7 +56,7 @@ export class SearchResultBox {
           break;
         case 'p':
           if (this.resultType === 'album')
-            this.customEmitter.emit('playPlaylist', this.results[this.selectedIndex].uri);
+            this.customEmitter.emit('playAlbum', this.results[this.selectedIndex].uri);
           else if (this.resultType === 'track')
             this.customEmitter.emit('playTrack', this.results[this.selectedIndex].uri);
           break;
