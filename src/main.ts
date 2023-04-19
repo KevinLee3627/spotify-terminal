@@ -45,10 +45,11 @@ export const bold = (str: string): string => `{bold}${str}{/bold}`;
 
 class Screen {
   spotify: Spotify;
+  deviceId: string;
   screen = b.screen({ autoPadding: true, log: './log.json', fullUnicode: true });
   gridHeight = parseInt(this.screen.height as string, 10);
   gridWidth = parseInt(this.screen.width as string, 10);
-  ghostElement = b.box({});
+  ghostElement = b.box({ height: 0, width: 0 });
   // CUSTOM EVENTS
   customEmitter: EventEmitter;
 
@@ -63,10 +64,11 @@ class Screen {
   queueBox: QueueBox;
   playlistBox: PlaylistBox;
 
-  constructor(spotify: Spotify, playback: Playback) {
+  constructor(spotify: Spotify, playback: Playback, deviceId: string) {
     this.screen.append(this.ghostElement);
 
     this.spotify = spotify;
+    this.deviceId = deviceId;
     this.customEmitter = new EventEmitter();
     this.grid = new bc.grid({
       rows: this.gridHeight,
@@ -260,11 +262,11 @@ class Screen {
         let playback = await this.spotify.getPlaybackState();
         if (playback.item == null) {
           // Transfers playback to an active device if nothing is currently playing
-          await this.spotify.transferPlaybackToDevice(process.env.DEVICE_ID as string);
+          await this.spotify.transferPlaybackToDevice(this.deviceId);
           await sleep(500);
           await this.spotify.resume(
             { context_uri: 'spotify:playlist:2yjBgi4TAosyAxLRclnKk6' },
-            process.env.DEVICE_ID
+            this.deviceId
           );
         } else {
           if (playback.is_playing) {
@@ -398,7 +400,7 @@ class Screen {
 
     this.customEmitter.on('playPlaylist', (uri: string) => {
       const play = async (uri: string): Promise<void> => {
-        await this.spotify.resume({ context_uri: uri }, process.env.DEVICE_ID);
+        await this.spotify.resume({ context_uri: uri }, this.deviceId);
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
         await this.updateSongAndAlbumBox(playback);
@@ -570,9 +572,15 @@ class Screen {
 async function main(): Promise<void> {
   const spotify = new Spotify();
   await spotify.getToken();
+
+  const { devices } = await spotify.getAvailableDevices();
+  const device = devices.find((device) => device.name === process.env.DEVICE_NAME);
+  if (device == null || device.id == null) {
+    throw new Error('Device not found');
+  }
   const playback = await spotify.getPlaybackState();
   // TODO: Transfer playback to librespot on app startup
-  const screen = new Screen(spotify, playback);
+  const screen = new Screen(spotify, playback, device.id);
   await screen.initGrid();
 }
 main().catch((err) => {
