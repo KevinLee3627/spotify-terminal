@@ -55,7 +55,7 @@ export class PlaylistBox {
           this.selectedIndex++;
           break;
         case 'p':
-          this.customEmitter.emit('playPlaylist', this.playlists[this.selectedIndex].uri);
+          this.customEmitter.emit('playPlaylist', this.playlists[this.selectedIndex]);
           break;
         default:
           break;

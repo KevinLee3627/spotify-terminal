@@ -398,15 +398,21 @@ class Screen {
       });
     });
 
-    this.customEmitter.on('playPlaylist', (uri: string) => {
-      const play = async (uri: string): Promise<void> => {
-        await this.spotify.resume({ context_uri: uri }, this.deviceId);
+    this.customEmitter.on('playPlaylist', (playlist: SimplifiedPlaylist) => {
+      const play = async (playlist: SimplifiedPlaylist): Promise<void> => {
+        await this.spotify.resume(
+          {
+            context_uri: playlist.uri,
+            offset: { position: Math.floor(Math.random() * 100) },
+          },
+          this.deviceId
+        );
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
         await this.updateSongAndAlbumBox(playback);
       };
 
-      play(uri).catch((err) => {
+      play(playlist).catch((err) => {
         this.screen.log(err.response);
       });
     });
