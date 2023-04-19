@@ -159,6 +159,7 @@ class Screen {
   }
 
   async updateSongAndAlbumBox(playback: Playback): Promise<void> {
+    // TODO: Sometimes doesn't work on initial resume event
     const track = playback.item;
     if (track != null) {
       const album = await this.spotify.getAlbum(track?.album.id);

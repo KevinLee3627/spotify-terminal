@@ -68,7 +68,7 @@ export class PlaylistBox {
     currentlyPlaying?: SimplifiedPlaylist['uri']
   ): void {
     const rows = playlists.map((playlist) => {
-      if (playlist.uri === currentlyPlaying) return `\u{1F508} ${playlist.name}`;
+      if (playlist.uri === currentlyPlaying) return `${playlist.name} \u{1F508}`;
       else return playlist.name;
     });
     this.element.setItems(rows);
