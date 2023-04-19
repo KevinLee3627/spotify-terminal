@@ -189,6 +189,12 @@ class Screen {
       this.albumBox.selectCurrentlyPlaying(track);
 
       this.queueBox.updateList(queue.queue);
+
+      if (playback.context?.type === 'playlist')
+        this.playlistBox.updateList(this.playlistBox.playlists, playback.context.uri);
+      else {
+        this.playlistBox.updateList(this.playlistBox.playlists);
+      }
     }
   }
 

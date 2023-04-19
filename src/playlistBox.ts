@@ -63,8 +63,14 @@ export class PlaylistBox {
     });
   }
 
-  updateList(playlists: SimplifiedPlaylist[]): void {
-    const rows = playlists.map((playlist) => playlist.name);
+  updateList(
+    playlists: SimplifiedPlaylist[],
+    currentlyPlaying?: SimplifiedPlaylist['uri']
+  ): void {
+    const rows = playlists.map((playlist) => {
+      if (playlist.uri === currentlyPlaying) return `\u{1F508} ${playlist.name}`;
+      else return playlist.name;
+    });
     this.element.setItems(rows);
     this.setPlaylists(playlists);
   }
