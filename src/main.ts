@@ -307,6 +307,7 @@ class Screen {
       });
     });
 
+    // TODO: Fix bug where librespot always unshuffles while starting album/playlist
     this.customEmitter.on('playAlbum', (albumUri: string) => {
       const playAlbum = async (albumUri: string): Promise<void> => {
         await this.spotify.resume({ context_uri: albumUri });
@@ -317,6 +318,25 @@ class Screen {
 
       playAlbum(albumUri).catch((err) => {
         this.screen.log(err);
+      });
+    });
+
+    this.customEmitter.on('playPlaylist', (playlist: SimplifiedPlaylist) => {
+      const play = async (playlist: SimplifiedPlaylist): Promise<void> => {
+        await this.spotify.resume(
+          {
+            context_uri: playlist.uri,
+            offset: { position: Math.floor(Math.random() * playlist.tracks.total) },
+          },
+          this.deviceId
+        );
+        await sleep(500);
+        const playback = await this.spotify.getPlaybackState();
+        await this.updateSongAndAlbumBox(playback);
+      };
+
+      play(playlist).catch((err) => {
+        this.screen.log(err.response);
       });
     });
 
@@ -396,25 +416,6 @@ class Screen {
 
       search(val, type).catch((err) => {
         this.screen.log(err);
-      });
-    });
-
-    this.customEmitter.on('playPlaylist', (playlist: SimplifiedPlaylist) => {
-      const play = async (playlist: SimplifiedPlaylist): Promise<void> => {
-        await this.spotify.resume(
-          {
-            context_uri: playlist.uri,
-            offset: { position: Math.floor(Math.random() * 100) },
-          },
-          this.deviceId
-        );
-        await sleep(500);
-        const playback = await this.spotify.getPlaybackState();
-        await this.updateSongAndAlbumBox(playback);
-      };
-
-      play(playlist).catch((err) => {
-        this.screen.log(err.response);
       });
     });
 
