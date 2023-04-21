@@ -2,7 +2,7 @@ import type EventEmitter from 'events';
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 
-interface ArtistPageOptions {
+interface ArtistInfoOptions {
   row: number;
   col: number;
   width: number;
@@ -11,10 +11,10 @@ interface ArtistPageOptions {
   customEmitter: EventEmitter;
 }
 
-export class ArtistPage {
+export class ArtistInfo {
   element: b.Widgets.BoxElement;
 
-  constructor(opts: ArtistPageOptions) {
+  constructor(opts: ArtistInfoOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.box, {
       tags: true,
       style: { focus: { border: { fg: 'green' } } },
