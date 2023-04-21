@@ -151,6 +151,13 @@ export class HomePage {
     });
 
     this.setupListeners();
+
+    this.initPlaylistsBox().catch((err) => {
+      this.songBox.element.screen.log(err);
+    });
+    this.updateSongAndAlbumBox(opts.playback).catch((err) => {
+      this.songBox.element.screen.log(err);
+    });
   }
 
   setupListeners(): void {
@@ -497,32 +504,11 @@ export class HomePage {
         });
       }
     );
-
-    this.init().catch((err) => {
-      this.songBox.element.screen.log(err);
-    });
   }
 
-  async init(): Promise<void> {
-    const playback = await this.spotify.getPlaybackState();
-    const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
-    const { queue } = await this.spotify.getQueue();
+  async initPlaylistsBox(): Promise<void> {
     const playlists = await this.spotify.getCurrentUserPlaylists();
-
     this.playlistBox.updateList(playlists.items);
-
-    if (playback.item == null || album == null) {
-      this.songBox.setNullState();
-      this.albumBox.setNullState();
-      this.albumBox.init();
-    } else {
-      const albumLiked = await this.spotify.checkSavedTracks(
-        album.tracks.items.map((t) => t.id)
-      );
-      const queueLiked = await this.spotify.checkSavedTracks(queue.map((t) => t.id));
-      this.albumBox.init(album, playback.item, albumLiked);
-      this.customEmitter.emit('updateQueueBox', queue, queueLiked);
-    }
   }
 
   async updateSongAndAlbumBox(playback: Playback): Promise<void> {

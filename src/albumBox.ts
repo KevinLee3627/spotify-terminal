@@ -47,9 +47,7 @@ export class AlbumBox {
         this.selectCurrentlyPlaying(track);
       }
     );
-  }
 
-  init(album?: AlbumFull, currentTrack?: Track | null, liked?: Record<string, boolean>): void {
     this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
@@ -100,6 +98,9 @@ export class AlbumBox {
           break;
       }
     });
+  }
+
+  init(album?: AlbumFull, currentTrack?: Track | null, liked?: Record<string, boolean>): void {
     if (album != null) {
       this.setCurrentAlbum(album);
       this.updateLabel(album);
