@@ -14,6 +14,7 @@ import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
 import { readFileSync, writeFileSync } from 'fs';
+import { ArtistPage } from './artistPage';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,6 +72,8 @@ class Screen {
   searchResultBox: SearchResultBox;
   queueBox: QueueBox;
   playlistBox: PlaylistBox;
+
+  artistPage: ArtistPage;
 
   constructor(spotify: Spotify, playback: Playback, deviceId: string) {
     this.screen.append(this.ghostElement);
@@ -160,6 +163,15 @@ class Screen {
       col: 0,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2,
+    });
+
+    this.artistPage = new ArtistPage({
+      customEmitter: this.customEmitter,
+      grid: this.grid,
+      row: 3,
+      col: 0,
+      width: this.gridWidth / 2,
+      height: this.gridHeight / 2 - 6 - 3,
     });
 
     // this.screen.on('keypress', (ch, key) => {
@@ -599,6 +611,9 @@ class Screen {
           case 'y':
             this.playlistBox.element.focus();
             break;
+          case 'S-a':
+            this.artistPage.element.focus();
+            break;
           case ':':
             // After focusing multiple boxes, this command goes funky
             // Could not figure out why the last element on the stack had their
@@ -611,7 +626,7 @@ class Screen {
         }
       };
       this.screen.key(
-        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', ':'],
+        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':'],
         screenKeyListener
       );
 
