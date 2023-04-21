@@ -13,6 +13,7 @@ import { PlaylistBox } from './playlistBox';
 import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
+import { readFileSync, writeFileSync } from 'fs';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,6 +44,10 @@ export function cutoff(
 
 export const bold = (str: string): string => `{bold}${str}{/bold}`;
 
+interface Settings {
+  onStartShuffleState: boolean;
+}
+
 class Screen {
   spotify: Spotify;
   deviceId: string;
@@ -52,6 +57,9 @@ class Screen {
   ghostElement = b.box({ height: 0, width: 0 });
   // CUSTOM EVENTS
   customEmitter: EventEmitter;
+
+  // SETTINGS
+  settings: Settings;
 
   // GRID ELEMENTS
   grid: bc.Widgets.GridElement;
@@ -66,6 +74,7 @@ class Screen {
 
   constructor(spotify: Spotify, playback: Playback, deviceId: string) {
     this.screen.append(this.ghostElement);
+    this.settings = JSON.parse(readFileSync('./settings.json', 'utf8'));
 
     this.spotify = spotify;
     this.deviceId = deviceId;
@@ -332,6 +341,18 @@ class Screen {
         );
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
+        await sleep(500);
+        // TODO: Librespot always sets shuffle to false when changing the context
+        // to a playlist or album. Since we keep track of the actual shuffle state within
+        // the app, this serves as a hacky workaround to stop this behavior from occuring.
+        const currentShuffleState =
+          this.playbackControlBox.currentShuffleState ??
+          this.settings.onStartShuffleState;
+        this.screen.log(`current shuffle: ${String(currentShuffleState)}`);
+        await this.spotify.setShuffleState(currentShuffleState);
+        this.playbackControlBox.setShuffleState(currentShuffleState);
+        this.playbackControlBox.updateShuffleText(currentShuffleState);
+
         await this.updateSongAndAlbumBox(playback);
       };
 
@@ -376,6 +397,7 @@ class Screen {
 
     this.customEmitter.on('toggleShuffle', (currentState: Playback['shuffle_state']) => {
       const toggleState = async (state: Playback['shuffle_state']): Promise<void> => {
+        writeFileSync('./settings.json', JSON.stringify({ onStartShuffleState: state }));
         await this.spotify.setShuffleState(state);
         this.playbackControlBox.updateShuffleText(state);
         this.playbackControlBox.setShuffleState(state);
@@ -588,6 +610,7 @@ async function main(): Promise<void> {
   }
   const playback = await spotify.getPlaybackState();
   // TODO: Transfer playback to librespot on app startup
+  await spotify.transferPlaybackToDevice(device.id);
   const screen = new Screen(spotify, playback, device.id);
   await screen.initGrid();
 }
