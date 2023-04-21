@@ -56,6 +56,8 @@ export class SearchResultBox {
         this.customEmitter.emit('playAlbum', this.results[i].uri);
       else if (this.resultType === 'track')
         this.customEmitter.emit('playTrack', this.results[i].uri);
+      else if (this.resultType === 'artist')
+        this.customEmitter.emit('showArtistPage', this.results[i]);
     });
 
     this.element.on('blur', () => {

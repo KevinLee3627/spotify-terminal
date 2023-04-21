@@ -217,6 +217,10 @@ export class Spotify {
     return await this.makeRequest('GET', `/artists/${artistId}`);
   }
 
+  async getArtistTopTracks(artistId: string): Promise<Track[]> {
+    return await this.makeRequest('GET', `/artists/${artistId}/top-tracks`);
+  }
+
   async makeRequest<Return = void, Body = Record<string, unknown>>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,

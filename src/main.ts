@@ -1,6 +1,6 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { AlbumFull, Playback, SimplifiedPlaylist, Track } from './types';
+import type { AlbumFull, Artist, Playback, SimplifiedPlaylist, Track } from './types';
 import { type SearchType, Spotify } from './spotify';
 import EventEmitter from 'events';
 import { SongBox } from './songBox';
@@ -15,6 +15,7 @@ import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
 import { readFileSync } from 'fs';
 import { Page } from './page';
+import { ArtistPage } from './artistPage';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,7 +50,7 @@ interface Settings {
   onStartShuffleState: boolean;
 }
 
-export type PageName = 'main';
+export type PageName = 'main' | 'artist';
 
 class App {
   spotify: Spotify;
@@ -82,7 +83,8 @@ class App {
   playlistBox: PlaylistBox;
   mainPage: Page;
 
-  pages: Record<PageName, Page>;
+  pages: Record<PageName, Page | null>;
+  activePage: PageName;
 
   constructor(spotify: Spotify, playback: Playback, deviceId: string) {
     this.screen.append(this.ghostElement);
@@ -191,7 +193,9 @@ class App {
 
     this.pages = {
       main: this.mainPage,
+      artist: null,
     };
+    this.activePage = 'main';
 
     // this.screen.on('keypress', (ch, key) => {
     //   this.screen.log(key.full);
@@ -533,6 +537,31 @@ class App {
         });
       }
     );
+
+    this.customEmitter.on('showArtistPage', (artist: Artist) => {
+      const artistPage = new ArtistPage({
+        grid: this.mainGrid,
+        customEmitter: this.customEmitter,
+        gridWidth: this.gridWidth,
+        gridHeight: this.gridHeight,
+        artist,
+      });
+      this.pages.artist = artistPage.page;
+      this.activePage = 'artist';
+      this.pages.main?.hide();
+      this.pages.artist.show();
+    });
+
+    this.customEmitter.on('setActivePage', (pageName: PageName) => {
+      Object.values(this.pages).forEach((page) => {
+        if (page == null) return;
+
+        if (page.name === pageName) page.show();
+        else page.hide();
+
+        this.ghostElement.focus();
+      });
+    });
   }
 
   async addTrackToPlaylist(playlist: SimplifiedPlaylist, track: Track): Promise<void> {
@@ -600,25 +629,30 @@ class App {
             this.queueBox.element.focus();
             break;
           case 'y':
-            this.playlistBox.element.focus();
+            if (this.activePage === 'main') this.playlistBox.element.focus();
             break;
           case 'S-a':
-            this.pages.main.show();
+            this.pages.main?.show();
+            break;
+          case 't':
+            if (this.activePage === 'artist')
+              this.customEmitter.emit('artistPageHotkey', key.full);
             break;
           case ':':
+            this.customEmitter.emit(`${this.activePage}PageHotkey`, key.full);
             // After focusing multiple boxes, this command goes funky
             // Could not figure out why the last element on the stack had their
             // focus styling persist - added a "ghost" element that we can focus to
             // in order to 'reset' the focus. Hacky :(
-            this.ghostElement.focus();
-            this.pages.main.hide();
+            // this.ghostElement.focus();
+            // this.pages.main?.hide();
             break;
           default:
             break;
         }
       };
       this.screen.key(
-        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':'],
+        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':', 't'],
         screenKeyListener
       );
 
