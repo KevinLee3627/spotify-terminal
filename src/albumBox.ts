@@ -22,7 +22,7 @@ export class AlbumBox extends TrackBox {
       }
     );
 
-    this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a'], (ch, key) => {
+    this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
 
@@ -67,6 +67,11 @@ export class AlbumBox extends TrackBox {
             'addToPlaylistModal',
             this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
           );
+          break;
+        case 'S-a':
+          // TODO: If there's >1 artist, maybe have a modal for user to choose which one
+          // they want to view?
+          this.customEmitter.emit('showArtistPage', this.currentAlbum?.artists[0]);
           break;
         default:
           break;

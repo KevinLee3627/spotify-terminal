@@ -72,7 +72,7 @@ export class SongBox {
       );
     });
 
-    this.element.key(['n', 'p', 'space', 'r', 'l', 'C-a'], (ch, key) => {
+    this.element.key(['n', 'p', 'space', 'r', 'l', 'C-a', 'S-a'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
 
       switch (key.full) {
@@ -94,6 +94,15 @@ export class SongBox {
         case 'C-a':
           if (this.currentPlayback.item != null)
             this.customEmitter.emit('addToPlaylistModal', this.currentPlayback.item);
+          break;
+        case 'S-a':
+          // TODO: If there's >1 artist, maybe have a modal for user to choose which one
+          // they want to view?
+          if (this.currentPlayback.item != null)
+            this.customEmitter.emit(
+              'showArtistPage',
+              this.currentPlayback.item?.album.artists[0]
+            );
           break;
         default:
           break;
