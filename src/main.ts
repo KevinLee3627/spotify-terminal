@@ -71,6 +71,7 @@ class App {
     this.customEmitter.on('showArtistPage', (artist: Artist) => {
       const showArtistPage = async (artist: Artist): Promise<void> => {
         const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artist.id);
+        const topTracksLiked = await this.spotify.checkSavedTracks(topTracks.map((t) => t.id));
         const artistPage = new ArtistPage({
           grid: this.grid,
           customEmitter: this.customEmitter,
@@ -78,13 +79,14 @@ class App {
           gridHeight: this.gridHeight,
           artist,
           topTracks,
+          topTracksLiked,
         });
         this.pages.artist = artistPage.page;
         this.customEmitter.emit('setActivePage', this.pages.artist.name);
       };
 
       showArtistPage(artist).catch((err) => {
-        this.screen.log(err.response.data);
+        this.screen.log(err);
       });
     });
 
@@ -92,9 +94,9 @@ class App {
       this.activePage = pageName;
       Object.values(this.pages).forEach((page) => {
         if (page == null) return;
-
-        if (page.name === pageName) page.show();
-        else page.hide();
+        if (page.name === pageName) {
+          page.show();
+        } else page.hide();
       });
     });
 
