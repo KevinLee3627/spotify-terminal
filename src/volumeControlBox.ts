@@ -52,19 +52,24 @@ export class VolumeControlBox {
         case 'right':
           this.customEmitter.emit('setVolume', this.volume + 10);
           this.setVolume(this.volume + 10);
+          this.updateVolumeText(this.volume);
+
           break;
         case 'down':
         case 'left':
           this.customEmitter.emit('setVolume', this.volume - 10);
           this.setVolume(this.volume - 10);
+          this.updateVolumeText(this.volume);
           break;
         case 'm':
           this.customEmitter.emit('setVolume', 0);
           this.setVolume(0);
+          this.updateVolumeText(this.volume);
           break;
         case 'x':
           this.customEmitter.emit('setVolume', 100);
           this.setVolume(100);
+          this.updateVolumeText(this.volume);
           break;
         default:
           break;

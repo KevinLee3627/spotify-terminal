@@ -502,7 +502,6 @@ class App {
 
       const setVolume = async (volume: number): Promise<void> => {
         await this.spotify.setVolume(volume);
-        this.volumeControlBox.updateVolumeText(volume);
       };
 
       setVolume(volume).catch((err) => {
