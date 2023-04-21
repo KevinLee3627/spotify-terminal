@@ -6,7 +6,7 @@ import EventEmitter from 'events';
 import { SongBox } from './songBox';
 import { AlbumBox } from './albumBox';
 import { SearchBox } from './searchBox';
-import { PlaybackControlBox } from './songControlBox';
+import { PlaybackControlBox } from './playbackControlBox';
 import { VolumeControlBox } from './volumeControlBox';
 import { QueueBox } from './queueBox';
 import { PlaylistBox } from './playlistBox';

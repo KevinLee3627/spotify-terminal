@@ -39,7 +39,7 @@ interface GetCurrentUserPlaylistsRes {
   items: SimplifiedPlaylist[];
 }
 
-export type SearchType = 'album' | 'track';
+export type SearchType = 'album' | 'track' | 'artist';
 
 export type SearchTypePlural = `${SearchType}s`;
 

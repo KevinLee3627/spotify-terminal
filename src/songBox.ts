@@ -2,7 +2,7 @@ import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { msToTime, bold } from './main';
-import type { PlaybackControlBox } from './songControlBox';
+import type { PlaybackControlBox } from './playbackControlBox';
 import type { Playback, Track } from './types';
 import type { VolumeControlBox } from './volumeControlBox';
 
