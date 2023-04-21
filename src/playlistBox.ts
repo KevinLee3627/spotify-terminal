@@ -1,6 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
+import { bold } from './main';
 import type { SimplifiedPlaylist } from './types';
 
 interface PlaylistBoxOptions {
@@ -65,13 +66,22 @@ export class PlaylistBox {
 
   updateList(
     playlists: SimplifiedPlaylist[],
-    currentlyPlaying?: SimplifiedPlaylist['uri']
+    currentPlaylistUri?: SimplifiedPlaylist['uri']
   ): void {
     const rows = playlists.map((playlist) => {
-      if (playlist.uri === currentlyPlaying) return `${playlist.name} \u{1F508}`;
-      else return playlist.name;
+      return playlist.name;
     });
     this.element.setItems(rows);
+
+    if (currentPlaylistUri != null) {
+      const currentPlaylist = playlists.find((p) => p.uri === currentPlaylistUri);
+      if (currentPlaylist != null) {
+        this.element.setLabel(`playlists (playing ${bold(currentPlaylist?.name)})`);
+      }
+    } else {
+      this.element.setLabel('playlists');
+    }
+
     this.setPlaylists(playlists);
   }
 
