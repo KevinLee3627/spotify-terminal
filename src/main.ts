@@ -345,6 +345,8 @@ class Screen {
         // TODO: Librespot always sets shuffle to false when changing the context
         // to a playlist or album. Since we keep track of the actual shuffle state within
         // the app, this serves as a hacky workaround to stop this behavior from occuring.
+        // We include a settings.json file to restore the shuffle state when restarting
+        // librespot.
         const currentShuffleState =
           this.playbackControlBox.currentShuffleState ??
           this.settings.onStartShuffleState;
