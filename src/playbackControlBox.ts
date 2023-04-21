@@ -66,6 +66,13 @@ export class PlaybackControlBox {
         this.toggleShuffle();
       }
     });
+
+    this.customEmitter.on('updatePlaybackControlBox', (playback: Playback) => {
+      this.updateShuffleText(playback.shuffle_state);
+      this.setShuffleState(playback.shuffle_state);
+      this.updateRepeatText(playback.repeat_state);
+      this.setRepeatState(playback.repeat_state);
+    });
   }
 
   updateRepeatText(state: Playback['repeat_state']): void {

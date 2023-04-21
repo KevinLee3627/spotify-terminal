@@ -228,43 +228,35 @@ class App {
   async updateSongAndAlbumBox(playback: Playback): Promise<void> {
     // TODO: Sometimes doesn't work on initial resume event
     const track = playback.item;
-    if (track != null) {
-      const album = await this.spotify.getAlbum(track?.album.id);
+    if (track == null) return;
 
-      if (album == null) {
-        this.albumBox.setNullState();
-        return;
-      }
-      const liked = await this.spotify.checkSavedTracks(
-        album.tracks.items.map((track) => track.id)
-      );
-      const queue = await this.spotify.getQueue();
+    const album = await this.spotify.getAlbum(track?.album.id);
+    if (album == null) {
+      this.albumBox.setNullState();
+      return;
+    }
+    const liked = await this.spotify.checkSavedTracks(
+      album.tracks.items.map((track) => track.id)
+    );
+    const queue = await this.spotify.getQueue();
 
-      this.songBox.setCurrentPlayback(playback);
-      this.songBox.updateLabel(track, liked[track.id]);
-      void this.songBox.startProgress(
-        playback.progress_ms,
-        track?.duration_ms ?? null,
-        playback.is_playing
-      );
-      this.playbackControlBox.updateShuffleText(playback.shuffle_state);
-      this.playbackControlBox.setShuffleState(playback.shuffle_state);
-      this.playbackControlBox.updateRepeatText(playback.repeat_state);
-      this.playbackControlBox.setRepeatState(playback.repeat_state);
-      this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
+    this.songBox.setCurrentPlayback(playback);
+    this.songBox.updateLabel(track, liked[track.id]);
+    void this.songBox.startProgress(
+      playback.progress_ms,
+      track?.duration_ms ?? null,
+      playback.is_playing
+    );
 
-      this.albumBox.setCurrentAlbum(album);
-      this.albumBox.updateLabel(album);
-      this.albumBox.updateList(album.tracks.items, liked);
-      this.albumBox.selectCurrentlyPlaying(track);
+    this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
+    this.customEmitter.emit('updatePlaybackControlBox', playback);
+    this.customEmitter.emit('updateAlbumBox', album, liked, track);
+    this.queueBox.updateList(queue.queue);
 
-      this.queueBox.updateList(queue.queue);
-
-      if (playback.context?.type === 'playlist')
-        this.playlistBox.updateList(this.playlistBox.playlists, playback.context.uri);
-      else {
-        this.playlistBox.updateList(this.playlistBox.playlists);
-      }
+    if (playback.context?.type === 'playlist')
+      this.playlistBox.updateList(this.playlistBox.playlists, playback.context.uri);
+    else {
+      this.playlistBox.updateList(this.playlistBox.playlists);
     }
   }
 

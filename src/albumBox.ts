@@ -37,13 +37,19 @@ export class AlbumBox {
     this.element.set('id', 'albumBox');
 
     this.customEmitter = opts.customEmitter;
+
+    this.customEmitter.on(
+      'updateAlbumBox',
+      (album: AlbumFull, liked: Record<string, boolean>, track: Track) => {
+        this.setCurrentAlbum(album);
+        this.updateLabel(album);
+        this.updateList(album.tracks.items, liked);
+        this.selectCurrentlyPlaying(track);
+      }
+    );
   }
 
-  init(
-    album?: AlbumFull,
-    currentTrack?: Track | null,
-    liked?: Record<string, boolean>
-  ): void {
+  init(album?: AlbumFull, currentTrack?: Track | null, liked?: Record<string, boolean>): void {
     this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a'], (ch, key) => {
       // p -> (p)lay the song now (add to queue and skip current track)
       // Shift-p -> (p)lay the song now, in album context (needs context)
@@ -146,9 +152,7 @@ export class AlbumBox {
     // get index of track in album
     if (this.currentAlbum == null) return;
 
-    const trackIndex = this.currentAlbum?.tracks.items.findIndex(
-      (val) => val.id === track.id
-    );
+    const trackIndex = this.currentAlbum?.tracks.items.findIndex((val) => val.id === track.id);
     this.element.select(trackIndex);
     this.selectedAlbumTrackIndex = trackIndex;
   }
