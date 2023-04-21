@@ -52,7 +52,7 @@ interface Settings {
 
 export type PageName = 'main' | 'artist';
 
-class Screen {
+class App {
   spotify: Spotify;
   deviceId: string;
   screen = b.screen({ autoPadding: true, log: './log.json', fullUnicode: true });
@@ -699,7 +699,7 @@ async function main(): Promise<void> {
   const playback = await spotify.getPlaybackState();
   // TODO: Transfer playback to librespot on app startup
   await spotify.transferPlaybackToDevice(device.id);
-  const screen = new Screen(spotify, playback, device.id);
+  const screen = new App(spotify, playback, device.id);
   await screen.initGrid();
 }
 main().catch((err) => {
