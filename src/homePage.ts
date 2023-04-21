@@ -95,6 +95,7 @@ export class HomePage {
       col: this.gridWidth / 2 + 1,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2,
+      label: 'N/A',
     });
 
     this.searchBox = new SearchBox({

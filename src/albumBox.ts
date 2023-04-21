@@ -1,42 +1,16 @@
-import * as b from 'blessed';
-import type bc from 'blessed-contrib';
-import type EventEmitter from 'events';
-import { msToTime, bold, cutoff } from './util';
+import { bold } from './util';
 import type { AlbumFull, Track } from './types';
+import { TrackBox, type TrackBoxOptions } from './trackBox';
 
-interface AlbumBoxOptions {
-  row: number;
-  col: number;
-  width: number;
-  height: number;
-  grid: bc.Widgets.GridElement;
-  customEmitter: EventEmitter;
-}
+interface AlbumBoxOptions extends TrackBoxOptions {}
 
-export class AlbumBox {
-  element: b.Widgets.ListElement;
+export class AlbumBox extends TrackBox {
   selectedAlbumTrackIndex: number = 0;
-  customEmitter: EventEmitter;
   currentAlbum: AlbumFull | null = null;
 
   constructor(opts: AlbumBoxOptions) {
-    this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
-      tags: true,
-      scrollable: true,
-      scrollbar: true,
-      noCellBorders: true,
-      interactive: true,
-      vi: true,
-      style: {
-        selected: { bg: 'red' },
-        scrollbar: { bg: 'blue' },
-        focus: { border: { fg: 'green' } },
-      },
-      keys: true,
-    });
+    super(opts);
     this.element.set('id', 'albumBox');
-
-    this.customEmitter = opts.customEmitter;
 
     this.customEmitter.on(
       'updateAlbumBox',
@@ -100,52 +74,12 @@ export class AlbumBox {
     });
   }
 
-  init(album?: AlbumFull, currentTrack?: Track | null, liked?: Record<string, boolean>): void {
-    if (album != null) {
-      this.setCurrentAlbum(album);
-      this.updateLabel(album);
-      this.updateList(album.tracks.items ?? [], liked ?? {});
-    }
-    if (currentTrack != null) this.selectCurrentlyPlaying(currentTrack);
-  }
-
   updateLabel(album: AlbumFull | null): void {
     if (album == null) {
       this.element.setLabel('No album playing.');
       return;
     }
     this.element.setLabel(`${bold(album.name)} (${album.release_date})`);
-  }
-
-  updateList(tracks: Track[], likedRecord: Record<string, boolean>): void {
-    const rows = tracks.map((track, i) => {
-      return this.formatRow(track, i, likedRecord[track.id]);
-    });
-    this.element.setItems(rows);
-  }
-
-  formatRow(track: Track, index: number, liked: boolean): string {
-    const listWidth = this.element.width as number;
-    const totalBorderWidth = 2;
-    const totalPaddingWidth = 3; // 4 columns, 1 col of padding between each column
-    const trackNumWidth = 2;
-    const durationWidth = 5;
-    const likedColWidth = 2;
-
-    const trackNameWidth =
-      listWidth -
-      totalBorderWidth -
-      totalPaddingWidth -
-      trackNumWidth -
-      durationWidth -
-      likedColWidth;
-
-    const trackNameCol = cutoff(track.name.padEnd(trackNameWidth, ' '), trackNameWidth);
-    const trackNumCol = String(index + 1).padEnd(trackNumWidth, ' ');
-    const durationCol = msToTime(track.duration_ms).padEnd(durationWidth, ' ');
-    const likedCol = liked ? '♥' : '';
-
-    return `${trackNumCol} ${trackNameCol} ${durationCol} ${likedCol}`;
   }
 
   selectCurrentlyPlaying(track: Track): void {
