@@ -149,6 +149,11 @@ export class HomePage {
         this.playlistBox.element,
       ],
       autoHide: [this.searchResultBox.element],
+      autoShow: [
+        this.songBox.element,
+        this.volumeControlBox.element,
+        this.playbackControlBox.element,
+      ],
       grid: opts.grid,
     });
 
