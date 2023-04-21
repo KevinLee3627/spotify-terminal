@@ -19,6 +19,7 @@ export class SearchResultBox {
   customEmitter: EventEmitter;
   resultType: SearchType = 'track';
   results: Array<Album | Track | Artist> = [];
+  selectedIndex: number = 0;
 
   constructor(opts: SearchResultBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
@@ -41,10 +42,25 @@ export class SearchResultBox {
 
     this.customEmitter = opts.customEmitter;
 
-    this.element.key(['h', 'up', 'down', 'j', 'k', 'p'], (ch, key) => {
+    this.element.key(['h', 'up', 'down', 'j', 'k', 'p', 'S-q'], (ch, key) => {
       switch (key.full) {
         case 'h':
           this.element.hide();
+          break;
+        case 'up':
+        case 'k':
+          if (this.selectedIndex <= 0) return;
+          this.selectedIndex--;
+          break;
+        case 'down':
+        case 'j':
+          if (this.selectedIndex >= this.results.length - 1) return;
+          this.selectedIndex++;
+          break;
+        case 'S-q':
+          if (this.resultType === 'track') {
+            this.customEmitter.emit('addTrackToQueue', this.results[this.selectedIndex]);
+          }
           break;
         default:
           break;
