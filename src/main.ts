@@ -1,6 +1,6 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { Artist, Playback } from './types';
+import type { Playback } from './types';
 import { Spotify } from './spotify';
 import EventEmitter from 'events';
 import { readFileSync } from 'fs';
@@ -68,9 +68,10 @@ class App {
     };
     this.activePage = 'home';
 
-    this.customEmitter.on('showArtistPage', (artist: Artist) => {
-      const showArtistPage = async (artist: Artist): Promise<void> => {
-        const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artist.id);
+    this.customEmitter.on('showArtistPage', (artistId: string) => {
+      const showArtistPage = async (artistId: string): Promise<void> => {
+        const artist = await spotify.getArtist(artistId);
+        const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artistId);
         const topTracksLiked = await this.spotify.checkSavedTracks(topTracks.map((t) => t.id));
         const artistPage = new ArtistPage({
           grid: this.grid,
@@ -85,7 +86,7 @@ class App {
         this.customEmitter.emit('setActivePage', this.pages.artist.name);
       };
 
-      showArtistPage(artist).catch((err) => {
+      showArtistPage(artistId).catch((err) => {
         this.screen.log(err);
       });
     });

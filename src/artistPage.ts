@@ -1,8 +1,10 @@
+import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { Page } from './page';
 import { TrackBox } from './trackBox';
 import type { Artist, Track } from './types';
+import { bold } from './util';
 
 interface ArtistPageOptions {
   gridWidth: number;
@@ -18,13 +20,14 @@ export class ArtistPage {
   artist: Artist;
   page: Page;
   topTracksBox: TrackBox;
+  nameBox: b.Widgets.BigTextElement;
 
   constructor(opts: ArtistPageOptions) {
     this.artist = opts.artist;
 
     this.topTracksBox = new TrackBox({
       row: 0,
-      col: opts.gridWidth / 2,
+      col: opts.gridWidth / 2 + 1,
       width: opts.gridWidth / 2,
       height: 12,
       grid: opts.grid,
@@ -47,10 +50,14 @@ export class ArtistPage {
       }
     });
 
+    this.nameBox = opts.grid.set(0, 0, 20, opts.gridWidth / 2, b.box, {
+      content: `${bold(this.artist.name)}\nFollowers: ${String(this.artist.followers.total)}`,
+    });
+
     this.page = new Page({
       name: 'artist',
       grid: opts.grid,
-      elements: [this.topTracksBox.element],
+      elements: [this.topTracksBox.element, this.nameBox],
       autoHide: [],
     });
 

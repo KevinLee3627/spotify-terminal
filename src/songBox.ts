@@ -101,7 +101,7 @@ export class SongBox {
           if (this.currentPlayback.item != null)
             this.customEmitter.emit(
               'showArtistPage',
-              this.currentPlayback.item?.album.artists[0]
+              this.currentPlayback.item?.album.artists[0].id
             );
           break;
         default:

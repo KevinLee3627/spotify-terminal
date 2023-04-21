@@ -72,7 +72,7 @@ export class AlbumBox extends TrackBox {
           case 'S-a':
             // TODO: If there's >1 artist, maybe have a modal for user to choose which one
             // they want to view?
-            this.customEmitter.emit('showArtistPage', this.currentAlbum?.artists[0]);
+            this.customEmitter.emit('showArtistPage', this.currentAlbum?.artists[0].id);
             break;
           case 'S-q':
             this.customEmitter.emit(
