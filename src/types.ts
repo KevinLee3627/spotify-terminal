@@ -36,8 +36,15 @@ export interface Track {
   album: Album;
 }
 
-interface Artist {
+export interface Artist {
   id: string;
+  uri: string;
+  popularity: number;
+  type: 'artist';
+  followers: {
+    total: number;
+  };
+  genres: string[];
   href: string;
   name: string;
 }

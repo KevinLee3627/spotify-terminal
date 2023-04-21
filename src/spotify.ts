@@ -8,6 +8,7 @@ import type {
   Track,
   SimplifiedPlaylist,
   Album,
+  Artist,
 } from './types';
 
 interface ResumePlaybackBody {
@@ -56,6 +57,7 @@ export interface SearchResObject<T> {
 export interface SearchRes {
   tracks: SearchResObject<Track>;
   albums: SearchResObject<Album>;
+  artists: SearchResObject<Artist>;
 }
 
 export class Spotify {
@@ -69,10 +71,7 @@ export class Spotify {
 
     try {
       const tokenFile = JSON.parse(await readFile('./token.json', 'utf-8'));
-      if (
-        tokenFile.access_token == null ||
-        tokenFile.expires_in <= new Date().getTime()
-      ) {
+      if (tokenFile.access_token == null || tokenFile.expires_in <= new Date().getTime()) {
         const res = await axios<TokenRes>({
           method: 'POST',
           url: 'https://accounts.spotify.com/api/token',

@@ -469,6 +469,10 @@ class App {
           this.searchResultBox.setResultType('track');
           this.searchResultBox.setResults(res.tracks.items);
           this.searchResultBox.showTrackResults(res.tracks.items);
+        } else if (type === 'artist' && res.artists != null) {
+          this.searchResultBox.setResultType('artist');
+          this.searchResultBox.setResults(res.artists.items);
+          this.searchResultBox.showArtistResults(res.artists.items);
         }
       };
 
@@ -524,19 +528,16 @@ class App {
     this.customEmitter.on(
       'addTrackToPlaylist',
       (playlist: SimplifiedPlaylist, track: Track) => {
-        const addTrackToPlaylist = async (
-          playlist: SimplifiedPlaylist,
-          track: Track
-        ): Promise<void> => {
-          await this.spotify.addTracksToPlaylist(playlist.id, [track.uri]);
-          this.createToast(`Added ${bold(track.name)} to playlist ${bold(playlist.name)}`);
-        };
-
-        addTrackToPlaylist(playlist, track).catch((err) => {
+        this.addTrackToPlaylist(playlist, track).catch((err) => {
           this.screen.log(err);
         });
       }
     );
+  }
+
+  async addTrackToPlaylist(playlist: SimplifiedPlaylist, track: Track): Promise<void> {
+    await this.spotify.addTracksToPlaylist(playlist.id, [track.uri]);
+    this.createToast(`Added ${bold(track.name)} to playlist ${bold(playlist.name)}`);
   }
 
   createToast(content: string): Toast {

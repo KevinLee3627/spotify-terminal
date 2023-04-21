@@ -3,7 +3,7 @@ import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { cutoff, msToTime } from './main';
 import type { SearchType } from './spotify';
-import type { Album, Track } from './types';
+import type { Album, Artist, Track } from './types';
 
 interface SearchResultBoxOptions {
   row: number;
@@ -18,7 +18,7 @@ export class SearchResultBox {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
   resultType: SearchType = 'track';
-  results: Array<Album | Track> = [];
+  results: Array<Album | Track | Artist> = [];
 
   constructor(opts: SearchResultBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
@@ -114,11 +114,23 @@ export class SearchResultBox {
     return `${song} ${artists} ${album} ${msToTime(track.duration_ms)}`;
   }
 
+  showArtistResults(artists: Artist[]): void {
+    this.element.setItems(artists.map((a) => this.formatArtistRow(a)));
+    this.show();
+  }
+
+  formatArtistRow(artist: Artist): string {
+    const resultsWidth = (this.element.width as number) - 2;
+    const nameWidth = resultsWidth;
+
+    return `${artist.name.padEnd(nameWidth)}`;
+  }
+
   setResultType(type: SearchType): void {
     this.resultType = type;
   }
 
-  setResults(results: Array<Album | Track>): void {
+  setResults(results: Array<Album | Track | Artist>): void {
     this.results = results;
   }
 }
