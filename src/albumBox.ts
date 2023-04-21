@@ -5,7 +5,6 @@ import { TrackBox, type TrackBoxOptions } from './trackBox';
 interface AlbumBoxOptions extends TrackBoxOptions {}
 
 export class AlbumBox extends TrackBox {
-  selectedAlbumTrackIndex: number = 0;
   currentAlbum: AlbumFull | null = null;
 
   constructor(opts: AlbumBoxOptions) {
@@ -33,41 +32,41 @@ export class AlbumBox extends TrackBox {
         switch (key.full) {
           case 'up':
           case 'k':
-            if (this.currentAlbum != null && this.selectedAlbumTrackIndex <= 0) return;
-            this.selectedAlbumTrackIndex--;
+            if (this.currentAlbum != null && this.selectedIndex <= 0) return;
+            this.selectedIndex--;
             break;
           case 'down':
           case 'j':
             if (
               this.currentAlbum != null &&
-              this.selectedAlbumTrackIndex >= this.currentAlbum.total_tracks - 1
+              this.selectedIndex >= this.currentAlbum.total_tracks - 1
             )
               return;
-            this.selectedAlbumTrackIndex++;
+            this.selectedIndex++;
             break;
           case 'p':
             this.customEmitter.emit(
               'playTrack',
-              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
+              this.currentAlbum?.tracks.items[this.selectedIndex].uri
             );
             break;
           case 'S-p':
             this.customEmitter.emit(
               'playTrackFromAlbumWithinAlbum',
               this.currentAlbum,
-              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
+              this.currentAlbum?.tracks.items[this.selectedIndex].uri
             );
             break;
           case 'l':
             this.customEmitter.emit(
               'toggleTrackLikeStatus',
-              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+              this.currentAlbum?.tracks.items[this.selectedIndex]
             );
             break;
           case 'C-a':
             this.customEmitter.emit(
               'showPlaylistModal',
-              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+              this.currentAlbum?.tracks.items[this.selectedIndex]
             );
             break;
           case 'S-a':
@@ -78,7 +77,7 @@ export class AlbumBox extends TrackBox {
           case 'S-q':
             this.customEmitter.emit(
               'addTrackToQueue',
-              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+              this.currentAlbum?.tracks.items[this.selectedIndex]
             );
             break;
           default:
@@ -103,7 +102,7 @@ export class AlbumBox extends TrackBox {
 
     const trackIndex = this.currentAlbum?.tracks.items.findIndex((val) => val.id === track.id);
     this.element.select(trackIndex);
-    this.selectedAlbumTrackIndex = trackIndex;
+    this.selectedIndex = trackIndex;
   }
 
   setNullState(): void {

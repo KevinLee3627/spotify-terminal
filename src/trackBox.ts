@@ -20,6 +20,7 @@ export class TrackBox {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
   tracks: Track[] = [];
+  selectedIndex: number = 0;
 
   constructor(opts: TrackBoxOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
@@ -45,6 +46,24 @@ export class TrackBox {
       this.updateList(opts.tracks, opts.likedMapping);
     }
 
+    // Track selected index for any descendants that want to have custom hotkeys
+    // instead of just doing something on select
+    this.element.key(['up', 'down', 'k', 'j'], (ch, key) => {
+      switch (key.full) {
+        case 'up':
+        case 'k':
+          if (this.selectedIndex <= 0) return;
+          this.selectedIndex--;
+          break;
+        case 'down':
+        case 'j':
+          if (this.selectedIndex >= this.tracks.length - 1) return;
+          this.selectedIndex++;
+          break;
+        default:
+          break;
+      }
+    });
     this.element.on('select', (item, i) => {
       this.customEmitter.emit('playTrack', this.tracks[i].uri);
     });
