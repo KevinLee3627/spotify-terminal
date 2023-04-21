@@ -4,7 +4,7 @@ import type EventEmitter from 'events';
 import { cutoff, msToTime } from './util';
 import type { Track } from './types';
 
-interface TrackBoxOptions {
+export interface TrackBoxOptions {
   row: number;
   col: number;
   width: number;
@@ -19,7 +19,6 @@ interface TrackBoxOptions {
 export class TrackBox {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
-  selectedIndex: number = 0;
   tracks: Track[] = [];
 
   constructor(opts: TrackBoxOptions) {

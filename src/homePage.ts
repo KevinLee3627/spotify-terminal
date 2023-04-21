@@ -122,6 +122,7 @@ export class HomePage {
       col: this.gridWidth / 2 + 1,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2 - 6,
+      label: 'up next',
     });
 
     // TODO: Get all playlists, not just first 20
@@ -505,7 +506,7 @@ export class HomePage {
   async init(): Promise<void> {
     const playback = await this.spotify.getPlaybackState();
     const album = await this.spotify.getAlbum(playback.item?.album.id ?? null);
-    const queue = await this.spotify.getQueue();
+    const { queue } = await this.spotify.getQueue();
     const playlists = await this.spotify.getCurrentUserPlaylists();
 
     this.playlistBox.updateList(playlists.items);
@@ -515,9 +516,12 @@ export class HomePage {
       this.albumBox.setNullState();
       this.albumBox.init();
     } else {
-      const liked = await this.spotify.checkSavedTracks(album.tracks.items.map((t) => t.id));
-      this.albumBox.init(album, playback.item, liked);
-      this.queueBox.init(queue.queue);
+      const albumLiked = await this.spotify.checkSavedTracks(
+        album.tracks.items.map((t) => t.id)
+      );
+      const queueLiked = await this.spotify.checkSavedTracks(queue.map((t) => t.id));
+      this.albumBox.init(album, playback.item, albumLiked);
+      this.customEmitter.emit('updateQueueBox', queue, queueLiked);
     }
   }
 
@@ -540,7 +544,7 @@ export class HomePage {
     this.customEmitter.emit('updateVolumeBox', playback.device.volume_percent ?? 0);
     this.customEmitter.emit('updatePlaybackControlBox', playback);
     this.customEmitter.emit('updateAlbumBox', album, liked, track);
-    this.customEmitter.emit('updateQueueBox', queue);
+    this.customEmitter.emit('updateQueueBox', queue, liked);
 
     if (playback.context?.type === 'playlist')
       this.playlistBox.updateList(this.playlistBox.playlists, playback.context.uri);
