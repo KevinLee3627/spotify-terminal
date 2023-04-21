@@ -13,7 +13,7 @@ import { PlaylistBox } from './playlistBox';
 import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { ArtistInfo } from './artistInfo';
 import { Page } from './page';
 
@@ -485,10 +485,7 @@ class App {
 
     this.customEmitter.on('toggleShuffle', (currentState: Playback['shuffle_state']) => {
       const toggleState = async (state: Playback['shuffle_state']): Promise<void> => {
-        writeFileSync('./settings.json', JSON.stringify({ onStartShuffleState: state }));
         await this.spotify.setShuffleState(state);
-        this.playbackControlBox.updateShuffleText(state);
-        this.playbackControlBox.setShuffleState(state);
       };
 
       toggleState(!currentState).catch((err) => {

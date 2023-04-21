@@ -1,6 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
+import { writeFileSync } from 'fs';
 import { bold } from './main';
 import type { Playback } from './types';
 
@@ -87,6 +88,12 @@ export class PlaybackControlBox {
 
   toggleShuffle(): void {
     this.customEmitter.emit('toggleShuffle', this.currentShuffleState);
+    writeFileSync(
+      './settings.json',
+      JSON.stringify({ onStartShuffleState: !this.currentShuffleState })
+    );
+    this.updateShuffleText(!this.currentShuffleState);
+    this.setShuffleState(!this.currentShuffleState);
   }
 
   setShuffleState(state: Playback['shuffle_state']): void {
