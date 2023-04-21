@@ -25,9 +25,17 @@ export class ArtistPage {
   constructor(opts: ArtistPageOptions) {
     this.artist = opts.artist;
 
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    this.nameBox = opts.grid.set(0, 0, 4, opts.gridWidth / 2, b.box, {
+      tags: true,
+      content: `${bold(
+        this.artist.name
+      )}\nFollowers: ${this.artist.followers.total.toLocaleString(locale)}`,
+    });
+
     this.topTracksBox = new TrackBox({
-      row: 0,
-      col: opts.gridWidth / 2 + 1,
+      row: this.nameBox.height as number,
+      col: 0,
       width: opts.gridWidth / 2,
       height: 12,
       grid: opts.grid,
@@ -48,10 +56,6 @@ export class ArtistPage {
         default:
           break;
       }
-    });
-
-    this.nameBox = opts.grid.set(0, 0, 20, opts.gridWidth / 2, b.box, {
-      content: `${bold(this.artist.name)}\nFollowers: ${String(this.artist.followers.total)}`,
     });
 
     this.page = new Page({
