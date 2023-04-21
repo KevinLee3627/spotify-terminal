@@ -68,12 +68,6 @@ class App {
     };
     this.activePage = 'home';
 
-    // this.screen.on('keypress', (ch, key) => {
-    //   this.screen.log(key.full);
-    // });
-  }
-
-  initCustomEmitter(): void {
     this.customEmitter.on('showArtistPage', (artist: Artist) => {
       const showArtistPage = async (artist: Artist): Promise<void> => {
         const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artist.id);
@@ -103,31 +97,21 @@ class App {
         else page.hide();
       });
     });
-  }
 
-  async initGrid(): Promise<void> {
-    // Define elements + event listeners
-    try {
-      this.initCustomEmitter();
+    const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
+      // TODO: Pause playback on application close?
+      if (['escape', 'C-c'].includes(key.full)) {
+        return process.exit(0);
+      }
 
-      // Must be arrow function so "this" refers to the class and not the function.
-      const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
-        // TODO: Pause playback on application close?
-        if (['escape', 'C-c'].includes(key.full)) {
-          return process.exit(0);
-        }
+      this.customEmitter.emit(`${this.activePage}PageHotkey`, key.full);
+    };
+    this.screen.key(
+      ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':', 't'],
+      screenKeyListener
+    );
 
-        this.customEmitter.emit(`${this.activePage}PageHotkey`, key.full);
-      };
-      this.screen.key(
-        ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':', 't'],
-        screenKeyListener
-      );
-
-      this.refreshScreen();
-    } catch (err) {
-      this.screen.log(err);
-    }
+    this.refreshScreen();
   }
 
   refreshScreen(): void {
@@ -150,8 +134,7 @@ async function main(): Promise<void> {
   const playback = await spotify.getPlaybackState();
   // TODO: Transfer playback to librespot on app startup
   await spotify.transferPlaybackToDevice(device.id);
-  const screen = new App(spotify, playback, device.id);
-  await screen.initGrid();
+  const app = new App(spotify, playback, device.id);
 }
 main().catch((err) => {
   console.log(err);
