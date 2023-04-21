@@ -40,6 +40,10 @@ interface GetCurrentUserPlaylistsRes {
   items: SimplifiedPlaylist[];
 }
 
+interface GetArtistTopTracksRes {
+  tracks: Track[];
+}
+
 export type SearchType = 'album' | 'track' | 'artist';
 
 export type SearchTypePlural = `${SearchType}s`;
@@ -217,8 +221,11 @@ export class Spotify {
     return await this.makeRequest('GET', `/artists/${artistId}`);
   }
 
-  async getArtistTopTracks(artistId: string): Promise<Track[]> {
-    return await this.makeRequest('GET', `/artists/${artistId}/top-tracks`);
+  async getArtistTopTracks(artistId: string): Promise<GetArtistTopTracksRes> {
+    return await this.makeRequest('GET', `/artists/${artistId}/top-tracks`, {
+      // TODO: Make this based on /me api call
+      query: { market: 'US' },
+    });
   }
 
   async makeRequest<Return = void, Body = Record<string, unknown>>(

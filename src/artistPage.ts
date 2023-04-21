@@ -2,7 +2,7 @@ import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { Page } from './page';
-import type { Artist } from './types';
+import type { Artist, Track } from './types';
 
 interface ArtistPageOptions {
   gridWidth: number;
@@ -10,6 +10,7 @@ interface ArtistPageOptions {
   grid: bc.Widgets.GridElement;
   customEmitter: EventEmitter;
   artist: Artist;
+  topTracks: Track[];
 }
 export class ArtistPage {
   customEmitter: EventEmitter;
@@ -40,6 +41,7 @@ export class ArtistPage {
         },
         keys: true,
         label: 'top tracks',
+        items: opts.topTracks.map((t) => t.name),
       }
     );
     this.topTracksBox.hide();

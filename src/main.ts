@@ -539,27 +539,32 @@ class App {
     );
 
     this.customEmitter.on('showArtistPage', (artist: Artist) => {
-      const artistPage = new ArtistPage({
-        grid: this.mainGrid,
-        customEmitter: this.customEmitter,
-        gridWidth: this.gridWidth,
-        gridHeight: this.gridHeight,
-        artist,
+      const showArtistPage = async (artist: Artist): Promise<void> => {
+        const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artist.id);
+        const artistPage = new ArtistPage({
+          grid: this.mainGrid,
+          customEmitter: this.customEmitter,
+          gridWidth: this.gridWidth,
+          gridHeight: this.gridHeight,
+          artist,
+          topTracks,
+        });
+        this.pages.artist = artistPage.page;
+        this.customEmitter.emit('setActivePage', this.pages.artist.name);
+      };
+
+      showArtistPage(artist).catch((err) => {
+        this.screen.log(err.response.data);
       });
-      this.pages.artist = artistPage.page;
-      this.activePage = 'artist';
-      this.pages.main?.hide();
-      this.pages.artist.show();
     });
 
     this.customEmitter.on('setActivePage', (pageName: PageName) => {
+      this.activePage = pageName;
       Object.values(this.pages).forEach((page) => {
         if (page == null) return;
 
         if (page.name === pageName) page.show();
         else page.hide();
-
-        this.ghostElement.focus();
       });
     });
   }
