@@ -34,6 +34,19 @@ export class ArtistPage {
       likedMapping: opts.topTracksLiked,
     });
 
+    this.topTracksBox.element.key(['S-q'], (ch, key) => {
+      switch (key.full) {
+        case 'S-q':
+          this.customEmitter.emit(
+            'addTrackToQueue',
+            this.topTracksBox.tracks[this.topTracksBox.selectedIndex]
+          );
+          break;
+        default:
+          break;
+      }
+    });
+
     this.page = new Page({
       name: 'artist',
       grid: opts.grid,
