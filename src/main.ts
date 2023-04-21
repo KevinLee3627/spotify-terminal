@@ -322,6 +322,20 @@ class Screen {
         await this.spotify.resume({ context_uri: albumUri });
         await sleep(500);
         const playback = await this.spotify.getPlaybackState();
+        await sleep(500);
+        // TODO: Librespot always sets shuffle to false when changing the context
+        // to a playlist or album. Since we keep track of the actual shuffle state within
+        // the app, this serves as a hacky workaround to stop this behavior from occuring.
+        // We include a settings.json file to restore the shuffle state when restarting
+        // librespot.
+        const currentShuffleState =
+          this.playbackControlBox.currentShuffleState ??
+          this.settings.onStartShuffleState;
+        this.screen.log(`current shuffle: ${String(currentShuffleState)}`);
+        await this.spotify.setShuffleState(currentShuffleState);
+        this.playbackControlBox.setShuffleState(currentShuffleState);
+        this.playbackControlBox.updateShuffleText(currentShuffleState);
+
         await this.updateSongAndAlbumBox(playback);
       };
 
@@ -376,7 +390,7 @@ class Screen {
           await this.spotify.resume({ uris: picked });
           await sleep(500);
           const playback = await this.spotify.getPlaybackState();
-
+          await sleep(500);
           // TODO: Librespot always sets shuffle to false when changing the context
           // to a playlist or album. Since we keep track of the actual shuffle state within
           // the app, this serves as a hacky workaround to stop this behavior from occuring.
