@@ -388,6 +388,21 @@ export class HomePage {
       }
     );
 
+    this.customEmitter.on('addTrackToQueue', (track: Track) => {
+      const addTrack = async (track: Track): Promise<void> => {
+        await this.spotify.addTrackToQueue(track.uri);
+        await sleep(500);
+        const { queue } = await this.spotify.getQueue();
+        const liked = await this.spotify.checkSavedTracks(queue.map((track) => track.id));
+        this.customEmitter.emit('updateQueueBox', queue, liked);
+        this.createToast(`Added ${track.name} to queue.`);
+      };
+
+      addTrack(track).catch((err) => {
+        this.songBox.element.screen.log(err);
+      });
+    });
+
     this.customEmitter.on('cycleRepeatState', (newState: Playback['repeat_state']) => {
       const setState = async (newState: Playback['repeat_state']): Promise<void> => {
         await this.spotify.setRepeatState(newState);

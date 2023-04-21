@@ -22,61 +22,70 @@ export class AlbumBox extends TrackBox {
       }
     );
 
-    this.element.key(['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a'], (ch, key) => {
-      // p -> (p)lay the song now (add to queue and skip current track)
-      // Shift-p -> (p)lay the song now, in album context (needs context)
+    this.element.key(
+      ['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a', 'S-q'],
+      (ch, key) => {
+        // p -> (p)lay the song now (add to queue and skip current track)
+        // Shift-p -> (p)lay the song now, in album context (needs context)
 
-      // TODO: Autoplay songs after album finishes.
-      // Manage the index of the selected track manually. Inited in updateAlbumBox
-      switch (key.full) {
-        case 'up':
-        case 'k':
-          if (this.currentAlbum != null && this.selectedAlbumTrackIndex <= 0) return;
-          this.selectedAlbumTrackIndex--;
-          break;
-        case 'down':
-        case 'j':
-          if (
-            this.currentAlbum != null &&
-            this.selectedAlbumTrackIndex >= this.currentAlbum.total_tracks - 1
-          )
-            return;
-          this.selectedAlbumTrackIndex++;
-          break;
-        case 'p':
-          this.customEmitter.emit(
-            'playTrack',
-            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
-          );
-          break;
-        case 'S-p':
-          this.customEmitter.emit(
-            'playTrackFromAlbumWithinAlbum',
-            this.currentAlbum,
-            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
-          );
-          break;
-        case 'l':
-          this.customEmitter.emit(
-            'toggleTrackLikeStatus',
-            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
-          );
-          break;
-        case 'C-a':
-          this.customEmitter.emit(
-            'showPlaylistModal',
-            this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
-          );
-          break;
-        case 'S-a':
-          // TODO: If there's >1 artist, maybe have a modal for user to choose which one
-          // they want to view?
-          this.customEmitter.emit('showArtistPage', this.currentAlbum?.artists[0]);
-          break;
-        default:
-          break;
+        // TODO: Autoplay songs after album finishes.
+        // Manage the index of the selected track manually. Inited in updateAlbumBox
+        switch (key.full) {
+          case 'up':
+          case 'k':
+            if (this.currentAlbum != null && this.selectedAlbumTrackIndex <= 0) return;
+            this.selectedAlbumTrackIndex--;
+            break;
+          case 'down':
+          case 'j':
+            if (
+              this.currentAlbum != null &&
+              this.selectedAlbumTrackIndex >= this.currentAlbum.total_tracks - 1
+            )
+              return;
+            this.selectedAlbumTrackIndex++;
+            break;
+          case 'p':
+            this.customEmitter.emit(
+              'playTrack',
+              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
+            );
+            break;
+          case 'S-p':
+            this.customEmitter.emit(
+              'playTrackFromAlbumWithinAlbum',
+              this.currentAlbum,
+              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex].uri
+            );
+            break;
+          case 'l':
+            this.customEmitter.emit(
+              'toggleTrackLikeStatus',
+              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+            );
+            break;
+          case 'C-a':
+            this.customEmitter.emit(
+              'showPlaylistModal',
+              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+            );
+            break;
+          case 'S-a':
+            // TODO: If there's >1 artist, maybe have a modal for user to choose which one
+            // they want to view?
+            this.customEmitter.emit('showArtistPage', this.currentAlbum?.artists[0]);
+            break;
+          case 'S-q':
+            this.customEmitter.emit(
+              'addTrackToQueue',
+              this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
+            );
+            break;
+          default:
+            break;
+        }
       }
-    });
+    );
   }
 
   updateLabel(album: AlbumFull | null): void {
