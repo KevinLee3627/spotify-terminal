@@ -134,7 +134,6 @@ async function main(): Promise<void> {
     throw new Error('Device not found');
   }
   const playback = await spotify.getPlaybackState();
-  // TODO: Transfer playback to librespot on app startup
   await spotify.transferPlaybackToDevice(device.id);
   const app = new App(spotify, playback, device.id);
 }

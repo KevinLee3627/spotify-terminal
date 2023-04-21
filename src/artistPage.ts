@@ -38,6 +38,7 @@ export class ArtistPage {
       name: 'artist',
       grid: opts.grid,
       elements: [this.topTracksBox.element],
+      autoHide: [],
     });
 
     this.customEmitter = opts.customEmitter;

@@ -148,6 +148,7 @@ export class HomePage {
         this.queueBox.element,
         this.playlistBox.element,
       ],
+      autoHide: [this.searchResultBox.element],
       grid: opts.grid,
     });
 
