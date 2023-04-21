@@ -14,7 +14,6 @@ import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
 import { readFileSync } from 'fs';
-import { ArtistInfo } from './artistInfo';
 import { Page } from './page';
 
 const sleep = async (ms: number): Promise<void> => {
@@ -50,7 +49,7 @@ interface Settings {
   onStartShuffleState: boolean;
 }
 
-export type PageName = 'main' | 'artist';
+export type PageName = 'main';
 
 class App {
   spotify: Spotify;
@@ -82,10 +81,6 @@ class App {
   queueBox: QueueBox;
   playlistBox: PlaylistBox;
   mainPage: Page;
-
-  artistGrid: bc.Widgets.GridElement;
-  artistInfo: ArtistInfo;
-  artistPage: Page;
 
   pages: Record<PageName, Page>;
 
@@ -179,12 +174,6 @@ class App {
       height: this.gridHeight / 2,
     });
 
-    this.artistGrid = new bc.grid({
-      rows: this.gridHeight,
-      cols: this.gridWidth,
-      screen: this.screen,
-    });
-
     this.mainPage = new Page({
       name: 'main',
       elements: [
@@ -200,24 +189,8 @@ class App {
       grid: this.mainGrid,
     });
 
-    this.artistInfo = new ArtistInfo({
-      customEmitter: this.customEmitter,
-      grid: this.mainGrid,
-      row: 3,
-      col: 0,
-      width: this.gridWidth / 2,
-      height: this.gridHeight / 2 - 6 - 3,
-    });
-
-    this.artistPage = new Page({
-      name: 'artist',
-      elements: [this.artistInfo.element],
-      grid: this.artistGrid,
-    });
-
     this.pages = {
       main: this.mainPage,
-      artist: this.artistPage,
     };
 
     // this.screen.on('keypress', (ch, key) => {
@@ -518,11 +491,11 @@ class App {
         await this.updateSongAndAlbumBox(playback);
       };
 
-      if (track != null) {
-        likeTrack(track).catch((err) => {
-          this.screen.log(err);
-        });
-      }
+      if (track == null) return;
+
+      likeTrack(track).catch((err) => {
+        this.screen.log(err);
+      });
     });
 
     this.customEmitter.on('addToPlaylistModal', (track: Track) => {
@@ -629,7 +602,6 @@ class App {
             this.playlistBox.element.focus();
             break;
           case 'S-a':
-            this.pages.artist.hide();
             this.pages.main.show();
             break;
           case ':':
@@ -638,7 +610,6 @@ class App {
             // focus styling persist - added a "ghost" element that we can focus to
             // in order to 'reset' the focus. Hacky :(
             this.ghostElement.focus();
-            this.pages.artist.show();
             this.pages.main.hide();
             break;
           default:
