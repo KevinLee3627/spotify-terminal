@@ -109,6 +109,10 @@ export class Spotify {
     return await this.makeRequest('GET', '/me/player/devices');
   }
 
+  async transferPlaybackToDevice(deviceId: string): Promise<void> {
+    await this.makeRequest('PUT', '/me/player', { body: { device_ids: [deviceId] } });
+  }
+
   async getPlaybackState(): Promise<Playback> {
     return await this.makeRequest('GET', '/me/player');
   }
@@ -121,20 +125,8 @@ export class Spotify {
     await this.makeRequest('POST', '/me/player/previous');
   }
 
-  async addTrackToQueue(trackUri: string): Promise<void> {
-    await this.makeRequest('POST', '/me/player/queue', { query: { uri: trackUri } });
-  }
-
-  async getQueue(): Promise<QueueRes> {
-    return await this.makeRequest<QueueRes>('GET', '/me/player/queue');
-  }
-
   async pause(): Promise<void> {
     await this.makeRequest('PUT', '/me/player/pause');
-  }
-
-  async transferPlaybackToDevice(deviceId: string): Promise<void> {
-    await this.makeRequest('PUT', '/me/player', { body: { device_ids: [deviceId] } });
   }
 
   async resume(body?: Partial<ResumePlaybackBody>, deviceId?: string): Promise<void> {
@@ -161,6 +153,14 @@ export class Spotify {
     await this.makeRequest('PUT', '/me/player/volume', {
       query: { volume_percent: volume },
     });
+  }
+
+  async addTrackToQueue(trackUri: string): Promise<void> {
+    await this.makeRequest('POST', '/me/player/queue', { query: { uri: trackUri } });
+  }
+
+  async getQueue(): Promise<QueueRes> {
+    return await this.makeRequest<QueueRes>('GET', '/me/player/queue');
   }
 
   async getAlbum(id: string | null, limit: number = 100): Promise<AlbumFull | null> {

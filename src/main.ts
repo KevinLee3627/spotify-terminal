@@ -99,7 +99,7 @@ class App {
         } else page.hide();
       });
     });
-
+    // TODO: Hotkey system? Ex. 'send current song to playlist GOLD'
     const screenKeyListener = (ch: any, key: b.Widgets.Events.IKeyEventArg): void => {
       // TODO: Pause playback on application close?
       if (['escape', 'C-c'].includes(key.full)) {
