@@ -14,7 +14,8 @@ import { SearchResultBox } from './searchResultBox';
 import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
 import { readFileSync, writeFileSync } from 'fs';
-import { ArtistPage } from './artistPage';
+import { ArtistInfo } from './artistInfo';
+import { Page } from './page';
 
 const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,6 +50,8 @@ interface Settings {
   onStartShuffleState: boolean;
 }
 
+export type PageName = 'main' | 'artist';
+
 class Screen {
   spotify: Spotify;
   deviceId: string;
@@ -63,7 +66,7 @@ class Screen {
   settings: Settings;
 
   // GRID ELEMENTS
-  grid: bc.Widgets.GridElement;
+  mainGrid: bc.Widgets.GridElement;
   songBox: SongBox;
   playbackControlBox: PlaybackControlBox;
   volumeControlBox: VolumeControlBox;
@@ -72,8 +75,13 @@ class Screen {
   searchResultBox: SearchResultBox;
   queueBox: QueueBox;
   playlistBox: PlaylistBox;
+  mainPage: Page;
 
-  artistPage: ArtistPage;
+  artistGrid: bc.Widgets.GridElement;
+  artistInfo: ArtistInfo;
+  artistPage: Page;
+
+  pages: Record<PageName, Page>;
 
   constructor(spotify: Spotify, playback: Playback, deviceId: string) {
     this.screen.append(this.ghostElement);
@@ -82,13 +90,13 @@ class Screen {
     this.spotify = spotify;
     this.deviceId = deviceId;
     this.customEmitter = new EventEmitter();
-    this.grid = new bc.grid({
+    this.mainGrid = new bc.grid({
       rows: this.gridHeight,
       cols: this.gridWidth,
       screen: this.screen,
     });
     this.playbackControlBox = new PlaybackControlBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       top: 1,
       left: 1,
@@ -98,7 +106,7 @@ class Screen {
     });
 
     this.volumeControlBox = new VolumeControlBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       top: 1,
       left: ((this.screen.width as number) - 2) / 3 + 1,
@@ -108,7 +116,7 @@ class Screen {
     });
 
     this.songBox = new SongBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       row: this.gridHeight - 6,
       col: 0,
@@ -120,7 +128,7 @@ class Screen {
     });
 
     this.albumBox = new AlbumBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       row: this.gridHeight / 2 - 6,
       col: this.gridWidth / 2 + 1,
@@ -129,7 +137,7 @@ class Screen {
     });
 
     this.searchBox = new SearchBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       row: 0,
       col: 0,
@@ -138,7 +146,7 @@ class Screen {
     });
 
     this.searchResultBox = new SearchResultBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       row: 3,
       col: 0,
       width: this.gridWidth,
@@ -147,7 +155,7 @@ class Screen {
     });
 
     this.queueBox = new QueueBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       row: 0,
       col: this.gridWidth / 2 + 1,
@@ -157,7 +165,7 @@ class Screen {
 
     // TODO: Get all playlists, not just first 20
     this.playlistBox = new PlaylistBox({
-      grid: this.grid,
+      grid: this.mainGrid,
       customEmitter: this.customEmitter,
       row: this.gridHeight / 2 - 6,
       col: 0,
@@ -165,14 +173,46 @@ class Screen {
       height: this.gridHeight / 2,
     });
 
-    this.artistPage = new ArtistPage({
+    this.artistGrid = new bc.grid({
+      rows: this.gridHeight,
+      cols: this.gridWidth,
+      screen: this.screen,
+    });
+
+    this.mainPage = new Page({
+      name: 'main',
+      elements: [
+        this.playbackControlBox.element,
+        this.volumeControlBox.element,
+        this.songBox.element,
+        this.albumBox.element,
+        this.searchBox.element,
+        this.searchResultBox.element,
+        this.queueBox.element,
+        this.playlistBox.element,
+      ],
+      grid: this.mainGrid,
+    });
+
+    this.artistInfo = new ArtistInfo({
       customEmitter: this.customEmitter,
-      grid: this.grid,
+      grid: this.mainGrid,
       row: 3,
       col: 0,
       width: this.gridWidth / 2,
       height: this.gridHeight / 2 - 6 - 3,
     });
+
+    this.artistPage = new Page({
+      name: 'artist',
+      elements: [this.artistInfo.element],
+      grid: this.artistGrid,
+    });
+
+    this.pages = {
+      main: this.mainPage,
+      artist: this.artistPage,
+    };
 
     // this.screen.on('keypress', (ch, key) => {
     //   this.screen.log(key.full);
@@ -514,7 +554,7 @@ class Screen {
           col: this.gridWidth / 2 - width / 2,
           height,
           width,
-          grid: this.grid,
+          grid: this.mainGrid,
           playlists: playlistsRes.items,
           customEmitter: this.customEmitter,
           track,
@@ -556,7 +596,7 @@ class Screen {
       height,
       width,
       content,
-      grid: this.grid,
+      grid: this.mainGrid,
     });
   }
 
@@ -612,7 +652,8 @@ class Screen {
             this.playlistBox.element.focus();
             break;
           case 'S-a':
-            this.artistPage.element.focus();
+            this.pages.artist.hide();
+            this.pages.main.show();
             break;
           case ':':
             // After focusing multiple boxes, this command goes funky
@@ -620,6 +661,8 @@ class Screen {
             // focus styling persist - added a "ghost" element that we can focus to
             // in order to 'reset' the focus. Hacky :(
             this.ghostElement.focus();
+            this.pages.artist.show();
+            this.pages.main.hide();
             break;
           default:
             break;
