@@ -2,7 +2,7 @@ import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { writeFileSync } from 'fs';
-import { bold } from './main';
+import { bold } from './util';
 import type { Playback } from './types';
 
 interface PlaybackControlBoxOptions {

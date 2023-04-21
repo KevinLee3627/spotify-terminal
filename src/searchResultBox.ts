@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
-import { cutoff, msToTime } from './main';
+import { cutoff, msToTime } from './util';
 import type { SearchType } from './spotify';
 import type { Album, Artist, Track } from './types';
 

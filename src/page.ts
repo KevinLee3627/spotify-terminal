@@ -1,6 +1,7 @@
 import type * as b from 'blessed';
 import type bc from 'blessed-contrib';
-import type { PageName } from './main';
+
+export type PageName = 'home' | 'artist';
 
 interface PageOptions {
   name: PageName;

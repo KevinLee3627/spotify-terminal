@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
-import { bold } from './main';
+import { bold } from './util';
 import type { SimplifiedPlaylist } from './types';
 
 interface PlaylistBoxOptions {

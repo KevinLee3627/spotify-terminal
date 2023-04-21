@@ -1,7 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
-import { msToTime, bold, cutoff } from './main';
+import { msToTime, bold, cutoff } from './util';
 import type { AlbumFull, Track } from './types';
 
 interface AlbumBoxOptions {

@@ -11,7 +11,8 @@ import { SearchResultBox } from './searchResultBox';
 import { Page } from './page';
 import type { AlbumFull, Playback, SimplifiedPlaylist, Track } from './types';
 import type { SearchType, Spotify } from './spotify';
-import { type Settings, sleep, bold } from './main';
+import type { Settings } from './main';
+import { bold, sleep } from './util';
 import { Toast } from './toast';
 import { PlaylistAddModal } from './playlistAddModal';
 
