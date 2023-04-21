@@ -149,6 +149,10 @@ export class HomePage {
       grid: opts.grid,
     });
 
+    this.setupListeners();
+  }
+
+  setupListeners(): void {
     this.customEmitter.on('homePageHotkey', (key: string) => {
       switch (key) {
         case 's':
