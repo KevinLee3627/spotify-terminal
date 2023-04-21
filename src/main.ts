@@ -387,8 +387,7 @@ class App {
         // We include a settings.json file to restore the shuffle state when restarting
         // librespot.
         const currentShuffleState =
-          this.playbackControlBox.currentShuffleState ??
-          this.settings.onStartShuffleState;
+          this.playbackControlBox.currentShuffleState ?? this.settings.onStartShuffleState;
         this.screen.log(`current shuffle: ${String(currentShuffleState)}`);
         await this.spotify.setShuffleState(currentShuffleState);
         this.playbackControlBox.setShuffleState(currentShuffleState);
@@ -420,8 +419,7 @@ class App {
         // We include a settings.json file to restore the shuffle state when restarting
         // librespot.
         const currentShuffleState =
-          this.playbackControlBox.currentShuffleState ??
-          this.settings.onStartShuffleState;
+          this.playbackControlBox.currentShuffleState ?? this.settings.onStartShuffleState;
         this.screen.log(`current shuffle: ${String(currentShuffleState)}`);
         await this.spotify.setShuffleState(currentShuffleState);
         this.playbackControlBox.setShuffleState(currentShuffleState);
@@ -438,10 +436,7 @@ class App {
     this.customEmitter.on(
       'playTrackFromAlbumWithinAlbum',
       (album: AlbumFull, trackUri: string) => {
-        const playNowInAlbum = async (
-          album: AlbumFull,
-          trackUri: string
-        ): Promise<void> => {
+        const playNowInAlbum = async (album: AlbumFull, trackUri: string): Promise<void> => {
           // Play the seleced track next, then queue up the rest of the tracks.
           const trackUris = album.tracks.items.map((item) => item.uri);
           const picked = trackUris.slice(trackUris.indexOf(trackUri));
@@ -455,8 +450,7 @@ class App {
           // We include a settings.json file to restore the shuffle state when restarting
           // librespot.
           const currentShuffleState =
-            this.playbackControlBox.currentShuffleState ??
-            this.settings.onStartShuffleState;
+            this.playbackControlBox.currentShuffleState ?? this.settings.onStartShuffleState;
           this.screen.log(`current shuffle: ${String(currentShuffleState)}`);
           await this.spotify.setShuffleState(currentShuffleState);
           this.playbackControlBox.setShuffleState(currentShuffleState);
@@ -577,9 +571,7 @@ class App {
           track: Track
         ): Promise<void> => {
           await this.spotify.addTracksToPlaylist(playlist.id, [track.uri]);
-          this.createToast(
-            `Added ${bold(track.name)} to playlist ${bold(playlist.name)}`
-          );
+          this.createToast(`Added ${bold(track.name)} to playlist ${bold(playlist.name)}`);
         };
 
         addTrackToPlaylist(playlist, track).catch((err) => {
@@ -618,9 +610,7 @@ class App {
         this.albumBox.setNullState();
         this.albumBox.init();
       } else {
-        const liked = await this.spotify.checkSavedTracks(
-          album.tracks.items.map((t) => t.id)
-        );
+        const liked = await this.spotify.checkSavedTracks(album.tracks.items.map((t) => t.id));
         this.albumBox.init(album, playback.item, liked);
         this.queueBox.init(queue.queue);
       }
