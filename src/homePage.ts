@@ -506,6 +506,23 @@ export class HomePage {
         });
       }
     );
+
+    this.customEmitter.on(
+      'deleteTrackFromPlaylist',
+      (playlist: SimplifiedPlaylist, track: Track) => {
+        const deleteTrackFromPlaylist = async (
+          playlist: SimplifiedPlaylist,
+          track: Track
+        ): Promise<void> => {
+          await this.spotify.deleteTracksFromPlaylist(playlist.id, [track.uri]);
+          this.createToast(`Removed ${bold(track.name)} from playlist ${bold(playlist.name)}`);
+        };
+
+        deleteTrackFromPlaylist(playlist, track).catch((err) => {
+          this.songBox.element.screen.log(err);
+        });
+      }
+    );
   }
 
   async initPlaylistsBox(): Promise<void> {

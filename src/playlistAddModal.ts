@@ -44,7 +44,7 @@ export class PlaylistAddModal {
     this.updateList(this.playlists);
     this.track = opts.track;
 
-    this.element.key(['up', 'k', 'down', 'j', 'enter', 'h'], (ch, key) => {
+    this.element.key(['up', 'k', 'down', 'j', 'enter', 'h', 'd'], (ch, key) => {
       switch (key.full) {
         case 'up':
         case 'k':
@@ -59,6 +59,13 @@ export class PlaylistAddModal {
         case 'enter':
           this.customEmitter.emit(
             'addTrackToPlaylist',
+            this.playlists[this.selectedIndex],
+            this.track
+          );
+          break;
+        case 'd':
+          this.customEmitter.emit(
+            'deleteTrackFromPlaylist',
             this.playlists[this.selectedIndex],
             this.track
           );

@@ -217,6 +217,14 @@ export class Spotify {
     });
   }
 
+  async deleteTracksFromPlaylist(playlistId: string, trackUris: string[]): Promise<void> {
+    await this.makeRequest('DELETE', `/playlists/${playlistId}/tracks`, {
+      body: {
+        tracks: trackUris.map((uri) => ({ uri })),
+      },
+    });
+  }
+
   async getArtist(artistId: string): Promise<Artist> {
     return await this.makeRequest('GET', `/artists/${artistId}`);
   }
