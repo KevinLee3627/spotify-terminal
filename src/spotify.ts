@@ -213,6 +213,10 @@ export class Spotify {
     });
   }
 
+  async getArtist(artistId: string): Promise<Artist> {
+    return await this.makeRequest('GET', `/artists/${artistId}`);
+  }
+
   async makeRequest<Return = void, Body = Record<string, unknown>>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
