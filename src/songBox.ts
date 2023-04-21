@@ -93,7 +93,7 @@ export class SongBox {
           break;
         case 'C-a':
           if (this.currentPlayback.item != null)
-            this.customEmitter.emit('addToPlaylistModal', this.currentPlayback.item);
+            this.customEmitter.emit('showPlaylistModal', this.currentPlayback.item);
           break;
         case 'S-a':
           // TODO: If there's >1 artist, maybe have a modal for user to choose which one

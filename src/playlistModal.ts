@@ -3,7 +3,7 @@ import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import type { SimplifiedPlaylist, Track } from './types';
 
-interface PlaylistAddModalOptions {
+interface PlaylistModalOptions {
   row: number;
   col: number;
   width: number;
@@ -14,14 +14,14 @@ interface PlaylistAddModalOptions {
   track: Track;
 }
 
-export class PlaylistAddModal {
+export class PlaylistModal {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
   selectedIndex: number = 0;
   playlists: SimplifiedPlaylist[] = [];
   track: Track;
 
-  constructor(opts: PlaylistAddModalOptions) {
+  constructor(opts: PlaylistModalOptions) {
     this.element = opts.grid.set(opts.row, opts.col, opts.height, opts.width, b.list, {
       tags: true,
       scrollable: true,

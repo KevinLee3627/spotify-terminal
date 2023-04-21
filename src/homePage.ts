@@ -14,7 +14,7 @@ import type { SearchType, Spotify } from './spotify';
 import type { Settings } from './main';
 import { bold, sleep } from './util';
 import { Toast } from './toast';
-import { PlaylistAddModal } from './playlistAddModal';
+import { PlaylistModal } from './playlistModal';
 
 interface HomePageOptions {
   gridWidth: number;
@@ -467,12 +467,12 @@ export class HomePage {
       });
     });
 
-    this.customEmitter.on('addToPlaylistModal', (track: Track) => {
+    this.customEmitter.on('showPlaylistModal', (track: Track) => {
       const showPlaylistModal = async (): Promise<void> => {
         const playlistsRes = await this.spotify.getCurrentUserPlaylists();
         const width = 40;
         const height = 35;
-        const modal = new PlaylistAddModal({
+        const modal = new PlaylistModal({
           row: this.gridHeight / 2 - height / 2,
           col: this.gridWidth / 2 - width / 2,
           height,

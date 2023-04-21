@@ -64,7 +64,7 @@ export class AlbumBox extends TrackBox {
           break;
         case 'C-a':
           this.customEmitter.emit(
-            'addToPlaylistModal',
+            'showPlaylistModal',
             this.currentAlbum?.tracks.items[this.selectedAlbumTrackIndex]
           );
           break;
