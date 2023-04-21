@@ -238,7 +238,7 @@ class App {
     const liked = await this.spotify.checkSavedTracks(
       album.tracks.items.map((track) => track.id)
     );
-    const queue = await this.spotify.getQueue();
+    const { queue } = await this.spotify.getQueue();
 
     this.songBox.setCurrentPlayback(playback);
     this.songBox.updateLabel(track, liked[track.id]);
@@ -251,7 +251,7 @@ class App {
     this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
     this.customEmitter.emit('updatePlaybackControlBox', playback);
     this.customEmitter.emit('updateAlbumBox', album, liked, track);
-    this.queueBox.updateList(queue.queue);
+    this.customEmitter.emit('updateQueueBox', queue);
 
     if (playback.context?.type === 'playlist')
       this.playlistBox.updateList(this.playlistBox.playlists, playback.context.uri);

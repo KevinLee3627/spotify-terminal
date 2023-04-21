@@ -38,6 +38,10 @@ export class QueueBox {
 
     this.customEmitter = opts.customEmitter;
 
+    this.customEmitter.on('updateQueueBox', (queue: Track[]) => {
+      this.updateList(queue);
+    });
+
     this.element.key(['r', 's'], (ch, key) => {});
   }
 
