@@ -18,7 +18,6 @@ export class SearchResultBox {
   element: b.Widgets.ListElement;
   customEmitter: EventEmitter;
   resultType: SearchType = 'track';
-  selectedIndex: number = 0;
   results: Array<Album | Track> = [];
 
   constructor(opts: SearchResultBoxOptions) {
@@ -44,29 +43,19 @@ export class SearchResultBox {
 
     this.element.key(['h', 'up', 'down', 'j', 'k', 'p'], (ch, key) => {
       switch (key.full) {
-        case 'up':
-        case 'k':
-          if (this.selectedIndex <= 0) return;
-          this.selectedIndex--;
-          break;
-        case 'down':
-        case 'j':
-          if (this.selectedIndex >= this.results.length) return;
-          this.selectedIndex++;
-          break;
-        case 'p':
-          if (this.resultType === 'album')
-            this.customEmitter.emit('playAlbum', this.results[this.selectedIndex].uri);
-          else if (this.resultType === 'track')
-            this.customEmitter.emit('playTrack', this.results[this.selectedIndex].uri);
-          break;
         case 'h':
           this.element.hide();
           break;
-
         default:
           break;
       }
+    });
+
+    this.element.on('select', (item, i) => {
+      if (this.resultType === 'album')
+        this.customEmitter.emit('playAlbum', this.results[i].uri);
+      else if (this.resultType === 'track')
+        this.customEmitter.emit('playTrack', this.results[i].uri);
     });
 
     this.element.on('blur', () => {
@@ -94,10 +83,10 @@ export class SearchResultBox {
     const albumWidth = resultsWidth - artistWidth - releaseWidth - durationWidth - 3;
 
     const albumName = cutoff(album.name, albumWidth).padEnd(albumWidth, ' ');
-    const artists = cutoff(
-      album.artists.map((a) => a.name).join(', '),
-      artistWidth
-    ).padEnd(artistWidth, ' ');
+    const artists = cutoff(album.artists.map((a) => a.name).join(', '), artistWidth).padEnd(
+      artistWidth,
+      ' '
+    );
     const release = cutoff(album.release_date, releaseWidth).padEnd(releaseWidth, ' ');
     return `${albumName} ${artists} ${release}`;
   }
@@ -117,10 +106,10 @@ export class SearchResultBox {
     const songWidth = resultsWidth - artistWidth - albumWidth - durationWidth - 3;
 
     const song = cutoff(track.name, songWidth).padEnd(songWidth, ' ');
-    const artists = cutoff(
-      track.artists.map((a) => a.name).join(', '),
-      albumWidth
-    ).padEnd(artistWidth, ' ');
+    const artists = cutoff(track.artists.map((a) => a.name).join(', '), albumWidth).padEnd(
+      artistWidth,
+      ' '
+    );
     const album = cutoff(track.album.name, albumWidth).padEnd(albumWidth, ' ');
     return `${song} ${artists} ${album} ${msToTime(track.duration_ms)}`;
   }
