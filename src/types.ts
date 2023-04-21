@@ -34,6 +34,7 @@ export interface Track {
   id: string;
   explicit: boolean;
   album: Album;
+  popularity: number;
 }
 
 export interface Artist {
