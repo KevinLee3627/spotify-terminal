@@ -75,6 +75,10 @@ export class VolumeControlBox {
           break;
       }
     });
+
+    this.customEmitter.on('updateVolumeBox', (volume: number) => {
+      this.updateVolumeText(volume);
+    });
   }
 
   updateVolumeText(volume: number): void {

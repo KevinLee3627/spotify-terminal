@@ -240,15 +240,8 @@ class App {
     );
     const { queue } = await this.spotify.getQueue();
 
-    this.songBox.setCurrentPlayback(playback);
-    this.songBox.updateLabel(track, liked[track.id]);
-    void this.songBox.startProgress(
-      playback.progress_ms,
-      track?.duration_ms ?? null,
-      playback.is_playing
-    );
-
-    this.volumeControlBox.updateVolumeText(playback.device.volume_percent ?? 0);
+    this.customEmitter.emit('updateSongBox', playback, liked[track.id]);
+    this.customEmitter.emit('updateVolumeBox', playback.device.volume_percent ?? 0);
     this.customEmitter.emit('updatePlaybackControlBox', playback);
     this.customEmitter.emit('updateAlbumBox', album, liked, track);
     this.customEmitter.emit('updateQueueBox', queue);

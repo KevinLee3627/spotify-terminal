@@ -62,6 +62,16 @@ export class SongBox {
     this.element.append(this.controlBox.element);
     this.element.append(this.volumeBox.element);
 
+    this.customEmitter.on('updateSongBox', (playback: Playback, liked: boolean) => {
+      this.setCurrentPlayback(playback);
+      this.updateLabel(playback.item, liked);
+      void this.startProgress(
+        playback.progress_ms,
+        playback.item?.duration_ms ?? null,
+        playback.is_playing
+      );
+    });
+
     this.element.key(['n', 'p', 'space', 'r', 'l', 'C-a'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
 
