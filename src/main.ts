@@ -102,7 +102,7 @@ class App {
       top: 1,
       left: 1,
       height: 3,
-      width: ((this.screen.width as number) - 2) / 3,
+      width: (this.gridWidth - 2) / 3,
       playback,
     });
 
@@ -110,9 +110,9 @@ class App {
       grid: this.mainGrid,
       customEmitter: this.customEmitter,
       top: 1,
-      left: ((this.screen.width as number) - 2) / 3 + 1,
+      left: (this.gridWidth - 2) / 3 + 1,
       height: 3,
-      width: ((this.screen.width as number) - 2) / 3,
+      width: (this.gridWidth - 2) / 3,
       playback,
     });
 
