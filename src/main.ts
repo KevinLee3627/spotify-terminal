@@ -55,7 +55,13 @@ export type PageName = 'main' | 'artist';
 class App {
   spotify: Spotify;
   deviceId: string;
-  screen = b.screen({ autoPadding: true, log: './log.json', fullUnicode: true });
+  screen = b.screen({
+    autoPadding: true,
+    log: './log.json',
+    fullUnicode: true,
+    title: 'Spotify!',
+  });
+
   gridHeight = parseInt(this.screen.height as string, 10);
   gridWidth = parseInt(this.screen.width as string, 10);
   ghostElement = b.box({ height: 0, width: 0 });
