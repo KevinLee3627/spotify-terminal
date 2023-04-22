@@ -57,6 +57,9 @@ export class ArtistPage {
           break;
       }
     });
+    this.topTracksBox.element.on('select', (item, i) => {
+      this.customEmitter.emit('playTrack', this.topTracksBox.tracks[i].uri);
+    });
 
     this.page = new Page({
       name: 'artist',

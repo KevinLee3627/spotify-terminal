@@ -22,7 +22,7 @@ export class AlbumBox extends TrackBox {
     );
 
     this.element.key(
-      ['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a', 'S-q'],
+      ['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a', 'S-q', 'enter'],
       (ch, key) => {
         // p -> (p)lay the song now (add to queue and skip current track)
         // Shift-p -> (p)lay the song now, in album context (needs context)
@@ -45,6 +45,7 @@ export class AlbumBox extends TrackBox {
             this.selectedIndex++;
             break;
           case 'p':
+          case 'enter':
             this.customEmitter.emit(
               'playTrack',
               this.currentAlbum?.tracks.items[this.selectedIndex].uri

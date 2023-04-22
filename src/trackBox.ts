@@ -64,9 +64,6 @@ export class TrackBox {
           break;
       }
     });
-    this.element.on('select', (item, i) => {
-      this.customEmitter.emit('playTrack', this.tracks[i].uri);
-    });
   }
 
   updateList(tracks: Track[], likedMapping: Record<string, boolean>): void {

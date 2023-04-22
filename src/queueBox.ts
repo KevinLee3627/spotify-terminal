@@ -11,7 +11,12 @@ export class QueueBox extends TrackBox {
       'updateQueueBox',
       (queue: Track[], liked: Record<string, boolean>) => {
         this.updateList(queue, liked);
+        this.setTracks(queue);
       }
     );
+
+    this.element.on('select', (item, i) => {
+      this.customEmitter.emit('playTrack', this.tracks[this.selectedIndex].uri);
+    });
   }
 }
