@@ -316,7 +316,6 @@ export class HomePage {
         // librespot.
         const currentShuffleState =
           this.playbackControlBox.currentShuffleState ?? this.settings.onStartShuffleState;
-        this.songBox.element.screen.log(`current shuffle: ${String(currentShuffleState)}`);
         await this.spotify.setShuffleState(currentShuffleState);
         this.playbackControlBox.setShuffleState(currentShuffleState);
         this.playbackControlBox.updateShuffleText(currentShuffleState);
@@ -348,7 +347,6 @@ export class HomePage {
         // librespot.
         const currentShuffleState =
           this.playbackControlBox.currentShuffleState ?? this.settings.onStartShuffleState;
-        this.songBox.element.screen.log(`current shuffle: ${String(currentShuffleState)}`);
         await this.spotify.setShuffleState(currentShuffleState);
         this.playbackControlBox.setShuffleState(currentShuffleState);
         this.playbackControlBox.updateShuffleText(currentShuffleState);
@@ -379,7 +377,6 @@ export class HomePage {
           // librespot.
           const currentShuffleState =
             this.playbackControlBox.currentShuffleState ?? this.settings.onStartShuffleState;
-          this.songBox.element.screen.log(`current shuffle: ${String(currentShuffleState)}`);
           await this.spotify.setShuffleState(currentShuffleState);
           this.playbackControlBox.setShuffleState(currentShuffleState);
           this.playbackControlBox.updateShuffleText(currentShuffleState);
