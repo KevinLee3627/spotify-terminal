@@ -27,6 +27,7 @@ export class ArtistPage {
 
   constructor(opts: ArtistPageOptions) {
     this.artist = opts.artist;
+    this.customEmitter = opts.customEmitter;
 
     const locale = Intl.DateTimeFormat().resolvedOptions().locale;
     this.nameBox = opts.grid.set(0, 0, 4, opts.gridWidth / 2, b.box, {
@@ -105,6 +106,10 @@ export class ArtistPage {
         case 'enter':
         case 'right':
         case 'l':
+          this.customEmitter.emit(
+            'showAlbumInArtistPage',
+            opts.releases[this.releaseIndex].id
+          );
           break;
         default:
           break;
@@ -117,7 +122,13 @@ export class ArtistPage {
       elements: [this.topTracksBox.element, this.nameBox, this.releasesBox],
     });
 
-    this.customEmitter = opts.customEmitter;
+    this.customEmitter.on('showAlbumInArtistPage', (albumId: string) => {
+      const showAlbum = async (albumId: string): Promise<void> => {};
+      showAlbum(albumId).catch((err) => {
+        this.nameBox.screen.log(err);
+      });
+    });
+
     this.customEmitter.on('artistPageHotkey', (key: string) => {
       switch (key) {
         case 't':
