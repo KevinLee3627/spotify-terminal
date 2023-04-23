@@ -6,7 +6,7 @@ import { Page } from './page';
 import type { Spotify } from './spotify';
 import { TrackBox } from './trackBox';
 import type { Album, Artist, Track } from './types';
-import { bold } from './util';
+import { bold, cutoff } from './util';
 
 interface ArtistPageOptions {
   spotify: Spotify;
@@ -95,7 +95,11 @@ export class ArtistPage {
         keys: true,
       }
     );
-    this.releasesBox.setItems(opts.releases.map((r) => `${r.name} - ${r.release_date}`));
+
+    const sortedReleases = opts.releases.sort((a, b) => {
+      return new Date(b.release_date).getTime() - new Date(a.release_date).getTime();
+    });
+    this.releasesBox.setItems(sortedReleases.map((r) => this.formatReleaseRow(r)));
 
     this.releasesBox.key(['up', 'down', 'k', 'j', 'right', 'l', 'enter'], (ch, key) => {
       switch (key.full) {
@@ -118,10 +122,13 @@ export class ArtistPage {
           );
           this.albumBox.element.focus();
           break;
+        case '':
+          break;
         default:
           break;
       }
     });
+
     this.albumBox = new AlbumBox({
       row: 0,
       col: opts.gridWidth / 2 + 1,
@@ -175,5 +182,16 @@ export class ArtistPage {
           break;
       }
     });
+  }
+
+  formatReleaseRow(album: Album): string {
+    const resultsWidth = (this.releasesBox.width as number) - 2; // -2 for border
+    const releaseWidth = 10;
+    // -3 for column gaps
+    const albumWidth = resultsWidth - releaseWidth - 3;
+
+    const albumName = cutoff(album.name, albumWidth).padEnd(albumWidth, ' ');
+    const release = cutoff(album.release_date, releaseWidth).padEnd(releaseWidth, ' ');
+    return `${albumName} ${release} `;
   }
 }
