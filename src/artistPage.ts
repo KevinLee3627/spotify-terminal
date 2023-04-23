@@ -35,7 +35,7 @@ export class ArtistPage {
         this.artist.name
       )}\nFollowers: ${this.artist.followers.total.toLocaleString(locale)}`,
     });
-
+    this.nameBox.focus();
     this.topTracksBox = new TrackBox({
       row: this.nameBox.height as number,
       col: 0,
