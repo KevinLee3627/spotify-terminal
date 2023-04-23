@@ -104,10 +104,10 @@ export class AlbumBox extends TrackBox {
     this.currentAlbum = album;
   }
 
-  updateAlbumBox(album: AlbumFull, liked: Record<string, boolean>, track: Track): void {
+  updateAlbumBox(album: AlbumFull, liked: Record<string, boolean>, track?: Track): void {
     this.setCurrentAlbum(album);
     this.updateLabel(album);
     this.updateList(album.tracks.items, liked);
-    this.selectCurrentlyPlaying(track);
+    if (track != null) this.selectCurrentlyPlaying(track);
   }
 }

@@ -3,7 +3,7 @@ import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { AlbumBox } from './albumBox';
 import { Page } from './page';
-import { Spotify } from './spotify';
+import type { Spotify } from './spotify';
 import { TrackBox } from './trackBox';
 import type { Album, Artist, Track } from './types';
 import { bold } from './util';
@@ -28,7 +28,7 @@ export class ArtistPage {
   nameBox: b.Widgets.BigTextElement;
   releasesBox: b.Widgets.ListElement;
   releaseIndex: number = 0;
-  albumBox: TrackBox;
+  albumBox: AlbumBox;
 
   constructor(opts: ArtistPageOptions) {
     this.spotify = opts.spotify;
@@ -150,9 +150,7 @@ export class ArtistPage {
         const likedMapping = await this.spotify.checkSavedTracks(
           album.tracks.items.map((t) => t.id)
         );
-        this.albumBox.setLabel(`${bold(album.name)} (${album.release_date})`);
-        this.albumBox.setTracks(album.tracks.items);
-        this.albumBox.updateList(album.tracks.items, likedMapping);
+        this.albumBox.updateAlbumBox(album, likedMapping);
         this.albumBox.element.show();
       };
       showAlbum(albumId).catch((err) => {
