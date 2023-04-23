@@ -141,7 +141,6 @@ export class ArtistPage {
         this.releasesBox,
         this.albumBox.element,
       ],
-      autoHide: [this.albumBox.element],
     });
 
     this.customEmitter.on('showAlbumInArtistPage', (albumId: string) => {
