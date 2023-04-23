@@ -23,6 +23,7 @@ export class ArtistPage {
   topTracksBox: TrackBox;
   nameBox: b.Widgets.BigTextElement;
   releasesBox: b.Widgets.ListElement;
+  releaseIndex: number = 0;
 
   constructor(opts: ArtistPageOptions) {
     this.artist = opts.artist;
@@ -88,6 +89,28 @@ export class ArtistPage {
       }
     );
     this.releasesBox.setItems(opts.releases.map((r) => `${r.name} - ${r.release_date}`));
+
+    this.releasesBox.key(['up', 'down', 'k', 'j', 'right', 'l', 'enter'], (ch, key) => {
+      switch (key.full) {
+        case 'up':
+        case 'k':
+          if (this.releaseIndex <= 0) return;
+          this.releaseIndex--;
+          break;
+        case 'down':
+        case 'j':
+          if (this.releaseIndex >= opts.releases.length - 1) return;
+          this.releaseIndex++;
+          break;
+        case 'enter':
+        case 'right':
+        case 'l':
+          break;
+        default:
+          break;
+      }
+    });
+
     this.page = new Page({
       name: 'artist',
       grid: opts.grid,
