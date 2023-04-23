@@ -116,12 +116,12 @@ export class ArtistPage {
             'showAlbumInArtistPage',
             opts.releases[this.releaseIndex].id
           );
+          this.albumBox.element.focus();
           break;
         default:
           break;
       }
     });
-
     this.albumBox = new AlbumBox({
       row: 0,
       col: opts.gridWidth / 2 + 1,
