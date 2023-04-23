@@ -3,7 +3,7 @@ import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { AlbumBox } from './albumBox';
 import { Page } from './page';
-import type { Spotify } from './spotify';
+import type { ArtistAlbumGroups, Spotify } from './spotify';
 import { TrackBox } from './trackBox';
 import type { Album, Artist, Track } from './types';
 import { bold, cutoff } from './util';
@@ -17,7 +17,8 @@ interface ArtistPageOptions {
   artist: Artist;
   topTracks: Track[];
   topTracksLiked: Record<string, boolean>;
-  releases: Album[];
+  albums: Album[]; // Includes albums
+  singles: Album[]; // Includes singles and EPs
 }
 export class ArtistPage {
   spotify: Spotify;
@@ -96,10 +97,11 @@ export class ArtistPage {
       }
     );
 
-    const sortedReleases = opts.releases.sort((a, b) => {
-      return new Date(b.release_date).getTime() - new Date(a.release_date).getTime();
-    });
-    this.releasesBox.setItems(sortedReleases.map((r) => this.formatReleaseRow(r)));
+    // const sortedReleases = opts.albums.sort((a, b) => {
+    //   return new Date(b.release_date).getTime() - new Date(a.release_date).getTime();
+    // });
+    const releases = [...opts.albums, ...opts.singles];
+    this.releasesBox.setItems(releases.map((r) => this.formatReleaseRow(r, r.album_type)));
 
     this.releasesBox.key(['up', 'down', 'k', 'j', 'right', 'l', 'enter'], (ch, key) => {
       switch (key.full) {
@@ -110,16 +112,13 @@ export class ArtistPage {
           break;
         case 'down':
         case 'j':
-          if (this.releaseIndex >= opts.releases.length - 1) return;
+          if (this.releaseIndex >= opts.albums.length - 1) return;
           this.releaseIndex++;
           break;
         case 'enter':
         case 'right':
         case 'l':
-          this.customEmitter.emit(
-            'showAlbumInArtistPage',
-            opts.releases[this.releaseIndex].id
-          );
+          this.customEmitter.emit('showAlbumInArtistPage', opts.albums[this.releaseIndex].id);
           this.albumBox.element.focus();
           break;
         case '':
@@ -184,14 +183,15 @@ export class ArtistPage {
     });
   }
 
-  formatReleaseRow(album: Album): string {
+  formatReleaseRow(album: Album, type: ArtistAlbumGroups): string {
     const resultsWidth = (this.releasesBox.width as number) - 2; // -2 for border
     const releaseWidth = 10;
+    const typeWidth = 6;
     // -3 for column gaps
-    const albumWidth = resultsWidth - releaseWidth - 3;
+    const albumWidth = resultsWidth - releaseWidth - typeWidth - 3;
 
     const albumName = cutoff(album.name, albumWidth).padEnd(albumWidth, ' ');
     const release = cutoff(album.release_date, releaseWidth).padEnd(releaseWidth, ' ');
-    return `${albumName} ${release} `;
+    return `${albumName} ${release} ${type}`;
   }
 }

@@ -54,7 +54,7 @@ interface GetArtistAlbumsRes {
   href: string;
 }
 
-type ArtistAlbumGroups = 'album' | 'single' | 'appears_on' | 'compilation';
+export type ArtistAlbumGroups = 'album' | 'single' | 'appears_on' | 'compilation';
 
 interface GetArtistAlbumsOptions {
   market?: string;
