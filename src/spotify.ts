@@ -267,6 +267,23 @@ export class Spotify {
     });
   }
 
+  async getAllArtistAlbums(
+    artistId: string,
+    options?: Pick<GetArtistAlbumsOptions, 'include_groups' | 'market'>
+  ): Promise<Album[]> {
+    const albums = [];
+    let offset = 0;
+    const limit = 50;
+    let res = await this.getArtistAlbums(artistId, { ...options, offset: 0, limit });
+    albums.push(...res.items);
+    while (res.next != null) {
+      offset += limit;
+      res = await this.getArtistAlbums(artistId, { ...options, offset, limit });
+      albums.push(...res.items);
+    }
+    return albums;
+  }
+
   async makeRequest<Return = void, Body = Record<string, unknown>>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,

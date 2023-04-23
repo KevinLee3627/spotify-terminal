@@ -73,10 +73,10 @@ class App {
         const artist = await spotify.getArtist(artistId);
         const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artistId);
         const topTracksLiked = await this.spotify.checkSavedTracks(topTracks.map((t) => t.id));
-        const { items: albums } = await this.spotify.getArtistAlbums(artistId, {
+        const albums = await this.spotify.getAllArtistAlbums(artistId, {
           include_groups: ['album'],
         });
-        const { items: singles } = await this.spotify.getArtistAlbums(artistId, {
+        const singles = await this.spotify.getAllArtistAlbums(artistId, {
           include_groups: ['single'],
         });
         const artistPage = new ArtistPage({
