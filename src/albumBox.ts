@@ -11,16 +11,6 @@ export class AlbumBox extends TrackBox {
     super(opts);
     this.element.set('id', 'albumBox');
 
-    this.customEmitter.on(
-      'updateAlbumBox',
-      (album: AlbumFull, liked: Record<string, boolean>, track: Track) => {
-        this.setCurrentAlbum(album);
-        this.updateLabel(album);
-        this.updateList(album.tracks.items, liked);
-        this.selectCurrentlyPlaying(track);
-      }
-    );
-
     this.element.key(
       ['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a', 'S-q', 'enter'],
       (ch, key) => {
@@ -28,7 +18,7 @@ export class AlbumBox extends TrackBox {
         // Shift-p -> (p)lay the song now, in album context (needs context)
 
         // TODO: Autoplay songs after album finishes.
-        // Manage the index of the selected track manually. Inited in updateAlbumBox
+        // Manage the index of the selected track manually
         switch (key.full) {
           case 'up':
           case 'k':
@@ -112,5 +102,12 @@ export class AlbumBox extends TrackBox {
 
   setCurrentAlbum(album: AlbumFull): void {
     this.currentAlbum = album;
+  }
+
+  updateAlbumBox(album: AlbumFull, liked: Record<string, boolean>, track: Track): void {
+    this.setCurrentAlbum(album);
+    this.updateLabel(album);
+    this.updateList(album.tracks.items, liked);
+    this.selectCurrentlyPlaying(track);
   }
 }

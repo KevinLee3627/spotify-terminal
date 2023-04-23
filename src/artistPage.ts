@@ -1,6 +1,7 @@
 import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
+import { AlbumBox } from './albumBox';
 import { Page } from './page';
 import { Spotify } from './spotify';
 import { TrackBox } from './trackBox';
@@ -121,7 +122,7 @@ export class ArtistPage {
       }
     });
 
-    this.albumBox = new TrackBox({
+    this.albumBox = new AlbumBox({
       row: 0,
       col: opts.gridWidth / 2 + 1,
       width: opts.gridWidth / 2,

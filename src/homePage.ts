@@ -565,7 +565,7 @@ export class HomePage {
     this.customEmitter.emit('updateSongBox', playback, liked[track.id]);
     this.customEmitter.emit('updateVolumeBox', playback.device.volume_percent ?? 0);
     this.customEmitter.emit('updatePlaybackControlBox', playback);
-    this.customEmitter.emit('updateAlbumBox', album, liked, track);
+    this.albumBox.updateAlbumBox(album, liked, track);
     this.customEmitter.emit('updateQueueBox', queue, liked);
 
     if (playback.context?.type === 'playlist')
