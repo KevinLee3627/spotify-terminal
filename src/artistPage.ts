@@ -2,11 +2,13 @@ import * as b from 'blessed';
 import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { Page } from './page';
+import { Spotify } from './spotify';
 import { TrackBox } from './trackBox';
 import type { Album, Artist, Track } from './types';
 import { bold } from './util';
 
 interface ArtistPageOptions {
+  spotify: Spotify;
   gridWidth: number;
   gridHeight: number;
   grid: bc.Widgets.GridElement;
@@ -17,6 +19,7 @@ interface ArtistPageOptions {
   releases: Album[];
 }
 export class ArtistPage {
+  spotify: Spotify;
   customEmitter: EventEmitter;
   artist: Artist;
   page: Page;
@@ -24,8 +27,10 @@ export class ArtistPage {
   nameBox: b.Widgets.BigTextElement;
   releasesBox: b.Widgets.ListElement;
   releaseIndex: number = 0;
+  albumBox: TrackBox;
 
   constructor(opts: ArtistPageOptions) {
+    this.spotify = opts.spotify;
     this.artist = opts.artist;
     this.customEmitter = opts.customEmitter;
 
@@ -116,14 +121,39 @@ export class ArtistPage {
       }
     });
 
+    this.albumBox = new TrackBox({
+      row: 0,
+      col: opts.gridWidth / 2 + 1,
+      width: opts.gridWidth / 2,
+      height: opts.gridHeight - 6, // -6 is for songBox
+      grid: opts.grid,
+      customEmitter: opts.customEmitter,
+      label: '',
+    });
+
     this.page = new Page({
       name: 'artist',
       grid: opts.grid,
-      elements: [this.topTracksBox.element, this.nameBox, this.releasesBox],
+      elements: [
+        this.topTracksBox.element,
+        this.nameBox,
+        this.releasesBox,
+        this.albumBox.element,
+      ],
+      autoHide: [this.albumBox.element],
     });
 
     this.customEmitter.on('showAlbumInArtistPage', (albumId: string) => {
-      const showAlbum = async (albumId: string): Promise<void> => {};
+      const showAlbum = async (albumId: string): Promise<void> => {
+        const album = await this.spotify.getAlbum(albumId);
+        const likedMapping = await this.spotify.checkSavedTracks(
+          album.tracks.items.map((t) => t.id)
+        );
+        this.albumBox.setLabel(`${bold(album.name)} (${album.release_date})`);
+        this.albumBox.setTracks(album.tracks.items);
+        this.albumBox.updateList(album.tracks.items, likedMapping);
+        this.albumBox.element.show();
+      };
       showAlbum(albumId).catch((err) => {
         this.nameBox.screen.log(err);
       });

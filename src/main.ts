@@ -75,6 +75,7 @@ class App {
         const topTracksLiked = await this.spotify.checkSavedTracks(topTracks.map((t) => t.id));
         const { items: releases } = await this.spotify.getArtistAlbums(artistId, {});
         const artistPage = new ArtistPage({
+          spotify: this.spotify,
           grid: this.grid,
           customEmitter: this.customEmitter,
           gridWidth: this.gridWidth,
