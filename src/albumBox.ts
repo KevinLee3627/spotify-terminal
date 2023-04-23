@@ -20,20 +20,6 @@ export class AlbumBox extends TrackBox {
         // TODO: Autoplay songs after album finishes.
         // Manage the index of the selected track manually
         switch (key.full) {
-          case 'up':
-          case 'k':
-            if (this.currentAlbum != null && this.selectedIndex <= 0) return;
-            this.selectedIndex--;
-            break;
-          case 'down':
-          case 'j':
-            if (
-              this.currentAlbum != null &&
-              this.selectedIndex >= this.currentAlbum.total_tracks - 1
-            )
-              return;
-            this.selectedIndex++;
-            break;
           case 'p':
           case 'enter':
             this.customEmitter.emit(
@@ -106,6 +92,7 @@ export class AlbumBox extends TrackBox {
 
   updateAlbumBox(album: AlbumFull, liked: Record<string, boolean>, track?: Track): void {
     this.setCurrentAlbum(album);
+    this.setTracks(album.tracks.items);
     this.updateLabel(album);
     this.updateList(album.tracks.items, liked);
     if (track != null) this.selectCurrentlyPlaying(track);
