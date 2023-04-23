@@ -3,7 +3,7 @@ import type bc from 'blessed-contrib';
 import type EventEmitter from 'events';
 import { Page } from './page';
 import { TrackBox } from './trackBox';
-import type { Artist, Track } from './types';
+import type { Album, Artist, Track } from './types';
 import { bold } from './util';
 
 interface ArtistPageOptions {
@@ -14,6 +14,7 @@ interface ArtistPageOptions {
   artist: Artist;
   topTracks: Track[];
   topTracksLiked: Record<string, boolean>;
+  releases: Album[];
 }
 export class ArtistPage {
   customEmitter: EventEmitter;
@@ -21,6 +22,7 @@ export class ArtistPage {
   page: Page;
   topTracksBox: TrackBox;
   nameBox: b.Widgets.BigTextElement;
+  releasesBox: b.Widgets.ListElement;
 
   constructor(opts: ArtistPageOptions) {
     this.artist = opts.artist;
@@ -61,10 +63,35 @@ export class ArtistPage {
       this.customEmitter.emit('playTrack', this.topTracksBox.tracks[i].uri);
     });
 
+    const nameBoxHeight = this.nameBox.height as number;
+    const topTracksHeight = this.topTracksBox.element.height as number;
+    this.releasesBox = opts.grid.set(
+      nameBoxHeight + topTracksHeight,
+      0,
+      opts.gridHeight - nameBoxHeight - topTracksHeight - 6, // 6 = songBoxHeight TODO
+      opts.gridWidth / 2,
+      b.list,
+      {
+        tags: true,
+        scrollable: true,
+        scrollbar: true,
+        noCellBorders: true,
+        interactive: true,
+        vi: true,
+        style: {
+          selected: { bg: 'red' },
+          scrollbar: { bg: 'blue' },
+          focus: { border: { fg: 'green' } },
+        },
+        label: 'releases',
+        keys: true,
+      }
+    );
+    this.releasesBox.setItems(opts.releases.map((r) => `${r.name} - ${r.release_date}`));
     this.page = new Page({
       name: 'artist',
       grid: opts.grid,
-      elements: [this.topTracksBox.element, this.nameBox],
+      elements: [this.topTracksBox.element, this.nameBox, this.releasesBox],
     });
 
     this.customEmitter = opts.customEmitter;
@@ -72,6 +99,9 @@ export class ArtistPage {
       switch (key) {
         case 't':
           this.topTracksBox.element.focus();
+          break;
+        case 'r':
+          this.releasesBox.focus();
           break;
         case ':':
           this.customEmitter.emit('setActivePage', 'home');

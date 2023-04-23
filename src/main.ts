@@ -73,6 +73,7 @@ class App {
         const artist = await spotify.getArtist(artistId);
         const { tracks: topTracks } = await this.spotify.getArtistTopTracks(artistId);
         const topTracksLiked = await this.spotify.checkSavedTracks(topTracks.map((t) => t.id));
+        const { items: releases } = await this.spotify.getArtistAlbums(artistId, {});
         const artistPage = new ArtistPage({
           grid: this.grid,
           customEmitter: this.customEmitter,
@@ -81,6 +82,7 @@ class App {
           artist,
           topTracks,
           topTracksLiked,
+          releases,
         });
         this.pages.artist = artistPage.page;
         this.customEmitter.emit('setActivePage', this.pages.artist.name);
@@ -110,7 +112,7 @@ class App {
       this.customEmitter.emit(`${this.activePage}PageHotkey`, key.full);
     };
     this.screen.key(
-      ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':', 't'],
+      ['escape', 'q', 'C-c', 's', 'a', 'c', 'v', 'w', 'x', 'y', 'S-a', ':', 't', 'r'],
       screenKeyListener
     );
 

@@ -44,6 +44,25 @@ interface GetArtistTopTracksRes {
   tracks: Track[];
 }
 
+interface GetArtistAlbumsRes {
+  items: Album[];
+  total: number;
+  previous: string | undefined | null;
+  next: string | undefined | null;
+  offset: number;
+  limit: number;
+  href: string;
+}
+
+type ArtistAlbumGroups = 'album' | 'single' | 'appears_on' | 'compilation';
+
+interface GetArtistAlbumsOptions {
+  market?: string;
+  limit?: number;
+  offset?: number;
+  include_groups?: ArtistAlbumGroups[];
+}
+
 export type SearchType = 'album' | 'track' | 'artist';
 
 export type SearchTypePlural = `${SearchType}s`;
@@ -233,6 +252,19 @@ export class Spotify {
     return await this.makeRequest('GET', `/artists/${artistId}/top-tracks`, {
       // TODO: Make this based on /me api call
       query: { market: 'US' },
+    });
+  }
+
+  async getArtistAlbums(
+    artistId: string,
+    options?: GetArtistAlbumsOptions
+  ): Promise<GetArtistAlbumsRes> {
+    return await this.makeRequest('GET', `/artists/${artistId}/albums`, {
+      query: {
+        limit: options?.limit ?? 20,
+        offset: options?.offset ?? 0,
+        include_groups: options?.include_groups?.join(','),
+      },
     });
   }
 
