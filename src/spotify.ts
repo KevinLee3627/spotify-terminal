@@ -182,9 +182,8 @@ export class Spotify {
     return await this.makeRequest<QueueRes>('GET', '/me/player/queue');
   }
 
-  async getAlbum(id: string | null, limit: number = 100): Promise<AlbumFull | null> {
-    if (id == null) return null;
-    return await this.makeRequest<AlbumFull>('GET', `/albums/${id}?limit=${limit}`);
+  async getAlbum(id: string): Promise<AlbumFull> {
+    return await this.makeRequest<AlbumFull>('GET', `/albums/${id}`);
   }
 
   async checkSavedTracks(ids: string[]): Promise<Record<string, boolean>> {

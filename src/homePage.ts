@@ -552,7 +552,7 @@ export class HomePage {
     const track = playback.item;
     if (track == null) return;
 
-    const album = await this.spotify.getAlbum(track?.album.id);
+    const album = await this.spotify.getAlbum(track.album.id);
     if (album == null) {
       this.albumBox.setNullState();
       return;
