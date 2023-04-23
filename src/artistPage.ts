@@ -167,6 +167,9 @@ export class ArtistPage {
         case 'r':
           this.releasesBox.focus();
           break;
+        case 'a':
+          this.albumBox.element.focus();
+          break;
         case ':':
           this.customEmitter.emit('setActivePage', 'home');
           break;
