@@ -1,8 +1,15 @@
+export interface Image {
+  url: string;
+  height: number | null | undefined;
+  width: number | null | undefined;
+}
+
 export interface Album {
   album_type: 'album' | 'single' | 'compilation';
   total_tracks: number;
   href: string;
   id: string;
+  images: Image[];
   name: string;
   release_date: string;
   release_date_precision: 'year' | 'month' | 'day';
@@ -39,6 +46,7 @@ export interface Track {
 
 export interface Artist {
   id: string;
+  images: Image[];
   uri: string;
   popularity: number;
   type: 'artist';
