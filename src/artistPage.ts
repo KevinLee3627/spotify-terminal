@@ -20,6 +20,8 @@ interface ArtistPageOptions {
   albums: Album[]; // Includes albums
   singles: Album[]; // Includes singles and EPs
 }
+
+type ReleaseMode = 'all' | 'album' | 'single';
 export class ArtistPage {
   spotify: Spotify;
   customEmitter: EventEmitter;
@@ -29,6 +31,11 @@ export class ArtistPage {
   nameBox: b.Widgets.BigTextElement;
   releasesBox: b.Widgets.ListElement;
   releaseIndex: number = 0;
+  releasesBoxMode: ReleaseMode;
+  releasesMaxIndex: number;
+  allReleases: Album[];
+  albums: Album[];
+  singles: Album[];
   albumBox: AlbumBox;
 
   constructor(opts: ArtistPageOptions) {
@@ -74,6 +81,12 @@ export class ArtistPage {
 
     const nameBoxHeight = this.nameBox.height as number;
     const topTracksHeight = this.topTracksBox.element.height as number;
+
+    this.allReleases = [...opts.albums, ...opts.singles];
+    this.albums = opts.albums;
+    this.singles = opts.singles;
+    this.releasesMaxIndex = this.allReleases.length - 1;
+    this.releasesBoxMode = 'all';
     this.releasesBox = opts.grid.set(
       nameBoxHeight + topTracksHeight,
       0,
@@ -97,14 +110,10 @@ export class ArtistPage {
       }
     );
 
-    // const sortedReleases = opts.albums.sort((a, b) => {
-    //   return new Date(b.release_date).getTime() - new Date(a.release_date).getTime();
-    // });
-    const releases = [...opts.albums, ...opts.singles];
-    this.releasesBox.setItems(releases.map((r) => this.formatReleaseRow(r)));
+    this.releasesBox.setItems(this.allReleases.map((r) => this.formatReleaseRow(r)));
 
     this.releasesBox.key(
-      ['up', 'down', 'k', 'j', 'right', 'l', 'enter', 'a', 's', 'e'],
+      ['up', 'down', 'k', 'j', 'right', 'l', 'enter', 'a', 's', 'e', 'i'],
       (ch, key) => {
         switch (key.full) {
           case 'up':
@@ -114,7 +123,7 @@ export class ArtistPage {
             break;
           case 'down':
           case 'j':
-            if (this.releaseIndex >= opts.albums.length - 1) return;
+            if (this.releaseIndex >= this.releasesMaxIndex) return;
             this.releaseIndex++;
             break;
           case 'enter':
@@ -122,20 +131,31 @@ export class ArtistPage {
           case 'l':
             this.customEmitter.emit(
               'showAlbumInArtistPage',
-              opts.albums[this.releaseIndex].id
+              this.albums[this.releaseIndex].id
             );
             this.albumBox.element.focus();
             break;
           case 'a':
-            this.releasesBox.setItems(opts.albums.map((r) => this.formatReleaseRow(r)));
+            this.setReleaseMode('album');
             break;
           case 's':
-            this.releasesBox.setItems(opts.singles.map((s) => this.formatReleaseRow(s)));
+            this.setReleaseMode('single');
             break;
           case 'e':
-            this.releasesBox.setItems(releases.map((r) => this.formatReleaseRow(r)));
+            this.setReleaseMode('all');
             break;
-
+          case 'i':
+            if (this.releasesBoxMode === 'all') {
+              this.customEmitter.emit(
+                'showImage',
+                this.allReleases[this.releaseIndex].images[0]
+              );
+            } else if (this.releasesBoxMode === 'album') {
+              this.customEmitter.emit('showImage', this.albums[this.releaseIndex].images[0]);
+            } else if (this.releasesBoxMode === 'single') {
+              this.customEmitter.emit('showImage', this.singles[this.releaseIndex].images[0]);
+            }
+            break;
           default:
             break;
         }
@@ -186,7 +206,7 @@ export class ArtistPage {
         case 'r':
           this.releasesBox.focus();
           break;
-        case 'a':
+        case 'q':
           this.albumBox.element.focus();
           break;
         case ':':
@@ -208,5 +228,29 @@ export class ArtistPage {
     const albumName = cutoff(album.name, albumWidth).padEnd(albumWidth, ' ');
     const release = cutoff(album.release_date, releaseWidth).padEnd(releaseWidth, ' ');
     return `${albumName} ${release} ${album.album_type}`;
+  }
+
+  setReleaseMode(mode: ReleaseMode): void {
+    // Resets the index, in case the previous selection was "out of bounds"
+    // for the new items.
+    // For example, if in 'all' mode, the user selected result 30, but
+    // the artist only has 10 albums, trying to display the image for
+    // album 30 when there are only 10 would cause an error.
+    if (mode === 'album') {
+      this.releasesMaxIndex = this.albums.length - 1;
+      this.releasesBox.setItems(this.albums.map((r) => this.formatReleaseRow(r)));
+    } else if (mode === 'single') {
+      this.releasesMaxIndex = this.singles.length - 1;
+      this.releasesBox.setItems(this.singles.map((s) => this.formatReleaseRow(s)));
+    } else if (mode === 'all') {
+      this.releasesMaxIndex = this.allReleases.length - 1;
+      this.releasesBox.setItems(this.allReleases.map((r) => this.formatReleaseRow(r)));
+    }
+
+    const newIndex =
+      this.releaseIndex >= this.releasesMaxIndex ? this.releasesMaxIndex : this.releaseIndex;
+    this.releasesBox.select(newIndex);
+    this.releaseIndex = newIndex;
+    this.releasesBoxMode = mode;
   }
 }
