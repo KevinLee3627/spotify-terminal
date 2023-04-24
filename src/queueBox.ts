@@ -15,6 +15,10 @@ export class QueueBox extends TrackBox {
       }
     );
 
+    this.element.key('i', (ch, key) => {
+      this.customEmitter.emit('showImage', this.tracks[this.selectedIndex].album.images[0]);
+    });
+
     this.element.on('select', (item, i) => {
       this.customEmitter.emit('playTrack', this.tracks[this.selectedIndex].uri);
     });

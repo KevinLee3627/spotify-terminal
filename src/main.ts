@@ -8,8 +8,6 @@ import type { Page, PageName } from './page';
 import { ArtistPage } from './artistPage';
 import { HomePage } from './homePage';
 import { spawn } from 'child_process';
-import { sleep } from './util';
-import { kill } from 'process';
 
 export interface Settings {
   onStartShuffleState: boolean;
@@ -124,8 +122,6 @@ class App {
         child.stderr.on('data', (data) => {
           this.screen.log(`stderr: ${JSON.stringify(data)}`);
         });
-        if (child.pid == null) return;
-        kill(child?.pid);
       };
       doStuff(image).catch((err) => {
         this.screen.log(err);

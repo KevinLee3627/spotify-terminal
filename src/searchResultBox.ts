@@ -42,7 +42,7 @@ export class SearchResultBox {
 
     this.customEmitter = opts.customEmitter;
 
-    this.element.key(['h', 'up', 'down', 'j', 'k', 'p', 'S-q'], (ch, key) => {
+    this.element.key(['h', 'up', 'down', 'j', 'k', 'p', 'S-q', 'i'], (ch, key) => {
       switch (key.full) {
         case 'h':
           this.element.hide();
@@ -60,6 +60,16 @@ export class SearchResultBox {
         case 'S-q':
           if (this.resultType === 'track') {
             this.customEmitter.emit('addTrackToQueue', this.results[this.selectedIndex]);
+          }
+          break;
+        case 'i':
+          if (this.resultType === 'album' && this.isAlbumArray(this.results)) {
+            this.customEmitter.emit('showImage', this.results[this.selectedIndex].images[0]);
+          } else if (this.resultType === 'track' && this.isTrackArray(this.results)) {
+            this.customEmitter.emit(
+              'showImage',
+              this.results[this.selectedIndex].album.images[0]
+            );
           }
           break;
         default:
@@ -150,5 +160,13 @@ export class SearchResultBox {
 
   setResults(results: Array<Album | Track | Artist>): void {
     this.results = results;
+  }
+
+  isAlbumArray(x: any[]): x is Album[] {
+    return x.every((val) => val.type === 'album');
+  }
+
+  isTrackArray(x: any[]): x is Track[] {
+    return x.every((val) => val.type === 'track');
   }
 }
