@@ -63,12 +63,18 @@ export class ArtistPage {
       likedMapping: opts.topTracksLiked,
     });
 
-    this.topTracksBox.element.key(['S-q'], (ch, key) => {
+    this.topTracksBox.element.key(['S-q', 'i'], (ch, key) => {
       switch (key.full) {
         case 'S-q':
           this.customEmitter.emit(
             'addTrackToQueue',
             this.topTracksBox.tracks[this.topTracksBox.selectedIndex]
+          );
+          break;
+        case 'i':
+          this.customEmitter.emit(
+            'showImage',
+            this.topTracksBox.tracks[this.topTracksBox.selectedIndex].album.images[0]
           );
           break;
         default:
