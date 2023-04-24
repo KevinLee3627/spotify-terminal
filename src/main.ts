@@ -1,12 +1,15 @@
 import * as b from 'blessed';
 import bc from 'blessed-contrib';
-import type { Playback } from './types';
+import type { Image, Playback } from './types';
 import { Spotify } from './spotify';
 import EventEmitter from 'events';
 import { readFileSync } from 'fs';
 import type { Page, PageName } from './page';
 import { ArtistPage } from './artistPage';
 import { HomePage } from './homePage';
+import { spawn } from 'child_process';
+import { sleep } from './util';
+import { kill } from 'process';
 
 export interface Settings {
   onStartShuffleState: boolean;
@@ -107,6 +110,25 @@ class App {
         if (page.name === pageName) {
           page.show();
         } else page.hide();
+      });
+    });
+
+    this.customEmitter.on('showImage', (image: Image) => {
+      this.screen.log('showing image');
+      const doStuff = async (image: Image): Promise<void> => {
+        const child = spawn(`feh`, [
+          image.url,
+          '--geometry',
+          `${String(image.width)}x${String(image.height)}`,
+        ]);
+        child.stderr.on('data', (data) => {
+          this.screen.log(`stderr: ${JSON.stringify(data)}`);
+        });
+        if (child.pid == null) return;
+        kill(child?.pid);
+      };
+      doStuff(image).catch((err) => {
+        this.screen.log(err);
       });
     });
     // TODO: Hotkey system? Ex. 'send current song to playlist GOLD'

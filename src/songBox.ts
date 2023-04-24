@@ -72,7 +72,7 @@ export class SongBox {
       );
     });
 
-    this.element.key(['n', 'p', 'space', 'r', 'l', 'C-a', 'S-a'], (ch, key) => {
+    this.element.key(['n', 'p', 'space', 'r', 'l', 'C-a', 'S-a', 'i'], (ch, key) => {
       // TODO: ADD DEVICE PICKER BOX
 
       switch (key.full) {
@@ -103,6 +103,9 @@ export class SongBox {
               'showArtistPage',
               this.currentPlayback.item?.album.artists[0].id
             );
+          break;
+        case 'i':
+          this.customEmitter.emit('showImage', this.currentPlayback.item?.album?.images[0]);
           break;
         default:
           break;

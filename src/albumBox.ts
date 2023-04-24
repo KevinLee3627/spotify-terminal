@@ -12,7 +12,7 @@ export class AlbumBox extends TrackBox {
     this.element.set('id', 'albumBox');
 
     this.element.key(
-      ['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a', 'S-q', 'enter'],
+      ['S-p', 'p', 'up', 'k', 'down', 'j', 'l', 'C-a', 'S-a', 'S-q', 'enter', 'i'],
       (ch, key) => {
         // p -> (p)lay the song now (add to queue and skip current track)
         // Shift-p -> (p)lay the song now, in album context (needs context)
@@ -56,6 +56,9 @@ export class AlbumBox extends TrackBox {
               'addTrackToQueue',
               this.currentAlbum?.tracks.items[this.selectedIndex]
             );
+            break;
+          case 'i':
+            this.customEmitter.emit('showImage', this.currentAlbum?.images[0]);
             break;
           default:
             break;
